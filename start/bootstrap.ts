@@ -1,15 +1,16 @@
 import appwrite from '#services/appwrite_service'
+import logger from '@adonisjs/core/services/logger'
 import { Permission, Role, Compression } from 'node-appwrite'
 
 async function bootstrapPublicMediaBucket() {
   const bucketId = 'public-media'
   try {
     await appwrite.storage.getBucket({ bucketId })
-    console.log(`[Bootstrap] Bucket '${bucketId}' already exists.`)
+    logger.info({ bucketId }, '[Bootstrap] Bucket already exists')
   } catch (error: any) {
     // If the bucket does not exist, Appwrite throws a 404
     if (error.code === 404) {
-      console.log(`[Bootstrap] Creating bucket '${bucketId}'...`)
+      logger.info({ bucketId }, '[Bootstrap] Creating bucket...')
       await appwrite.storage.createBucket({
         bucketId,
         name: 'Public Media',
@@ -27,9 +28,9 @@ async function bootstrapPublicMediaBucket() {
         antivirus: true,
         transformations: true, // Enables getFilePreview
       })
-      console.log(`[Bootstrap] Bucket '${bucketId}' created successfully.`)
+      logger.info({ bucketId }, '[Bootstrap] Bucket created successfully')
     } else {
-      console.error(`[Bootstrap] Error checking bucket '${bucketId}':`, error)
+      logger.error({ bucketId, error }, '[Bootstrap] Error checking bucket')
     }
   }
 }

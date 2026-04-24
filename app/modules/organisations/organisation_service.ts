@@ -1,7 +1,8 @@
-import { ID, Permission, Role, Compression } from 'node-appwrite'
-import { InputFile } from 'node-appwrite/file'
-import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
+import appwrite from '#services/appwrite_service'
+import logger from '@adonisjs/core/services/logger'
+import { Compression, ID, Permission, Query, Role } from 'node-appwrite'
+import { InputFile } from 'node-appwrite/file'
 
 interface CreateOrganisationPayload {
   name: string
@@ -105,7 +106,9 @@ export default class OrganisationService {
     return Promise.all(
       result.teams.map(async (team) => {
         const prefs = (await appwrite.teams.getPrefs({ teamId: team.$id })) as any
-        const logoUrl = prefs.logoFileId ? OrganisationService.buildPreviewUrl(prefs.logoFileId) : null
+        const logoUrl = prefs.logoFileId
+          ? OrganisationService.buildPreviewUrl(prefs.logoFileId)
+          : null
         return {
           id: team.$id,
           name: team.name,
@@ -124,7 +127,7 @@ export default class OrganisationService {
   async get(teamId: string) {
     const [team, prefs] = await Promise.all([
       appwrite.teams.get({ teamId }),
-      (appwrite.teams.getPrefs({ teamId }) as Promise<any>),
+      appwrite.teams.getPrefs({ teamId }) as Promise<any>,
     ])
 
     const logoUrl = prefs.logoFileId ? OrganisationService.buildPreviewUrl(prefs.logoFileId) : null
@@ -236,12 +239,40 @@ export default class OrganisationService {
 
   /**
    * Add a member to the organisation by email address.
-   * With the admin API key, the membership is confirmed instantly.
+   *
+   * Uses a userId-based approach to avoid sending invitation emails:
+   * 1. Look up the user by email in the admin Users API.
+   * 2. If not found, auto-create the account with a temporary password.
+   * 3. Add them to the team by userId (auto-confirmed, no email sent).
    */
   async addMember(teamId: string, email: string, roles: string[]) {
+    // 1. Find or create the user
+    const userList = await appwrite.users.list({
+      queries: [Query.equal('email', [email])],
+    })
+
+    let userId: string
+
+    if (userList.total > 0) {
+      // User already exists
+      userId = userList.users[0].$id
+    } else {
+      // User doesn't exist — create with a temporary password
+      const newUser = await appwrite.users.create({
+        userId: ID.unique(),
+        email,
+        password: appwriteConfig.tempMemberPassword,
+        name: email.split('@')[0], // Use email prefix as default name
+      })
+      userId = newUser.$id
+
+      logger.info({ email }, '[Member] Created account (using TEMP_MEMBER_PASSWORD)')
+    }
+
+    // 2. Add to team by userId — auto-confirmed, no email sent
     const membership = await appwrite.teams.createMembership({
       teamId,
-      email,
+      userId,
       roles,
     })
 

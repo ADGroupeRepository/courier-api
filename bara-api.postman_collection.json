@@ -211,6 +211,70 @@
               }
             }
           ]
+        },
+        {
+          "name": "Uploader un Avatar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me",
+                "avatar"
+              ]
+            },
+            "description": "Met à jour la photo de profil de l'utilisateur."
+          },
+          "response": []
+        },
+        {
+          "name": "Supprimer l'Avatar",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me",
+                "avatar"
+              ]
+            },
+            "description": "Supprime la photo de profil de l'utilisateur."
+          },
+          "response": []
         }
       ]
     },
@@ -436,6 +500,43 @@
               }
             }
           ]
+        },
+        {
+          "name": "Uploader le Logo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/logo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "logo"
+              ]
+            },
+            "description": "Met à jour le logo de l'organisation."
+          },
+          "response": []
         }
       ]
     },

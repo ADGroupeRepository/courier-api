@@ -20,6 +20,7 @@ class AppwriteService {
       .setEndpoint(appwriteConfig.endpoint)
       .setProject(appwriteConfig.projectId)
       .setKey(appwriteConfig.apiKey)
+      .setSelfSigned(true)
   }
 
   /** Admin-scoped Users service (requires API key). */
@@ -56,6 +57,7 @@ class AppwriteService {
       .setEndpoint(appwriteConfig.endpoint)
       .setProject(appwriteConfig.projectId)
       .setJWT(jwt)
+      .setSelfSigned(true)
 
     return {
       client,

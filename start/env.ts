@@ -23,4 +23,5 @@ export default await Env.create(new URL('../', import.meta.url), {
   APPWRITE_ENDPOINT: Env.schema.string(),
   APPWRITE_PROJECT_ID: Env.schema.string(),
   APPWRITE_KEY: Env.schema.string(),
+  TEMP_MEMBER_PASSWORD: Env.schema.string(),
 })

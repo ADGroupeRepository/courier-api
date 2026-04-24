@@ -2,6 +2,7 @@ import { ID, Account, Client, AppwriteException } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
 import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
+import logger from '@adonisjs/core/services/logger'
 
 interface SignupPayload {
   name: string
@@ -26,6 +27,7 @@ export default class AuthService {
     const client = new Client()
       .setEndpoint(appwriteConfig.endpoint)
       .setProject(appwriteConfig.projectId)
+      .setSelfSigned(true)
     return new Account(client)
   }
 
@@ -52,7 +54,7 @@ export default class AuthService {
       } catch (err) {
         // Non-fatal: log but don't fail the signup
         if (err instanceof AppwriteException) {
-          console.warn(`Phone update failed for user ${user.$id}: ${err.message}`)
+          logger.warn({ userId: user.$id, error: err.message }, 'Phone update failed during signup')
         }
       }
     }

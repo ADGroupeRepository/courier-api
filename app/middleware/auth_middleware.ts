@@ -33,6 +33,7 @@ export default class AuthMiddleware {
         .setEndpoint(appwriteConfig.endpoint)
         .setProject(appwriteConfig.projectId)
         .setJWT(token)
+        .setSelfSigned(true)
 
       const account = new Account(sessionClient)
       const user = await account.get()
