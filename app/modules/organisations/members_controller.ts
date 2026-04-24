@@ -1,0 +1,64 @@
+import type { HttpContext } from '@adonisjs/core/http'
+import OrganisationService from '#modules/organisations/organisation_service'
+import {
+  addMemberValidator,
+  updateMemberValidator,
+} from '#modules/organisations/organisation_validator'
+
+export default class MembersController {
+  /**
+   * GET /api/v1/organisations/:orgId/members
+   * List all members of an organisation.
+   */
+  async index({ request, response }: HttpContext) {
+    const orgId = request.param('orgId')
+    const service = new OrganisationService()
+    const members = await service.listMembers(orgId)
+
+    return response.ok({ data: members })
+  }
+
+  /**
+   * POST /api/v1/organisations/:orgId/members
+   * Add a new member to the organisation by email address.
+   * Using the admin API key means the membership is confirmed instantly.
+   */
+  async store({ request, response }: HttpContext) {
+    const orgId = request.param('orgId')
+    const { email, roles } = await request.validateUsing(addMemberValidator)
+
+    const service = new OrganisationService()
+    const membership = await service.addMember(orgId, email, roles)
+
+    return response.created({ message: 'Member added successfully', data: membership })
+  }
+
+  /**
+   * PATCH /api/v1/organisations/:orgId/members/:memberId
+   * Update a member's roles within the organisation.
+   */
+  async update({ request, response }: HttpContext) {
+    const orgId = request.param('orgId')
+    const membershipId = request.param('memberId')
+    const { roles } = await request.validateUsing(updateMemberValidator)
+
+    const service = new OrganisationService()
+    const membership = await service.updateMember(orgId, membershipId, roles)
+
+    return response.ok({ message: 'Member roles updated', data: membership })
+  }
+
+  /**
+   * DELETE /api/v1/organisations/:orgId/members/:memberId
+   * Remove a member from the organisation.
+   */
+  async destroy({ request, response }: HttpContext) {
+    const orgId = request.param('orgId')
+    const membershipId = request.param('memberId')
+
+    const service = new OrganisationService()
+    await service.removeMember(orgId, membershipId)
+
+    return response.noContent()
+  }
+}

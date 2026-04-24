@@ -3,4 +3,16 @@
  * DO NOT EDIT manually
  */
 
-export const controllers = {}
+export const controllers = {
+  auth: {
+    Auth: () => import('#modules/auth/auth_controller'),
+    AuthService: () => import('#modules/auth/auth_service'),
+    AuthValidator: () => import('#modules/auth/auth_validator'),
+  },
+  organisations: {
+    Members: () => import('#modules/organisations/members_controller'),
+    OrganisationService: () => import('#modules/organisations/organisation_service'),
+    OrganisationValidator: () => import('#modules/organisations/organisation_validator'),
+    Organisations: () => import('#modules/organisations/organisations_controller'),
+  },
+}

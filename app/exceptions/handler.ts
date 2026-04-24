@@ -1,5 +1,6 @@
 import app from '@adonisjs/core/services/app'
-import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
+import { type HttpContext, ExceptionHandler } from '@adonisjs/core/http'
+import { AppwriteException } from 'node-appwrite'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -20,6 +21,14 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
+    if (error instanceof AppwriteException) {
+      const status = error.code && error.code >= 100 ? error.code : 500
+      return ctx.response.status(status).json({
+        message: error.message,
+        type: error.type ?? 'appwrite_error',
+      })
+    }
+
     return super.handle(error, ctx)
   }
 
