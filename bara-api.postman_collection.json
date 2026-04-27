@@ -774,6 +774,200 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Modules de l'Organisation",
+      "description": "Gestion des modules activés au sein d'une organisation.",
+      "item": [
+        {
+          "name": "Lister les modules actifs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "modules"
+              ]
+            },
+            "description": "Récupère la liste des modules actuellement activés pour l'organisation."
+          },
+          "response": []
+        },
+        {
+          "name": "Activer un module",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moduleName\": \"directory\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "modules"
+              ]
+            },
+            "description": "Active un nouveau module pour l'organisation et provisionne les ressources nécessaires."
+          },
+          "response": []
+        },
+        {
+          "name": "Désactiver un module",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules/directory",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "modules",
+                "directory"
+              ]
+            },
+            "description": "Désactive un module pour l'organisation (les données sont conservées)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Marché des Modules",
+      "description": "Consultation des modules disponibles dans le marketplace.",
+      "item": [
+        {
+          "name": "Lister les modules disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "modules"
+              ]
+            },
+            "description": "Affiche tous les modules publiés et disponibles à l'activation."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Administration",
+      "description": "Outils d'administration pour la gestion du marketplace.",
+      "item": [
+        {
+          "name": "Publier un module",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moduleName\": \"directory\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/marketplace",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "marketplace"
+              ]
+            },
+            "description": "Publie un module du code vers le marketplace."
+          },
+          "response": []
+        },
+        {
+          "name": "Dépublier un module",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/marketplace/directory",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "marketplace",
+                "directory"
+              ]
+            },
+            "description": "Retire un module du marketplace."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [

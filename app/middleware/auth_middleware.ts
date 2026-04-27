@@ -39,6 +39,7 @@ export default class AuthMiddleware {
       const user = await account.get()
 
       ctx.user = user
+      ctx.token = token
       ctx.sessionClient = sessionClient
     } catch {
       return ctx.response.unauthorized({

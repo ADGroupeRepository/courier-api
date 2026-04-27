@@ -3,6 +3,7 @@ import { InputFile } from 'node-appwrite/file'
 import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
 import logger from '@adonisjs/core/services/logger'
+import OrganisationService from '#modules/organisations/organisation_service'
 
 interface SignupPayload {
   name: string
@@ -90,9 +91,18 @@ export default class AuthService {
       duration: 3600, // 1 hour (maximum allowed by Appwrite)
     })
 
+    // Step 3 — Fetch profile and organisations for UI bootstrapping
+    const organisationService = new OrganisationService()
+    const [user, organisations] = await Promise.all([
+      this.getUserProfile(jwt),
+      organisationService.list(jwt),
+    ])
+
     return {
       token: jwt,
       expiresAt: session.expire,
+      user,
+      organisations,
     }
   }
 
@@ -107,7 +117,7 @@ export default class AuthService {
   /**
    * Return the currently authenticated user's profile.
    */
-  async me(jwt: string) {
+  async getUserProfile(jwt: string) {
     const { account } = appwrite.createSessionClient(jwt)
     const user = await account.get()
 

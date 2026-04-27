@@ -19,3 +19,4 @@ router.get('/', async () => ({ status: 'ok', service: 'bara-api' }))
 // ── Module Routes ───────────────────────────────────────────────────────────
 import './routes/auth.js'
 import './routes/organisations.js'
+import './routes/admin.js'

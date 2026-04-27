@@ -4,6 +4,17 @@
  */
 
 export const controllers = {
+  registry: {
+    definitions: {
+      Directory: () => import('#modules/_registry/definitions/directory'),
+    },
+    ModuleRegistry: () => import('#modules/_registry/module_registry'),
+    ProvisioningService: () => import('#modules/_registry/provisioning_service'),
+    Types: () => import('#modules/_registry/types'),
+  },
+  admin: {
+    AdminMarketplace: () => import('#modules/admin/admin_marketplace_controller'),
+  },
   auth: {
     Auth: () => import('#modules/auth/auth_controller'),
     AuthService: () => import('#modules/auth/auth_service'),
@@ -11,8 +22,14 @@ export const controllers = {
   },
   organisations: {
     Members: () => import('#modules/organisations/members_controller'),
+    OrganisationModules: () => import('#modules/organisations/organisation_modules_controller'),
     OrganisationService: () => import('#modules/organisations/organisation_service'),
     OrganisationValidator: () => import('#modules/organisations/organisation_validator'),
     Organisations: () => import('#modules/organisations/organisations_controller'),
+  },
+  directory: {
+    DepartmentsValidator: () => import('#modules/directory/departments_validator'),
+    DepartmentsService: () => import('#modules/directory/departments_service'),
+    Departments: () => import('#modules/directory/departments_controller'),
   },
 }

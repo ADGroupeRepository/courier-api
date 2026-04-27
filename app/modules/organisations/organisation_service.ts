@@ -3,6 +3,8 @@ import appwrite from '#services/appwrite_service'
 import logger from '@adonisjs/core/services/logger'
 import { Compression, ID, Permission, Query, Role } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
+import ModuleProvisioningService from '#modules/_registry/provisioning_service'
+import { MODULE_REGISTRY } from '#modules/_registry/module_registry'
 
 interface CreateOrganisationPayload {
   name: string
@@ -75,6 +77,14 @@ export default class OrganisationService {
         plan: 'free',
       },
     })
+
+    // Step 5: Auto-provision core modules (like 'directory')
+    const provisioningService = new ModuleProvisioningService()
+    for (const [moduleName, moduleDef] of MODULE_REGISTRY) {
+      if (moduleDef.core) {
+        await provisioningService.activate(team.$id, moduleName)
+      }
+    }
 
     return {
       id: team.$id,

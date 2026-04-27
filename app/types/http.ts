@@ -25,5 +25,10 @@ declare module '@adonisjs/core/http' {
      * Respects Appwrite permission rules for the authenticated user.
      */
     sessionClient?: Client
+
+    /**
+     * The raw JWT token used for authentication.
+     */
+    token?: string
   }
 }

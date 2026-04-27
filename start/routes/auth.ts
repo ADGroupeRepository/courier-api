@@ -16,8 +16,8 @@ router
 
     // Protected
     router.post('/logout', [AuthController, 'logout']).use(middleware.auth())
-    router.get('/me', [AuthController, 'me']).use(middleware.auth())
-    router.post('/me/avatar', [AuthController, 'uploadAvatar']).use(middleware.auth())
-    router.delete('/me/avatar', [AuthController, 'deleteAvatar']).use(middleware.auth())
+    router.get('/profile', [AuthController, 'profile']).use(middleware.auth())
+    router.post('/profile/avatar', [AuthController, 'uploadAvatar']).use(middleware.auth())
+    router.delete('/profile/avatar', [AuthController, 'deleteAvatar']).use(middleware.auth())
   })
   .prefix('/api/v1/auth')

@@ -37,4 +37,6 @@ router.use([() => import('@adonisjs/core/bodyparser_middleware')])
 export const middleware = router.named({
   auth: () => import('#middleware/auth_middleware'),
   rateLimit: () => import('#middleware/rate_limit_middleware'),
+  moduleGuard: () => import('#middleware/module_guard_middleware'),
+  admin: () => import('#middleware/admin_middleware'),
 })

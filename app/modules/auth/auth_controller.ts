@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#modules/auth/auth_service'
 import { signupValidator, loginValidator } from '#modules/auth/auth_validator'
 
+
 export default class AuthController {
   /**
    * POST /api/v1/auth/signup
@@ -41,31 +42,28 @@ export default class AuthController {
   }
 
   /**
-   * GET /api/v1/auth/me
-   * Return the authenticated user's profile.
+   * GET /api/v1/auth/profile
+   * Return the authenticated user's profile and their organisations.
    */
-  async me({ user, response }: HttpContext) {
+  async profile({ user, token, response }: HttpContext) {
     // ctx.user is already populated by AuthMiddleware
-    // We explicitly map only the fields the frontend needs to avoid leaking
-    // internal Appwrite metadata (targets, prefs, internal IDs, etc.)
     const avatarFileId = user?.prefs?.avatarFileId
     const avatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : null
 
+    const authService = new AuthService()
+
+    const profile = await authService.getUserProfile(token!)
+
     return response.ok({
       data: {
-        id: user?.$id,
-        name: user?.name,
-        email: user?.email,
-        phone: user?.phone || null,
-        avatarUrl,
-        createdAt: user?.$createdAt,
-        updatedAt: user?.$updatedAt,
+        user: { ...profile, avatarUrl },
+        organisations: [],
       },
     })
   }
 
   /**
-   * POST /api/v1/auth/me/avatar
+   * POST /api/v1/auth/profile/avatar
    * Upload or replace the user's avatar.
    */
   async uploadAvatar({ request, response }: HttpContext) {
@@ -88,7 +86,7 @@ export default class AuthController {
   }
 
   /**
-   * DELETE /api/v1/auth/me/avatar
+   * DELETE /api/v1/auth/profile/avatar
    * Delete the user's avatar.
    */
   async deleteAvatar({ request, response }: HttpContext) {
