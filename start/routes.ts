@@ -20,3 +20,5 @@ router.get('/', async () => ({ status: 'ok', service: 'bara-api' }))
 import './routes/auth.js'
 import './routes/organisations.js'
 import './routes/admin.js'
+import './routes/directory.js'
+import './routes/courier.js'

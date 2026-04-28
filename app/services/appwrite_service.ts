@@ -1,4 +1,4 @@
-import { Client, Users, Teams, Databases, Storage, Account, TablesDB } from 'node-appwrite'
+import { Client, Users, Teams, Databases, Storage, Account } from 'node-appwrite'
 import appwriteConfig from '#config/appwrite'
 
 /**
@@ -38,10 +38,7 @@ class AppwriteService {
     return new Databases(this.adminClient)
   }
 
-  /** Admin-scoped TablesDB service (modern replacement for Databases). */
-  get tablesDB() {
-    return new TablesDB(this.adminClient)
-  }
+
 
   /** Admin-scoped Storage service (requires API key). */
   get storage() {
@@ -64,7 +61,6 @@ class AppwriteService {
       account: new Account(client),
       teams: new Teams(client),
       databases: new Databases(client),
-      tablesDB: new TablesDB(client),
       storage: new Storage(client),
     }
   }

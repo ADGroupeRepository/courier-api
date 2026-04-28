@@ -368,3 +368,269 @@ paths:
       responses:
         '200':
           description: Success
+  /organisations/{orgId}/departments:
+    get:
+      summary: Lister les départements
+      operationId: listDepartments
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Créer un département
+      operationId: createDepartment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Created
+  /organisations/{orgId}/departments/{id}:
+    get:
+      summary: Voir un département
+      operationId: getDepartment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+    put:
+      summary: Modifier un département
+      operationId: updateDepartment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+    delete:
+      summary: Supprimer un département
+      operationId: deleteDepartment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+  /organisations/{orgId}/members/{membershipId}/department:
+    post:
+      summary: Assigner à un département
+      operationId: assignMemberToDepartment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: membershipId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+  /organisations/{orgId}/departments/{id}/members:
+    get:
+      summary: Lister les membres d'un département
+      operationId: listDepartmentMembers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+  /organisations/{orgId}/profiles/{id}:
+    delete:
+      summary: Retirer d'un département
+      operationId: unassignMember
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+  /organisations/{orgId}/couriers:
+    get:
+      summary: Lister les courriers
+      operationId: listCouriers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: type
+          in: query
+          required: false
+          type: string
+          enum: [incoming, outgoing]
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Créer un courrier
+      operationId: createCourier
+      security:
+        - BearerAuth: []
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: type
+          in: formData
+          type: string
+          enum: [incoming, outgoing]
+          required: true
+        - name: subject
+          in: formData
+          type: string
+          required: true
+        - name: sender
+          in: formData
+          type: string
+        - name: recipient
+          in: formData
+          type: string
+        - name: assignedTo
+          in: formData
+          type: string
+          required: true
+        - name: targetType
+          in: formData
+          type: string
+          enum: [user, department]
+          required: true
+        - name: file
+          in: formData
+          type: file
+      responses:
+        '201':
+          description: Created
+  /organisations/{orgId}/couriers/{id}:
+    get:
+      summary: Voir un courrier
+      operationId: getCourier
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+    patch:
+      summary: Modifier un courrier
+      operationId: updateCourier
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+    delete:
+      summary: Supprimer un courrier
+      operationId: deleteCourier
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Courier'
+
+definitions:
+  Courier:
+    type: object
+    properties:
+      id: { type: string }
+      type: { type: string, enum: [incoming, outgoing] }
+      subject: { type: string }
+      sender: { type: string }
+      recipient: { type: string }
+      assignedTo: { type: string }
+      targetType: { type: string, enum: [user, department] }
+      fileUrl: { type: string }
+      status: { type: string }
+      createdAt: { type: string }
+      updatedAt: { type: string }
+
+

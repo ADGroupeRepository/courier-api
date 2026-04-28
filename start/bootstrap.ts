@@ -40,12 +40,12 @@ async function bootstrapPlatformDatabase() {
   const collectionId = 'marketplace_modules'
 
   try {
-    await appwrite.tablesDB.get({ databaseId })
+    await appwrite.databases.get({ databaseId })
     logger.info({ databaseId }, '[Bootstrap] Platform database already exists')
   } catch (error: any) {
     if (error.code === 404) {
       logger.info({ databaseId }, '[Bootstrap] Creating platform database...')
-      await appwrite.tablesDB.create({
+      await appwrite.databases.create({
         databaseId,
         name: 'Bara Platform Core',
       })
@@ -57,33 +57,33 @@ async function bootstrapPlatformDatabase() {
   }
 
   try {
-    await appwrite.tablesDB.getTable({ databaseId, tableId: collectionId })
+    await appwrite.databases.getCollection({ databaseId, collectionId })
     logger.info({ collectionId }, '[Bootstrap] Marketplace table already exists')
   } catch (error: any) {
     if (error.code === 404) {
       logger.info({ collectionId }, '[Bootstrap] Creating marketplace table...')
-      await appwrite.tablesDB.createTable({
+      await appwrite.databases.createCollection({
         databaseId,
-        tableId: collectionId,
+        collectionId,
         name: 'Marketplace Modules',
         permissions: [
           Permission.read(Role.any()), // Anyone can read published modules
         ],
-        rowSecurity: false,
+        documentSecurity: false,
       })
 
       // Columns
-      await appwrite.tablesDB.createTextColumn({ databaseId, tableId: collectionId, key: 'moduleName', required: true })
-      await appwrite.tablesDB.createTextColumn({ databaseId, tableId: collectionId, key: 'label', required: true })
-      await appwrite.tablesDB.createTextColumn({ databaseId, tableId: collectionId, key: 'description', required: false })
-      await appwrite.tablesDB.createBooleanColumn({ databaseId, tableId: collectionId, key: 'core', required: true })
-      await appwrite.tablesDB.createBooleanColumn({ databaseId, tableId: collectionId, key: 'isActive', required: true })
+      await appwrite.databases.createStringAttribute({ databaseId, collectionId, key: 'moduleName', size: 255, required: true })
+      await appwrite.databases.createStringAttribute({ databaseId, collectionId, key: 'label', size: 255, required: true })
+      await appwrite.databases.createStringAttribute({ databaseId, collectionId, key: 'description', size: 500, required: false })
+      await appwrite.databases.createBooleanAttribute({ databaseId, collectionId, key: 'core', required: true })
+      await appwrite.databases.createBooleanAttribute({ databaseId, collectionId, key: 'isActive', required: true })
 
       logger.info('[Bootstrap] Waiting for columns to become available...')
       await new Promise(resolve => setTimeout(resolve, 3000))
 
       // Indexes
-      await appwrite.tablesDB.createIndex({ databaseId, tableId: collectionId, key: 'module_name_idx', type: 'unique' as any, columns: ['moduleName'] })
+      await appwrite.databases.createIndex({ databaseId, collectionId, key: 'module_name_idx', type: 'unique' as any, attributes: ['moduleName'] })
       logger.info({ collectionId }, '[Bootstrap] Marketplace table created successfully')
     } else {
       logger.error({ collectionId, error }, '[Bootstrap] Error checking marketplace table')

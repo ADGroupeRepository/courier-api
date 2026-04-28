@@ -48,7 +48,12 @@ export default class DepartmentsController {
    * Create a new department.
    */
   async store({ request, response }: HttpContext) {
-    const { organisationId, ...payload } = await request.validateUsing(createDepartmentValidator)
+    const { organisationId, ...payload } = await request.validateUsing(createDepartmentValidator, {
+      data: {
+        ...request.all(),
+        organisationId: request.param('orgId'),
+      },
+    })
 
     try {
       const service = await DepartmentsService.forOrg(organisationId)
@@ -64,7 +69,12 @@ export default class DepartmentsController {
    * Update a department.
    */
   async update({ params, request, response }: HttpContext) {
-    const { organisationId, ...payload } = await request.validateUsing(updateDepartmentValidator)
+    const { organisationId, ...payload } = await request.validateUsing(updateDepartmentValidator, {
+      data: {
+        ...request.all(),
+        organisationId: request.param('orgId'),
+      },
+    })
     const departmentId = params.id
 
     try {

@@ -44,7 +44,7 @@ export default class OrganisationService {
     })
 
     // Step 2: Provision isolated database
-    const database = await appwrite.tablesDB.create({
+    const database = await appwrite.databases.create({
       databaseId: ID.unique(),
       name,
     })
@@ -236,7 +236,7 @@ export default class OrganisationService {
     const prefs = await appwrite.teams.getPrefs({ teamId })
 
     await Promise.all([
-      prefs.databaseId ? appwrite.tablesDB.delete({ databaseId: prefs.databaseId }) : null,
+      prefs.databaseId ? appwrite.databases.delete({ databaseId: prefs.databaseId }) : null,
       prefs.bucketId ? appwrite.storage.deleteBucket({ bucketId: prefs.bucketId }) : null,
     ])
 

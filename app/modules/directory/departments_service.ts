@@ -7,8 +7,8 @@ import { ID, Query } from 'node-appwrite'
  * stored in team preferences.
  */
 export default class DepartmentsService {
-  private databaseId: string
-  private tableId = 'departments'
+  private readonly databaseId: string
+  private readonly collectionId = 'departments'
 
   constructor(databaseId: string) {
     this.databaseId = databaseId
@@ -30,13 +30,13 @@ export default class DepartmentsService {
    * List all departments for the organisation.
    */
   async list() {
-    const result = await appwrite.tablesDB.listRows({
+    const result = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,
-      tableId: this.tableId,
+      collectionId: this.collectionId,
       queries: [Query.orderAsc('name'), Query.limit(100)],
     })
 
-    return result.rows.map((row) => ({
+    return result.documents.map((row) => ({
       id: row.$id,
       name: row.name,
       description: row.description || null,
@@ -50,10 +50,10 @@ export default class DepartmentsService {
    * Get a single department by ID.
    */
   async get(departmentId: string) {
-    const row = await appwrite.tablesDB.getRow({
+    const row = await appwrite.databases.getDocument({
       databaseId: this.databaseId,
-      tableId: this.tableId,
-      rowId: departmentId,
+      collectionId: this.collectionId,
+      documentId: departmentId,
     })
 
     return {
@@ -70,10 +70,10 @@ export default class DepartmentsService {
    * Create a new department.
    */
   async create(data: { name: string; description?: string; managerUserId?: string }) {
-    const row = await appwrite.tablesDB.createRow({
+    const row = await appwrite.databases.createDocument({
       databaseId: this.databaseId,
-      tableId: this.tableId,
-      rowId: ID.unique(),
+      collectionId: this.collectionId,
+      documentId: ID.unique(),
       data: {
         name: data.name,
         description: data.description ?? '',
@@ -100,10 +100,10 @@ export default class DepartmentsService {
     if (data.description !== undefined) updateData.description = data.description
     if (data.managerUserId !== undefined) updateData.managerUserId = data.managerUserId
 
-    const row = await appwrite.tablesDB.updateRow({
+    const row = await appwrite.databases.updateDocument({
       databaseId: this.databaseId,
-      tableId: this.tableId,
-      rowId: departmentId,
+      collectionId: this.collectionId,
+      documentId: departmentId,
       data: updateData,
     })
 
@@ -121,10 +121,10 @@ export default class DepartmentsService {
    * Delete a department.
    */
   async delete(departmentId: string) {
-    await appwrite.tablesDB.deleteRow({
+    await appwrite.databases.deleteDocument({
       databaseId: this.databaseId,
-      tableId: this.tableId,
-      rowId: departmentId,
+      collectionId: this.collectionId,
+      documentId: departmentId,
     })
   }
 }

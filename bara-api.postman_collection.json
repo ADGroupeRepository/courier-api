@@ -135,7 +135,7 @@
           ]
         },
         {
-          "name": "Moi (Me)",
+          "name": "Profil (Profile)",
           "request": {
             "method": "GET",
             "header": [
@@ -145,7 +145,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/me",
+              "raw": "{{base_url}}/api/v1/auth/profile",
               "host": [
                 "{{base_url}}"
               ],
@@ -153,7 +153,7 @@
                 "api",
                 "v1",
                 "auth",
-                "me"
+                "profile"
               ]
             },
             "description": "Récupère les informations de l'utilisateur actuellement connecté."
@@ -233,7 +233,7 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/me/avatar",
+              "raw": "{{base_url}}/api/v1/auth/profile/avatar",
               "host": [
                 "{{base_url}}"
               ],
@@ -241,7 +241,7 @@
                 "api",
                 "v1",
                 "auth",
-                "me",
+                "profile",
                 "avatar"
               ]
             },
@@ -260,7 +260,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/me/avatar",
+              "raw": "{{base_url}}/api/v1/auth/profile/avatar",
               "host": [
                 "{{base_url}}"
               ],
@@ -268,7 +268,7 @@
                 "api",
                 "v1",
                 "auth",
-                "me",
+                "profile",
                 "avatar"
               ]
             },
@@ -968,8 +968,405 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Annuaire (Directory)",
+      "description": "Gestion de l'annuaire de l'organisation (départements, etc.).",
+      "item": [
+        {
+          "name": "Départements (Departments)",
+          "description": "Gestion des départements au sein de l'organisation.",
+          "item": [
+            {
+              "name": "Lister les départements",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "organisations",
+                    "{{orgId}}",
+                    "departments"
+                  ]
+                },
+                "description": "Affiche tous les départements d'une organisation donnée."
+              },
+              "response": []
+            },
+            {
+              "name": "Créer un département",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Ressources Humaines\",\n  \"description\": \"Gestion du personnel et recrutement\",\n  \"organisationId\": \"{{orgId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "organisations",
+                    "{{orgId}}",
+                    "departments"
+                  ]
+                },
+                "description": "Crée un nouveau département dans l'organisation."
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Le statut est 201 (Créé)\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "pm.test(\"Enregistre l'ID du département dans les variables\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData && jsonData.data && jsonData.data.$id) {",
+                      "        pm.collectionVariables.set(\"deptId\", jsonData.data.$id);",
+                      "    } else if (jsonData && jsonData.data && jsonData.data.id) {",
+                      "        pm.collectionVariables.set(\"deptId\", jsonData.data.id);",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Voir un département",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
+                },
+                "description": "Récupère les détails d'un département spécifique."
+              },
+              "response": []
+            },
+            {
+              "name": "Modifier un département",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"RH & Recrutement\",\n  \"organisationId\": \"{{orgId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
+                },
+                "description": "Met à jour les informations d'un département."
+              },
+              "response": []
+            },
+            {
+              "name": "Supprimer un département",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
+                },
+                "description": "Supprime un département de l'organisation."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Membres de Département",
+          "description": "Gestion de l'affectation des membres aux départements.",
+          "item": [
+            {
+              "name": "Assigner à un département",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"departmentId\": \"{{deptId}}\",\n  \"departmentRole\": \"member\",\n  \"jobTitle\": \"Développeur Fullstack\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}/department",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "organisations",
+                    "{{orgId}}",
+                    "members",
+                    "{{memberId}}",
+                    "department"
+                  ]
+                },
+                "description": "Assigne un membre de l'organisation à un département spécifique."
+              },
+              "response": []
+            },
+            {
+              "name": "Lister les membres d'un département",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}/members",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}",
+                    "members"
+                  ]
+                },
+                "description": "Récupère la liste des membres affectés à un département."
+              },
+              "response": []
+            },
+            {
+              "name": "Retirer d'un département (Supprimer Profil)",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/profiles/{{profileId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "organisations",
+                    "{{orgId}}",
+                    "profiles",
+                    "{{profileId}}"
+                  ]
+                },
+                "description": "Supprime le profil d'un membre (le retire de son département)."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Courrier (Courier)",
+      "description": "Gestion des courriers entrants et sortants.",
+      "item": [
+        {
+          "name": "Lister les courriers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
+            },
+            "description": "Affiche tous les courriers d'une organisation."
+          },
+          "response": []
+        },
+        {
+          "name": "Créer un courrier",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "type", "value": "incoming", "type": "text" },
+                { "key": "subject", "value": "Facture Mars 2026", "type": "text" },
+                { "key": "sender", "value": "EDF", "type": "text" },
+                { "key": "assignedTo", "value": "{{memberId}}", "type": "text" },
+                { "key": "targetType", "value": "user", "type": "text" },
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
+            },
+            "description": "Enregistre un nouveau courrier dans le système."
+          },
+          "response": []
+        },
+        {
+          "name": "Créer un courrier sortant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "type", "value": "outgoing", "type": "text" },
+                { "key": "subject", "value": "Réponse Facture Mars", "type": "text" },
+                { "key": "recipient", "value": "EDF Service Client", "type": "text" },
+                { "key": "assignedTo", "value": "{{memberId}}", "type": "text" },
+                { "key": "targetType", "value": "user", "type": "text" },
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
+            },
+            "description": "Enregistre un nouveau courrier sortant."
+          },
+          "response": []
+        }
+      ]
     }
   ],
+
   "variable": [
     {
       "key": "base_url",
@@ -988,6 +1385,11 @@
     },
     {
       "key": "memberId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "deptId",
       "value": "",
       "type": "string"
     }

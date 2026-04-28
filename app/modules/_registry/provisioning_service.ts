@@ -34,11 +34,11 @@ export default class ModuleProvisioningService {
     for (const collDef of moduleDef.collections) {
       try {
         // Try getting the table to see if it already exists
-        await appwrite.tablesDB.getTable({
+        await appwrite.databases.getCollection({
           databaseId,
-          tableId: collDef.id,
+          collectionId: collDef.id,
         })
-        logger.info({ orgId, tableId: collDef.id }, '[ModuleProvisioning] Table already exists, skipping creation.')
+        logger.info({ orgId, collectionId: collDef.id }, '[ModuleProvisioning] Collection already exists, skipping creation.')
         // Note: For a production-ready system, you might want to diff columns here
         // and create any missing ones, but we skip for simplicity if it already exists.
         continue
@@ -49,49 +49,50 @@ export default class ModuleProvisioningService {
       }
 
       // 3. Create table
-      logger.info({ orgId, tableId: collDef.id }, '[ModuleProvisioning] Creating table...')
-      await appwrite.tablesDB.createTable({
+      logger.info({ orgId, collectionId: collDef.id }, '[ModuleProvisioning] Creating collection...')
+      await appwrite.databases.createCollection({
         databaseId,
-        tableId: collDef.id,
+        collectionId: collDef.id,
         name: collDef.name,
         permissions: collDef.permissions(orgId),
-        rowSecurity: collDef.documentSecurity,
+        documentSecurity: collDef.documentSecurity,
       })
 
       // 4. Create columns
       for (const attr of collDef.attributes) {
         switch (attr.type) {
           case 'string':
-            await appwrite.tablesDB.createTextColumn({
+            await appwrite.databases.createStringAttribute({
               databaseId,
-              tableId: collDef.id,
+              collectionId: collDef.id,
               key: attr.key,
+              size: attr.size || 255,
               required: attr.required,
               array: attr.array,
             })
             break
           case 'integer':
-            await appwrite.tablesDB.createIntegerColumn({
+            await appwrite.databases.createIntegerAttribute({
               databaseId,
-              tableId: collDef.id,
+              collectionId: collDef.id,
               key: attr.key,
               required: attr.required,
               array: attr.array,
             })
             break
           case 'boolean':
-            await appwrite.tablesDB.createBooleanColumn({
+            await appwrite.databases.createBooleanAttribute({
               databaseId,
-              tableId: collDef.id,
+              collectionId: collDef.id,
               key: attr.key,
               required: attr.required,
               array: attr.array,
             })
             break
           case 'enum':
-            await appwrite.tablesDB.createEnumColumn({
+            await appwrite.databases.createEnumAttribute({
               databaseId,
-              tableId: collDef.id,
+              collectionId: collDef.id,
               key: attr.key,
               elements: attr.elements || [],
               required: attr.required,
@@ -106,17 +107,17 @@ export default class ModuleProvisioningService {
       // We must wait for them to become 'available' before creating indexes.
       // A safe delay is usually 2-3 seconds for a few columns.
       if (collDef.indexes.length > 0) {
-        logger.info({ orgId, tableId: collDef.id }, '[ModuleProvisioning] Waiting for columns to be ready before creating indexes...')
+        logger.info({ orgId, collectionId: collDef.id }, '[ModuleProvisioning] Waiting for attributes to be ready before creating indexes...')
         await this.sleep(3000)
 
         // 5. Create indexes
         for (const idx of collDef.indexes) {
-          await appwrite.tablesDB.createIndex({
+          await appwrite.databases.createIndex({
             databaseId,
-            tableId: collDef.id,
+            collectionId: collDef.id,
             key: idx.key,
             type: idx.type as any,
-            columns: idx.attributes,
+            attributes: idx.attributes,
             orders: idx.orders?.map((o: string) => o.toLowerCase() as any),
           })
         }

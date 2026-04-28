@@ -10,13 +10,13 @@ export default class OrganisationModulesController {
    */
   async indexAvailable({ response }: HttpContext) {
     try {
-      const result = await appwrite.tablesDB.listRows({
+      const result = await appwrite.databases.listDocuments({
         databaseId: 'bara-platform',
-        tableId: 'marketplace_modules',
+        collectionId: 'marketplace_modules',
         queries: [Query.equal('isActive', true)],
       })
 
-      const modules = result.rows.map((doc) => ({
+      const modules = result.documents.map((doc) => ({
         name: doc.moduleName,
         label: doc.label,
         description: doc.description,

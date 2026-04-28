@@ -26,20 +26,20 @@ export default class AdminMarketplaceController {
 
     try {
       // 2. Check if already published
-      const existing = await appwrite.tablesDB.listRows({
+      const existing = await appwrite.databases.listDocuments({
         databaseId: this.databaseId,
-        tableId: this.collectionId,
+        collectionId: this.collectionId,
         queries: [Query.equal('moduleName', moduleName)],
       })
 
-      if (existing.rows.length > 0) {
+      if (existing.documents.length > 0) {
         // Just set isActive to true if it was unpublished
-        const doc = existing.rows[0]
+        const doc = existing.documents[0]
         if (!doc.isActive) {
-          await appwrite.tablesDB.updateRow({
+          await appwrite.databases.updateDocument({
             databaseId: this.databaseId,
-            tableId: this.collectionId,
-            rowId: doc.$id,
+            collectionId: this.collectionId,
+            documentId: doc.$id,
             data: {
               isActive: true,
               label: moduleDef.label,
@@ -53,10 +53,10 @@ export default class AdminMarketplaceController {
       }
 
       // 3. Create new marketplace record
-      await appwrite.tablesDB.createRow({
+      await appwrite.databases.createDocument({
         databaseId: this.databaseId,
-        tableId: this.collectionId,
-        rowId: ID.unique(),
+        collectionId: this.collectionId,
+        documentId: ID.unique(),
         data: {
           moduleName: moduleDef.name,
           label: moduleDef.label,
@@ -84,22 +84,22 @@ export default class AdminMarketplaceController {
     const moduleName = request.param('moduleName')
 
     try {
-      const existing = await appwrite.tablesDB.listRows({
+      const existing = await appwrite.databases.listDocuments({
         databaseId: this.databaseId,
-        tableId: this.collectionId,
+        collectionId: this.collectionId,
         queries: [Query.equal('moduleName', moduleName)],
       })
 
-      if (existing.rows.length === 0) {
+      if (existing.documents.length === 0) {
         return response.notFound({ message: `Module "${moduleName}" is not in the marketplace.` })
       }
 
-      const doc = existing.rows[0]
+      const doc = existing.documents[0]
       if (doc.isActive) {
-        await appwrite.tablesDB.updateRow({
+        await appwrite.databases.updateDocument({
           databaseId: this.databaseId,
-          tableId: this.collectionId,
-          rowId: doc.$id,
+          collectionId: this.collectionId,
+          documentId: doc.$id,
           data: {
             isActive: false,
           },
