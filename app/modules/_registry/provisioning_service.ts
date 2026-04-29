@@ -32,6 +32,7 @@ export default class ModuleProvisioningService {
 
     // 2. Process each collection in the module
     for (const collDef of moduleDef.collections) {
+      console.log(`[ModuleProvisioning] Processing collection: ${collDef.id}.`)
       try {
         // Try getting the table to see if it already exists
         await appwrite.databases.getCollection({
