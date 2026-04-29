@@ -1,24 +1,44 @@
 import appwrite from '#services/appwrite_service'
+import logger from '@adonisjs/core/services/logger'
 import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
+import { CourierUrgency, CourierStatus, CourierType, CourierStructureType } from '#modules/courier/courier_enums'
+import { Collections } from '#modules/_registry/collection_ids'
 
 export interface CreateCourierPayload {
-  type: 'incoming' | 'outgoing'
+  type: CourierType
+  urgency: CourierUrgency
   subject: string
-  sender?: string
-  recipient?: string
-  assignedTo: string
+  contactName: string
+  contactNumber: string
+  contactStructureType?: CourierStructureType
+  contactStructureName?: string
+  contactIdNumber?: string
+  contactPhone?: string
+  contactEmail?: string
+  externalContactId?: string
+  internalEntityId: string
   targetType: 'user' | 'department'
   createdBy: string
 }
 
 export interface UpdateCourierPayload {
+  urgency?: CourierUrgency
   subject?: string
-  sender?: string
-  recipient?: string
-  assignedTo?: string
-  status?: 'pending' | 'received' | 'assigned' | 'sent' | 'completed'
+  contactName?: string
+  contactNumber?: string
+  contactStructureType?: CourierStructureType
+  contactStructureName?: string
+  contactIdNumber?: string
+  contactPhone?: string
+  contactEmail?: string
+  externalContactId?: string
+  internalEntityId?: string
+  targetType?: 'user' | 'department'
+  status?: CourierStatus
+  isFavorite?: boolean
+  isArchived?: boolean
 }
 
 /**
@@ -27,7 +47,7 @@ export interface UpdateCourierPayload {
 export default class CourierService {
   private readonly databaseId: string
   private readonly bucketId: string
-  private readonly collectionId = 'couriers'
+  private readonly collectionId = Collections.COURIERS
 
   constructor(databaseId: string, bucketId: string) {
     this.databaseId = databaseId
@@ -53,12 +73,31 @@ export default class CourierService {
     userId: string
     departmentId?: string
     canManage: boolean
-    type?: 'incoming' | 'outgoing'
+    type?: CourierType
+    archived?: boolean
+    favorite?: boolean
+    limit?: number
+    offset?: number
   }) {
-    const baseQueries = [Query.orderDesc('$createdAt')]
+    const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
+    const offset = Math.max(options.offset ?? 0, 0)
+
+    const baseQueries = [
+      Query.orderDesc('$createdAt'),
+      Query.limit(limit),
+      Query.offset(offset),
+    ]
 
     if (options.type) {
       baseQueries.push(Query.equal('type', options.type))
+    }
+
+    // Filter by archive status (default: show non-archived)
+    baseQueries.push(Query.equal('isArchived', options.archived ?? false))
+
+    // Filter favorites only when explicitly requested
+    if (options.favorite) {
+      baseQueries.push(Query.equal('isFavorite', true))
     }
 
     if (options.canManage) {
@@ -67,7 +106,10 @@ export default class CourierService {
         collectionId: this.collectionId,
         queries: baseQueries,
       })
-      return result.documents.map((doc) => this.mapDocument(doc))
+      return {
+        total: result.total,
+        documents: result.documents.map((doc) => this.mapDocument(doc)),
+      }
     }
 
     // If not a manager, filter by assignment
@@ -76,13 +118,14 @@ export default class CourierService {
     // Construct OR query for assignment
     // Note: Appwrite 1.5+ supports Query.or
     const orQueries = [
-      Query.and([Query.equal('assignedTo', options.userId), Query.equal('targetType', 'user')]),
+      Query.and([Query.equal('internalEntityId', options.userId), Query.equal('targetType', 'user')]),
+      Query.equal('createdBy', options.userId),
     ]
 
     if (options.departmentId) {
       orQueries.push(
         Query.and([
-          Query.equal('assignedTo', options.departmentId),
+          Query.equal('internalEntityId', options.departmentId),
           Query.equal('targetType', 'department'),
         ])
       )
@@ -96,7 +139,10 @@ export default class CourierService {
       queries,
     })
 
-    return result.documents.map((doc) => this.mapDocument(doc))
+    return {
+      total: result.total,
+      documents: result.documents.map((doc) => this.mapDocument(doc)),
+    }
   }
 
   /**
@@ -139,7 +185,9 @@ export default class CourierService {
         data: {
           ...payload,
           fileId: fileId || null,
-          status: payload.type === 'incoming' ? 'pending' : 'sent',
+          status: payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
+          isFavorite: false,
+          isArchived: false,
         },
       })
 
@@ -160,11 +208,17 @@ export default class CourierService {
    * Update a courier record.
    */
   async update(courierId: string, payload: UpdateCourierPayload) {
+    // Auto-archive when status is set to completed
+    const data: Record<string, any> = { ...payload }
+    if (payload.status === CourierStatus.COMPLETED) {
+      data.isArchived = true
+    }
+
     const doc = await appwrite.databases.updateDocument({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
       documentId: courierId,
-      data: payload,
+      data,
     })
 
     return this.mapDocument(doc)
@@ -208,7 +262,7 @@ export default class CourierService {
           fileId: courier.fileId,
         })
       } catch (error) {
-        // Log error but continue deleting the document
+        logger.warn({ courierId, fileId: courier.fileId, error }, 'Failed to delete courier file, continuing with document deletion')
       }
     }
 
@@ -230,14 +284,24 @@ export default class CourierService {
     return {
       id: doc.$id,
       type: doc.type,
+      urgency: doc.urgency,
       subject: doc.subject,
-      sender: doc.sender || null,
-      recipient: doc.recipient || null,
-      assignedTo: doc.assignedTo,
+      contactName: doc.contactName,
+      contactNumber: doc.contactNumber,
+      contactStructureType: doc.contactStructureType || null,
+      contactStructureName: doc.contactStructureName || null,
+      contactIdNumber: doc.contactIdNumber || null,
+      contactPhone: doc.contactPhone || null,
+      contactEmail: doc.contactEmail || null,
+      externalContactId: doc.externalContactId || null,
+      internalEntityId: doc.internalEntityId,
       targetType: doc.targetType,
       fileUrl,
+      fileId: doc.fileId || null,
       createdBy: doc.createdBy,
       status: doc.status,
+      isFavorite: doc.isFavorite ?? false,
+      isArchived: doc.isArchived ?? false,
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
     }
