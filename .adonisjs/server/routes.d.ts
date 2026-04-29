@@ -40,6 +40,11 @@ export type ScannedRoutes = {
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'external_contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'external_contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   POST: {
     'auth.signup': { paramsTuple?: []; params?: {} }
@@ -54,6 +59,7 @@ export type ScannedRoutes = {
     'departments.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'department_members.assign': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'membershipId': ParamValue} }
     'courier.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'external_contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
   }
   GET: {
     'auth.profile': { paramsTuple?: []; params?: {} }
@@ -68,6 +74,8 @@ export type ScannedRoutes = {
     'department_members.index_by_department': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'external_contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   HEAD: {
     'auth.profile': { paramsTuple?: []; params?: {} }
@@ -82,6 +90,8 @@ export type ScannedRoutes = {
     'department_members.index_by_department': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'external_contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   DELETE: {
     'auth.delete_avatar': { paramsTuple?: []; params?: {} }
@@ -92,6 +102,7 @@ export type ScannedRoutes = {
     'departments.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'department_members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   PUT: {
     'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -103,6 +114,7 @@ export type ScannedRoutes = {
     'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
     'departments.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {
