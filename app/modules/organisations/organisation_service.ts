@@ -30,26 +30,39 @@ export default class OrganisationService {
    * 3. An isolated Storage Bucket (for file uploads)
    * 4. Team preferences storing the resource IDs + org metadata
    *
-   * The creator is automatically the team owner.
+   * The creator is automatically added as owner/admin.
    */
-  async create(payload: CreateOrganisationPayload) {
+  async create(payload: CreateOrganisationPayload, creatorId: string) {
+    console.error(`[OrgService] Starting creation for: ${payload.name} (Creator: ${creatorId})`)
     const { name, description, address } = payload
     const teamId = ID.unique()
 
     // Step 1: Create the team
+    console.log(`[OrgService] Creating team with ID: ${teamId}`)
     const team = await appwrite.teams.create({
       teamId,
       name,
-      roles: ['owner', 'admin', 'member'],
+    })
+    console.log(`[OrgService] Team created: ${team.$id}`)
+
+    // Step 1.1: Add the creator to the team as owner/admin
+    console.log(`[OrgService] Adding creator ${creatorId} to team...`)
+    await appwrite.teams.createMembership({
+      teamId: team.$id,
+      userId: creatorId,
+      roles: ['owner', 'admin'],
     })
 
     // Step 2: Provision isolated database
+    console.log('[OrgService] Creating database...')
     const database = await appwrite.databases.create({
       databaseId: ID.unique(),
       name,
     })
-
+    console.log(`[OrgService] Database created: ${database.$id}`)
+    
     // Step 3: Provision isolated storage bucket
+    console.log('[OrgService] Creating bucket...')
     const bucket = await appwrite.storage.createBucket({
       bucketId: ID.unique(),
       name,
@@ -64,8 +77,10 @@ export default class OrganisationService {
       compression: Compression.Gzip,
       encryption: true,
     })
-
+    console.log(`[OrgService] Bucket created: ${bucket.$id}`)
+    
     // Step 4: Store resource IDs + metadata in team preferences
+    console.log('[OrgService] Updating team prefs...')
     await appwrite.teams.updatePrefs({
       teamId: team.$id,
       prefs: {
@@ -77,14 +92,18 @@ export default class OrganisationService {
         plan: 'free',
       },
     })
-
+    console.log('[OrgService] Team prefs updated.')
+    
     // Step 5: Auto-provision core modules (like 'directory')
+    console.log('[OrgService] Provisioning core modules...')
     const provisioningService = new ModuleProvisioningService()
     for (const [moduleName, moduleDef] of MODULE_REGISTRY) {
       if (moduleDef.core) {
+        console.log(`[OrgService] Activating core module: ${moduleName}. Memory: ${JSON.stringify(process.memoryUsage())}`)
         await provisioningService.activate(team.$id, moduleName)
       }
     }
+    console.log(`[OrgService] Core modules provisioned. Memory: ${JSON.stringify(process.memoryUsage())}`)
 
     return {
       id: team.$id,
@@ -230,17 +249,66 @@ export default class OrganisationService {
 
   /**
    * Delete an organisation and all its provisioned resources.
-   * Order matters: delete DB and bucket before the team.
+   * Order matters: delete DB and bucket before the team to ensure we have access.
    */
   async delete(teamId: string) {
-    const prefs = await appwrite.teams.getPrefs({ teamId })
+    console.log(`[OrgService] Deleting organisation: ${teamId}`)
+    const prefs = (await appwrite.teams.getPrefs({ teamId })) as any
 
-    await Promise.all([
-      prefs.databaseId ? appwrite.databases.delete({ databaseId: prefs.databaseId }) : null,
-      prefs.bucketId ? appwrite.storage.deleteBucket({ bucketId: prefs.bucketId }) : null,
-    ])
+    // 1. Delete isolated resources (Database, Bucket)
+    // We wrap these in a Promise.allSettled or individual try/catch to ensure
+    // that if one fails (e.g. already deleted), the others still proceed.
+    const cleanupTasks = [
+      // Delete Database
+      async () => {
+        if (prefs.databaseId) {
+          try {
+            await appwrite.databases.delete({ databaseId: prefs.databaseId })
+            console.log(`[OrgService] Deleted database: ${prefs.databaseId}`)
+          } catch (err: any) {
+            console.log(`[OrgService] Failed to delete database ${prefs.databaseId}: ${err.message}`)
+          }
+        }
+      },
+      // Delete Bucket
+      async () => {
+        if (prefs.bucketId) {
+          try {
+            await appwrite.storage.deleteBucket({ bucketId: prefs.bucketId })
+            console.log(`[OrgService] Deleted bucket: ${prefs.bucketId}`)
+          } catch (err: any) {
+            console.log(`[OrgService] Failed to delete bucket ${prefs.bucketId}: ${err.message}`)
+          }
+        }
+      },
+      // Delete Logo from public-media
+      async () => {
+        const logoFileId = `logo-${teamId}`
+        try {
+          await appwrite.storage.deleteFile({
+            bucketId: 'public-media',
+            fileId: logoFileId,
+          })
+          console.log(`[OrgService] Deleted logo file: ${logoFileId}`)
+        } catch (err: any) {
+          // 404 is expected if no logo was ever uploaded
+          if (err.code !== 404) {
+            console.log(`[OrgService] Failed to delete logo ${logoFileId}: ${err.message}`)
+          }
+        }
+      },
+    ]
 
-    await appwrite.teams.delete({ teamId })
+    await Promise.all(cleanupTasks.map((task) => task()))
+
+    // 2. Delete the team itself
+    try {
+      await appwrite.teams.delete({ teamId })
+      console.log(`[OrgService] Deleted team: ${teamId}`)
+    } catch (err: any) {
+      console.log(`[OrgService] Failed to delete team ${teamId}: ${err.message}`)
+      throw err // Re-throw the team deletion error as it's the primary operation
+    }
   }
 
   // ---------------------------------------------------------------------------

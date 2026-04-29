@@ -1,7 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-import { Account, Client } from 'node-appwrite'
-import appwriteConfig from '#config/appwrite'
 
 /**
  * Validates the Bearer JWT on every protected request.
@@ -29,19 +27,17 @@ export default class AuthMiddleware {
     }
 
     try {
-      const sessionClient = new Client()
-        .setEndpoint(appwriteConfig.endpoint)
-        .setProject(appwriteConfig.projectId)
-        .setJWT(token)
-        .setSelfSigned(true)
-
-      const account = new Account(sessionClient)
+      console.log(`[AuthMiddleware] Verifying token.`)
+      const appwrite = (await import('#services/appwrite_service')).default
+      const { client, account } = appwrite.createSessionClient(token)
+      
       const user = await account.get()
 
       ctx.user = user
       ctx.token = token
-      ctx.sessionClient = sessionClient
-    } catch {
+      ctx.sessionClient = client
+    } catch (error: any) {
+      console.log('[AuthMiddleware] Token verification failed:', error.message)
       return ctx.response.unauthorized({
         message: 'Invalid or expired token. Please log in again.',
       })

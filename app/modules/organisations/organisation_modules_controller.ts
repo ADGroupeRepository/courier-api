@@ -46,16 +46,17 @@ export default class OrganisationModulesController {
    */
   async activate({ request, response }: HttpContext) {
     const orgId = request.param('orgId')
-    const { module } = request.only(['module'])
+    const { module, moduleName } = request.only(['module', 'moduleName'])
+    const finalModule = module || moduleName
 
-    if (!module || typeof module !== 'string') {
-      return response.badRequest({ message: 'Module name is required' })
+    if (!finalModule || typeof finalModule !== 'string') {
+      return response.badRequest({ message: 'Module name is required (use "module" or "moduleName" field)' })
     }
 
     const service = new ModuleProvisioningService()
     try {
-      await service.activate(orgId, module)
-      return response.created({ message: `Module "${module}" activated successfully` })
+      await service.activate(orgId, finalModule)
+      return response.created({ message: `Module "${finalModule}" activated successfully` })
     } catch (error: any) {
       return response.badRequest({ message: error.message })
     }
