@@ -23,6 +23,8 @@ export default class MembersService {
 
   /**
    * Factory method to initialize service for a specific organisation.
+   * @param orgId - The ID of the organisation (team).
+   * @returns A new instance of MembersService configured for the organisation.
    */
   static async forOrg(orgId: string): Promise<MembersService> {
     const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
@@ -35,6 +37,8 @@ export default class MembersService {
   /**
    * Assign a user to a department by creating an org_profile record.
    * If they already have a profile, it updates it (one profile per org/user).
+   * @param payload - The assignment details (user, department, role, title).
+   * @returns The created or updated profile document.
    */
   async assignToDepartment(payload: AssignMemberPayload) {
     // 1. Check if a profile already exists for this user in this org
@@ -73,6 +77,8 @@ export default class MembersService {
 
   /**
    * List all members assigned to a specific department.
+   * @param departmentId - The ID of the department.
+   * @returns A list of member profiles in the department.
    */
   async listByDepartment(departmentId: string) {
     const result = await appwrite.databases.listDocuments({
@@ -95,6 +101,7 @@ export default class MembersService {
 
   /**
    * Remove a member from their department (deletes their org_profile).
+   * @param profileId - The ID of the profile (org_profile) record.
    */
   async removeFromDepartment(profileId: string) {
     await appwrite.databases.deleteDocument({

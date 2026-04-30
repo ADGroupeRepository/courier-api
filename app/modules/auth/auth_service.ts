@@ -23,6 +23,7 @@ export default class AuthService {
    *
    * `createEmailPasswordSession` is a public endpoint — no API key or
    * session token required, just the project ID.
+   * @returns An unauthenticated Account service instance.
    */
   private publicAccountService() {
     const client = new Client()
@@ -37,6 +38,8 @@ export default class AuthService {
    *
    * Uses the admin Users API so we get the full user object back
    * without needing a session client.
+   * @param payload - The signup details (name, email, password, phone).
+   * @returns The created user profile.
    */
   async signup(payload: SignupPayload) {
     const { name, email, password, phone } = payload
@@ -78,6 +81,9 @@ export default class AuthService {
    *
    * The returned `token` (JWT) must be sent by the client as
    * `Authorization: Bearer <token>` on all subsequent protected requests.
+   * @param email - The user's email.
+   * @param password - The user's password.
+   * @returns Authentication details including JWT, user profile, and organisations.
    */
   async login(email: string, password: string) {
     // Step 1 — Verify credentials (public client, no API key needed)
@@ -108,6 +114,8 @@ export default class AuthService {
 
   /**
    * Invalidate the current session (logout).
+   * @param jwt - The user's session JWT.
+   * @param sessionId - The ID of the session to delete.
    */
   async logout(jwt: string, sessionId: string) {
     const { account } = appwrite.createSessionClient(jwt)
@@ -116,6 +124,8 @@ export default class AuthService {
 
   /**
    * Return the currently authenticated user's profile.
+   * @param jwt - The user's session JWT.
+   * @returns The user's profile details.
    */
   async getUserProfile(jwt: string) {
     const { account } = appwrite.createSessionClient(jwt)
@@ -137,6 +147,10 @@ export default class AuthService {
 
   /**
    * Build a public preview URL for any file stored in the public-media bucket.
+   * @param fileId - The ID of the file.
+   * @param width - The desired width of the preview.
+   * @param height - The desired height of the preview.
+   * @returns The public preview URL.
    */
   static buildPreviewUrl(fileId: string, width = 200, height = 200): string {
     return `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${fileId}/preview?width=${width}&height=${height}&project=${appwriteConfig.projectId}`
@@ -144,6 +158,10 @@ export default class AuthService {
 
   /**
    * Upload a new avatar, replacing the existing one if any.
+   * @param jwt - The user's session JWT.
+   * @param tmpPath - The temporary path of the avatar file.
+   * @param fileName - The original filename.
+   * @returns The preview URL of the new avatar.
    */
   async uploadAvatar(jwt: string, tmpPath: string, fileName: string) {
     const { account } = appwrite.createSessionClient(jwt)
@@ -186,6 +204,7 @@ export default class AuthService {
 
   /**
    * Delete the user's avatar entirely.
+   * @param jwt - The user's session JWT.
    */
   async deleteAvatar(jwt: string) {
     const { account } = appwrite.createSessionClient(jwt)

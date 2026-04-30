@@ -31,6 +31,9 @@ export default class OrganisationService {
    * 4. Team preferences storing the resource IDs + org metadata
    *
    * The creator is automatically added as owner/admin.
+   * @param payload - The organisation details (name, description, address).
+   * @param creatorId - The ID of the user creating the organisation.
+   * @returns The created organisation details.
    */
   async create(payload: CreateOrganisationPayload, creatorId: string) {
     console.error(`[OrgService] Starting creation for: ${payload.name} (Creator: ${creatorId})`)
@@ -119,6 +122,10 @@ export default class OrganisationService {
 
   /**
    * Build a public preview URL for any file stored in the public-media bucket.
+   * @param fileId - The ID of the file.
+   * @param width - The desired width of the preview.
+   * @param height - The desired height of the preview.
+   * @returns The public preview URL.
    */
   static buildPreviewUrl(fileId: string, width = 200, height = 200): string {
     return `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${fileId}/preview?width=${width}&height=${height}&project=${appwriteConfig.projectId}`
@@ -127,6 +134,8 @@ export default class OrganisationService {
   /**
    * List all organisations the authenticated user belongs to.
    * Uses the session-scoped teams service so only their orgs are returned.
+   * @param jwt - The user's session JWT.
+   * @returns A list of organisations.
    */
   async list(jwt: string) {
     const { teams } = appwrite.createSessionClient(jwt)
@@ -152,6 +161,8 @@ export default class OrganisationService {
 
   /**
    * Get a single organisation with its full metadata from preferences.
+   * @param teamId - The ID of the organisation (team).
+   * @returns The organisation's full details.
    */
   async get(teamId: string) {
     const [team, prefs] = await Promise.all([
@@ -179,6 +190,10 @@ export default class OrganisationService {
 
   /**
    * Upload or replace an organisation's logo.
+   * @param teamId - The ID of the organisation (team).
+   * @param tmpPath - The temporary path of the logo file.
+   * @param fileName - The original filename.
+   * @returns The public preview URL of the uploaded logo.
    */
   async uploadLogo(teamId: string, tmpPath: string, fileName: string) {
     const fileId = `logo-${teamId}`
@@ -219,6 +234,9 @@ export default class OrganisationService {
   /**
    * Update organisation name and/or metadata.
    * Merges with existing prefs to avoid overwriting other stored values.
+   * @param teamId - The ID of the organisation (team).
+   * @param payload - The update details (name, description, address).
+   * @returns The updated organisation details.
    */
   async update(teamId: string, payload: UpdateOrganisationPayload) {
     const updates: Promise<unknown>[] = []
@@ -250,6 +268,7 @@ export default class OrganisationService {
   /**
    * Delete an organisation and all its provisioned resources.
    * Order matters: delete DB and bucket before the team to ensure we have access.
+   * @param teamId - The ID of the organisation (team).
    */
   async delete(teamId: string) {
     console.log(`[OrgService] Deleting organisation: ${teamId}`)
@@ -322,6 +341,10 @@ export default class OrganisationService {
    * 1. Look up the user by email in the admin Users API.
    * 2. If not found, auto-create the account with a temporary password.
    * 3. Add them to the team by userId (auto-confirmed, no email sent).
+   * @param teamId - The ID of the organisation (team).
+   * @param email - The member's email address.
+   * @param roles - The roles to assign to the new member.
+   * @returns The membership details.
    */
   async addMember(teamId: string, email: string, roles: string[]) {
     // 1. Find or create the user
@@ -369,6 +392,8 @@ export default class OrganisationService {
 
   /**
    * List all members of an organisation.
+   * @param teamId - The ID of the organisation (team).
+   * @returns A list of members with their roles and status.
    */
   async listMembers(teamId: string) {
     const result = await appwrite.teams.listMemberships({ teamId })
@@ -387,6 +412,10 @@ export default class OrganisationService {
 
   /**
    * Update a member's roles within the organisation.
+   * @param teamId - The ID of the organisation (team).
+   * @param membershipId - The ID of the membership record.
+   * @param roles - The new roles to assign.
+   * @returns The updated membership details.
    */
   async updateMember(teamId: string, membershipId: string, roles: string[]) {
     const membership = await appwrite.teams.updateMembership({
@@ -404,6 +433,8 @@ export default class OrganisationService {
 
   /**
    * Remove a member from the organisation.
+   * @param teamId - The ID of the organisation (team).
+   * @param membershipId - The ID of the membership record to remove.
    */
   async removeMember(teamId: string, membershipId: string) {
     await appwrite.teams.deleteMembership({ teamId, membershipId })

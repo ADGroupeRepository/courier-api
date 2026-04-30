@@ -1,0 +1,120 @@
+include:
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+
+stages:
+  - verify
+  - build
+  - deploy
+
+variables:
+  GCP_PROJECT_ID: "bara-app-2026"
+  GCP_REGION: "europe-west1"
+  SERVICE_NAME: "bara-api"
+  # Note: GCP_SERVICE_ACCOUNT_KEY must be set in GitLab CI/CD Settings
+
+# Reusable authentication block
+.google-auth: &google-auth
+  - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp-key.json
+  - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
+  - gcloud config set project ${GCP_PROJECT_ID}
+  - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+
+# --- VERIFY STAGE ---
+
+lint_and_typecheck:
+  stage: verify
+  image: node:20-alpine
+  script:
+    - npm ci
+    - npm run lint
+    - npm run typecheck
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+validate_openapi:
+  stage: verify
+  image: node:20-alpine
+  script:
+    - npm install -g @stoplight/spectral-cli
+    - spectral lint api-gateway/openapi-dev.yaml
+    - spectral lint api-gateway/openapi-prod.yaml
+  rules:
+    - changes:
+        - api-gateway/*.yaml
+
+validate_terraform:
+  stage: verify
+  image: hashicorp/terraform:latest
+  script:
+    # Validate Dev
+    - cd infrastructure/terraform/environments/dev
+    - terraform init -backend=false
+    - terraform validate
+    # Validate Prod
+    - cd ../prod
+    - terraform init -backend=false
+    - terraform validate
+  rules:
+    - changes:
+        - infrastructure/terraform/**/*
+
+# --- BUILD STAGE ---
+
+build_dev:
+  stage: build
+  image: google/cloud-sdk:latest
+  variables:
+    IMAGE_NAME: "europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-dev/api"
+  script:
+    - *google-auth
+    - gcloud builds submit --tag ${IMAGE_NAME}:${CI_COMMIT_SHA} .
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+build_prod:
+  stage: build
+  image: google/cloud-sdk:latest
+  variables:
+    IMAGE_NAME: "europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-prod/api"
+  script:
+    - *google-auth
+    - gcloud builds submit --tag ${IMAGE_NAME}:${CI_COMMIT_SHA} .
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# --- DEPLOY STAGE ---
+
+deploy_dev:
+  stage: deploy
+  image: google/cloud-sdk:latest
+  environment:
+    name: development
+  variables:
+    IMAGE_NAME: "europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-dev/api"
+    ENV_SUFFIX: "-dev"
+  script:
+    - *google-auth
+    - gcloud run deploy ${SERVICE_NAME}${ENV_SUFFIX} --image ${IMAGE_NAME}:${CI_COMMIT_SHA} --region ${GCP_REGION} --platform managed
+    - SERVICE_URL=$(gcloud run services describe ${SERVICE_NAME}${ENV_SUFFIX} --region ${GCP_REGION} --format='value(status.url)')
+    - echo "Deployed to $SERVICE_URL"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+deploy_prod:
+  stage: deploy
+  image: google/cloud-sdk:latest
+  environment:
+    name: production
+  variables:
+    IMAGE_NAME: "europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-prod/api"
+    ENV_SUFFIX: "-prod"
+  script:
+    - *google-auth
+    - gcloud run deploy ${SERVICE_NAME}${ENV_SUFFIX} --image ${IMAGE_NAME}:${CI_COMMIT_SHA} --region ${GCP_REGION} --platform managed
+    - SERVICE_URL=$(gcloud run services describe ${SERVICE_NAME}${ENV_SUFFIX} --region ${GCP_REGION} --format='value(status.url)')
+    - echo "Deployed to $SERVICE_URL"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

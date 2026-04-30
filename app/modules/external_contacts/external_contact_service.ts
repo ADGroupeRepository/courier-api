@@ -26,12 +26,19 @@ export class ExternalContactService {
     this.orgId = orgId
   }
 
+  /**
+   * Initialize the service for a specific organisation.
+   * @param orgId - The ID of the organisation.
+   * @returns A new instance of ExternalContactService.
+   */
   static async forOrg(orgId: string) {
     return new ExternalContactService(orgId)
   }
 
   /**
    * List all external contacts for the organisation.
+   * @param queries - Optional Appwrite queries for filtering/sorting.
+   * @returns A list of external contacts.
    */
   async list(queries: string[] = []) {
     const response = await appwrite.databases.listDocuments({
@@ -44,7 +51,9 @@ export class ExternalContactService {
   }
 
   /**
-   * Get a single contact.
+   * Get a single external contact by ID.
+   * @param id - The ID of the contact.
+   * @returns The contact details.
    */
   async get(id: string) {
     const doc = await appwrite.databases.getDocument({
@@ -56,7 +65,9 @@ export class ExternalContactService {
   }
 
   /**
-   * Create a new contact.
+   * Create a new external contact.
+   * @param payload - The contact details.
+   * @returns The created contact details.
    */
   async create(payload: CreateExternalContactPayload) {
     const doc = await appwrite.databases.createDocument({
@@ -70,7 +81,10 @@ export class ExternalContactService {
   }
 
   /**
-   * Update a contact.
+   * Update an existing external contact.
+   * @param id - The ID of the contact to update.
+   * @param payload - The fields to update.
+   * @returns The updated contact details.
    */
   async update(id: string, payload: UpdateExternalContactPayload) {
     const doc = await appwrite.databases.updateDocument({
@@ -84,7 +98,8 @@ export class ExternalContactService {
   }
 
   /**
-   * Delete a contact.
+   * Permanently delete an external contact.
+   * @param id - The ID of the contact to delete.
    */
   async delete(id: string) {
     await appwrite.databases.deleteDocument({

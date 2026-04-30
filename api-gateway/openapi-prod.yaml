@@ -17,7 +17,7 @@ securityDefinitions:
 x-google-backend:
   # TODO: Replace this with your production Cloud Run URL
   # The /api/v1 suffix will automatically be prepended to all paths below
-  address: "https://[YOUR_PROD_CLOUD_RUN_URL]/api/v1"
+  address: "{{CLOUD_RUN_URL}}/api/v1"
   path_translation: APPEND_PATH_TO_ADDRESS
 
 x-google-management:
@@ -50,7 +50,7 @@ paths:
       operationId: healthCheck
       # We override the backend here because the health check is at the root (/), not /api/v1/
       x-google-backend:
-        address: "https://[YOUR_PROD_CLOUD_RUN_URL]/"
+        address: "{{CLOUD_RUN_URL}}/"
         path_translation: CONSTANT_ADDRESS
       responses:
         '200':
