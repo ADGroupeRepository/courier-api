@@ -49,6 +49,7 @@ export default class CourierController {
     const type = request.input('type') as CourierType | undefined
     const archived = request.input('archived') as string | undefined
     const favorite = request.input('favorite') as string | undefined
+    const deleted = request.input('deleted') as string | undefined
     const limit = Number(request.input('limit')) || 25
     const offset = Number(request.input('offset')) || 0
 
@@ -64,6 +65,7 @@ export default class CourierController {
         type,
         archived: archived === 'true',
         favorite: favorite === 'true' ? true : undefined,
+        deleted: deleted === 'true',
         limit,
         offset,
       })
@@ -178,7 +180,7 @@ export default class CourierController {
 
   /**
    * DELETE /api/v1/organisations/:orgId/couriers/:id
-   * Delete a courier.
+   * Move a courier to the bin (soft delete).
    */
   async destroy({ user, params, response }: HttpContext) {
     try {
@@ -193,8 +195,59 @@ export default class CourierController {
         return response.forbidden({ message: 'Only managers or the creator can delete this courier' })
       }
 
-      await service.delete(params.id)
-      return response.ok({ message: 'Courier deleted successfully' })
+      await service.softDelete(params.id)
+      return response.ok({ message: 'Courier moved to bin' })
+    } catch (error: any) {
+      if (error.code === 404) return response.notFound({ message: 'Courier not found' })
+      return response.internalServerError({ message: error.message })
+    }
+  }
+
+  /**
+   * POST /api/v1/organisations/:orgId/couriers/:id/restore
+   * Restore a courier from the bin.
+   */
+  async restore({ user, params, response }: HttpContext) {
+    try {
+      const { canManage, departmentId } = await this.getUserContext(user, params.orgId)
+      const service = await CourierService.forOrg(params.orgId)
+      const courier = await service.get(params.id)
+
+      const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
+      const isAssignedDept = courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isCreator = courier.createdBy === user?.$id
+
+      if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
+        return response.forbidden({ message: 'You do not have permission to restore this courier' })
+      }
+
+      const restoredCourier = await service.restore(params.id)
+      return response.ok({ data: restoredCourier, message: 'Courier restored successfully' })
+    } catch (error: any) {
+      if (error.code === 404) return response.notFound({ message: 'Courier not found' })
+      return response.internalServerError({ message: error.message })
+    }
+  }
+
+  /**
+   * DELETE /api/v1/organisations/:orgId/couriers/:id/force
+   * Permanently delete a courier.
+   */
+  async forceDestroy({ user, params, response }: HttpContext) {
+    try {
+      const { canManage } = await this.getUserContext(user, params.orgId)
+      const service = await CourierService.forOrg(params.orgId)
+      const courier = await service.get(params.id)
+
+      // Permission Check: Manager OR Creator
+      const isCreator = courier.createdBy === user?.$id
+
+      if (!canManage && !isCreator) {
+        return response.forbidden({ message: 'Only managers or the creator can permanently delete this courier' })
+      }
+
+      await service.forceDelete(params.id)
+      return response.ok({ message: 'Courier permanently deleted' })
     } catch (error: any) {
       if (error.code === 404) return response.notFound({ message: 'Courier not found' })
       return response.internalServerError({ message: error.message })

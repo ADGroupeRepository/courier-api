@@ -1,4 +1,3 @@
-
 export type AttributeType = 'string' | 'integer' | 'double' | 'boolean' | 'datetime' | 'email' | 'enum'
 
 export interface AttributeDefinition {

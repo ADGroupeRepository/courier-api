@@ -20,6 +20,7 @@ export const courierModule: ModuleDefinition = {
         Permission.delete(Role.team(orgId, 'admin')),
       ],
       attributes: [
+        { key: 'createdAt', type: 'datetime', required: true, default: new Date() },
         { key: 'type', type: 'enum', elements: Object.values(CourierType), required: true, default: CourierType.INCOMING },
         { key: 'urgency', type: 'enum', elements: Object.values(CourierUrgency), required: true, default: CourierUrgency.NORMAL },
         { key: 'subject', type: 'string', size: 255, required: true },
@@ -38,6 +39,7 @@ export const courierModule: ModuleDefinition = {
         { key: 'status', type: 'enum', elements: Object.values(CourierStatus), required: true, default: CourierStatus.PENDING },
         { key: 'isFavorite', type: 'boolean', required: true, default: false },
         { key: 'isArchived', type: 'boolean', required: true, default: false },
+        { key: 'isDeleted', type: 'boolean', required: true, default: false },
       ],
       indexes: [
         { key: 'subject_idx', type: 'key', attributes: ['subject'] },
@@ -46,6 +48,7 @@ export const courierModule: ModuleDefinition = {
         { key: 'status_idx', type: 'key', attributes: ['status'] },
         { key: 'archived_idx', type: 'key', attributes: ['isArchived'] },
         { key: 'favorite_idx', type: 'key', attributes: ['isFavorite'] },
+        { key: 'deleted_idx', type: 'key', attributes: ['isDeleted'] },
       ],
     },
     {

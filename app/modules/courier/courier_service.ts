@@ -76,6 +76,7 @@ export default class CourierService {
     type?: CourierType
     archived?: boolean
     favorite?: boolean
+    deleted?: boolean
     limit?: number
     offset?: number
   }) {
@@ -94,6 +95,9 @@ export default class CourierService {
 
     // Filter by archive status (default: show non-archived)
     baseQueries.push(Query.equal('isArchived', options.archived ?? false))
+
+    // Filter by deleted status (bin)
+    baseQueries.push(Query.equal('isDeleted', options.deleted ?? false))
 
     // Filter favorites only when explicitly requested
     if (options.favorite) {
@@ -188,6 +192,7 @@ export default class CourierService {
           status: payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
           isFavorite: false,
           isArchived: false,
+          isDeleted: false,
         },
       })
 
@@ -250,9 +255,35 @@ export default class CourierService {
   }
 
   /**
-   * Delete a courier and its associated file if it exists.
+   * Move a courier to the bin (soft delete).
    */
-  async delete(courierId: string) {
+  async softDelete(courierId: string) {
+    const doc = await appwrite.databases.updateDocument({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      documentId: courierId,
+      data: { isDeleted: true },
+    })
+    return this.mapDocument(doc)
+  }
+
+  /**
+   * Restore a soft-deleted courier from the bin.
+   */
+  async restore(courierId: string) {
+    const doc = await appwrite.databases.updateDocument({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      documentId: courierId,
+      data: { isDeleted: false },
+    })
+    return this.mapDocument(doc)
+  }
+
+  /**
+   * Permanently delete a courier and its associated file if it exists.
+   */
+  async forceDelete(courierId: string) {
     const courier = await this.get(courierId)
 
     if (courier.fileId) {
@@ -302,6 +333,7 @@ export default class CourierService {
       status: doc.status,
       isFavorite: doc.isFavorite ?? false,
       isArchived: doc.isArchived ?? false,
+      isDeleted: doc.isDeleted ?? false,
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
     }

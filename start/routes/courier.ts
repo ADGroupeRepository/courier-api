@@ -11,6 +11,8 @@ router
     router.get('couriers/:id', [CourierController, 'show'])
     router.patch('couriers/:id', [CourierController, 'update'])
     router.delete('couriers/:id', [CourierController, 'destroy'])
+    router.delete('couriers/:id/force', [CourierController, 'forceDestroy'])
+    router.post('couriers/:id/restore', [CourierController, 'restore'])
   })
   .prefix('/api/v1/organisations/:orgId')
   .use(middleware.auth())
