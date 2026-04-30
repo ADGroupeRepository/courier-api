@@ -4,8 +4,16 @@ include:
 
 stages:
   - verify
+  - test
   - build
   - deploy
+
+# Override security jobs to run in the verify stage
+secret_detection:
+  stage: verify
+
+sast:
+  stage: verify
 
 variables:
   GCP_PROJECT_ID: "bara-app-2026"
