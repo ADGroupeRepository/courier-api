@@ -255,6 +255,40 @@
           }
         },
         {
+          "name": "8.5. Créer un Contact Externe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && (jsonData.data.$id || jsonData.data.id)) {",
+                  "    pm.collectionVariables.set('scenarioContactId', jsonData.data.$id || jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Dubois\",\n  \"email\": \"alice.dubois@company.com\",\n  \"phone\": \"+1234567890\",\n  \"structureType\": \"physique\",\n  \"address\": \"456 Enterprise Ave\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts"]
+            }
+          }
+        },
+        {
           "name": "9. Créer Courrier (Assigné au Membre)",
           "event": [
             {
@@ -282,6 +316,7 @@
                 { "key": "subject", "value": "Courrier Assigné à l'Utilisateur", "type": "text" },
                 { "key": "contactName", "value": "Expéditeur Externe", "type": "text" },
                 { "key": "contactNumber", "value": "REF-123", "type": "text" },
+                { "key": "externalContactId", "value": "{{scenarioContactId}}", "type": "text" },
                 { "key": "internalEntityId", "value": "{{memberUserId}}", "type": "text" },
                 { "key": "targetType", "value": "user", "type": "text" }
               ]
