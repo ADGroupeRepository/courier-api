@@ -39,7 +39,10 @@ export default class ModuleProvisioningService {
           databaseId,
           collectionId: collDef.id,
         })
-        logger.info({ orgId, collectionId: collDef.id }, '[ModuleProvisioning] Collection already exists, skipping creation.')
+        logger.info(
+          { orgId, collectionId: collDef.id },
+          '[ModuleProvisioning] Collection already exists, skipping creation.'
+        )
         // Note: For a production-ready system, you might want to diff columns here
         // and create any missing ones, but we skip for simplicity if it already exists.
         continue
@@ -50,7 +53,10 @@ export default class ModuleProvisioningService {
       }
 
       // 3. Create table
-      logger.info({ orgId, collectionId: collDef.id }, '[ModuleProvisioning] Creating collection...')
+      logger.info(
+        { orgId, collectionId: collDef.id },
+        '[ModuleProvisioning] Creating collection...'
+      )
       await appwrite.databases.createCollection({
         databaseId,
         collectionId: collDef.id,
@@ -108,7 +114,10 @@ export default class ModuleProvisioningService {
       // We must wait for them to become 'available' before creating indexes.
       // A safe delay is usually 2-3 seconds for a few columns.
       if (collDef.indexes.length > 0) {
-        logger.info({ orgId, collectionId: collDef.id }, '[ModuleProvisioning] Waiting for attributes to be ready before creating indexes...')
+        logger.info(
+          { orgId, collectionId: collDef.id },
+          '[ModuleProvisioning] Waiting for attributes to be ready before creating indexes...'
+        )
         await this.sleep(3000)
 
         // 5. Create indexes
@@ -155,7 +164,7 @@ export default class ModuleProvisioningService {
 
     const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
     const activeModules: string[] = prefs.modules || []
-    
+
     if (activeModules.includes(moduleName)) {
       const updatedModules = activeModules.filter((m) => m !== moduleName)
       await appwrite.teams.updatePrefs({

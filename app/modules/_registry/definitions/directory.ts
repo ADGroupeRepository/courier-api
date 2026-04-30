@@ -1,5 +1,5 @@
 import { Permission, Role } from 'node-appwrite'
-import { ModuleDefinition } from '../types.js'
+import { type ModuleDefinition } from '../types.js'
 import { Collections } from '#modules/_registry/collection_ids'
 
 export const directoryModule: ModuleDefinition = {
@@ -23,9 +23,7 @@ export const directoryModule: ModuleDefinition = {
         { key: 'description', type: 'string', size: 500, required: false },
         { key: 'managerUserId', type: 'string', size: 36, required: false },
       ],
-      indexes: [
-        { key: 'name_idx', type: 'key', attributes: ['name'] },
-      ],
+      indexes: [{ key: 'name_idx', type: 'key', attributes: ['name'] }],
     },
     {
       id: Collections.ORG_PROFILES,

@@ -15,7 +15,7 @@ async function bootstrapPublicMediaBucket() {
         bucketId,
         name: 'Public Media',
         permissions: [
-          Permission.read(Role.any()),    // Anyone can view (public images)
+          Permission.read(Role.any()), // Anyone can view (public images)
           Permission.create(Role.users()), // Authenticated users can upload
           Permission.update(Role.users()), // Authenticated users can replace
           Permission.delete(Role.users()), // Authenticated users can delete
@@ -73,17 +73,51 @@ async function bootstrapPlatformDatabase() {
       })
 
       // Columns
-      await appwrite.databases.createStringAttribute({ databaseId, collectionId, key: 'moduleName', size: 255, required: true })
-      await appwrite.databases.createStringAttribute({ databaseId, collectionId, key: 'label', size: 255, required: true })
-      await appwrite.databases.createStringAttribute({ databaseId, collectionId, key: 'description', size: 500, required: false })
-      await appwrite.databases.createBooleanAttribute({ databaseId, collectionId, key: 'core', required: true })
-      await appwrite.databases.createBooleanAttribute({ databaseId, collectionId, key: 'isActive', required: true })
+      await appwrite.databases.createStringAttribute({
+        databaseId,
+        collectionId,
+        key: 'moduleName',
+        size: 255,
+        required: true,
+      })
+      await appwrite.databases.createStringAttribute({
+        databaseId,
+        collectionId,
+        key: 'label',
+        size: 255,
+        required: true,
+      })
+      await appwrite.databases.createStringAttribute({
+        databaseId,
+        collectionId,
+        key: 'description',
+        size: 500,
+        required: false,
+      })
+      await appwrite.databases.createBooleanAttribute({
+        databaseId,
+        collectionId,
+        key: 'core',
+        required: true,
+      })
+      await appwrite.databases.createBooleanAttribute({
+        databaseId,
+        collectionId,
+        key: 'isActive',
+        required: true,
+      })
 
       logger.info('[Bootstrap] Waiting for columns to become available...')
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      await new Promise((resolve) => setTimeout(resolve, 3000))
 
       // Indexes
-      await appwrite.databases.createIndex({ databaseId, collectionId, key: 'module_name_idx', type: 'unique' as any, attributes: ['moduleName'] })
+      await appwrite.databases.createIndex({
+        databaseId,
+        collectionId,
+        key: 'module_name_idx',
+        type: 'unique' as any,
+        attributes: ['moduleName'],
+      })
       logger.info({ collectionId }, '[Bootstrap] Marketplace table created successfully')
     } else {
       logger.error({ collectionId, error }, '[Bootstrap] Error checking marketplace table')

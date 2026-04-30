@@ -36,7 +36,7 @@ The pipeline should be updated to replace the `gcloud api-gateway` commands with
 # Example snippet for .gitlab-ci.yml
 deploy_dev:
   script:
-    - # ... deploy cloud run ...
+    -  # ... deploy cloud run ...
     - SERVICE_URL=$(gcloud run services describe bara-api-dev --format='value(status.url)')
     - cd infrastructure/terraform/environments/dev
     - terraform init

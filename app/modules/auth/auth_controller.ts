@@ -2,7 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#modules/auth/auth_service'
 import { signupValidator, loginValidator } from '#modules/auth/auth_validator'
 
-
 export default class AuthController {
   /**
    * POST /api/v1/auth/signup

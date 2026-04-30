@@ -1,4 +1,4 @@
-import { ModuleDefinition } from './types.js'
+import { type ModuleDefinition } from './types.js'
 import { directoryModule } from './definitions/directory.js'
 import { courierModule } from './definitions/courier.js'
 

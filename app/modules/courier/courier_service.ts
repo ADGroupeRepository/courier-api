@@ -3,7 +3,12 @@ import logger from '@adonisjs/core/services/logger'
 import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
-import { CourierUrgency, CourierStatus, CourierType, CourierStructureType } from '#modules/courier/courier_enums'
+import {
+  type CourierUrgency,
+  CourierStatus,
+  CourierType,
+  type CourierStructureType,
+} from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
 
 export interface CreateCourierPayload {
@@ -94,11 +99,7 @@ export default class CourierService {
     const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
     const offset = Math.max(options.offset ?? 0, 0)
 
-    const baseQueries = [
-      Query.orderDesc('$createdAt'),
-      Query.limit(limit),
-      Query.offset(offset),
-    ]
+    const baseQueries = [Query.orderDesc('$createdAt'), Query.limit(limit), Query.offset(offset)]
 
     if (options.type) {
       baseQueries.push(Query.equal('type', options.type))
@@ -133,7 +134,10 @@ export default class CourierService {
     // Construct OR query for assignment
     // Note: Appwrite 1.5+ supports Query.or
     const orQueries = [
-      Query.and([Query.equal('internalEntityId', options.userId), Query.equal('targetType', 'user')]),
+      Query.and([
+        Query.equal('internalEntityId', options.userId),
+        Query.equal('targetType', 'user'),
+      ]),
       Query.equal('createdBy', options.userId),
     ]
 
@@ -181,10 +185,7 @@ export default class CourierService {
    * @param fileOptions - Optional temporary path and filename for the file attachment.
    * @returns The created and mapped courier document.
    */
-  async create(
-    payload: CreateCourierPayload,
-    fileOptions?: { tmpPath: string; fileName: string }
-  ) {
+  async create(payload: CreateCourierPayload, fileOptions?: { tmpPath: string; fileName: string }) {
     let fileId: string | undefined
 
     if (fileOptions) {
@@ -205,7 +206,8 @@ export default class CourierService {
         data: {
           ...payload,
           fileId: fileId || null,
-          status: payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
+          status:
+            payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
           isFavorite: false,
           isArchived: false,
           isDeleted: false,
@@ -323,7 +325,10 @@ export default class CourierService {
           fileId: courier.fileId,
         })
       } catch (error) {
-        logger.warn({ courierId, fileId: courier.fileId, error }, 'Failed to delete courier file, continuing with document deletion')
+        logger.warn(
+          { courierId, fileId: courier.fileId, error },
+          'Failed to delete courier file, continuing with document deletion'
+        )
       }
     }
 

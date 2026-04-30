@@ -1,0 +1,4 @@
+extends: ["spectral:oas"]
+rules:
+  # You can add custom rules here if needed
+  # For now, we use the standard OAS ruleset

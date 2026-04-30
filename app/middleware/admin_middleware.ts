@@ -12,10 +12,11 @@ export default class AdminMiddleware {
     }
 
     const labels: string[] = ctx.user.labels || []
-    
+
     if (!labels.includes('admin')) {
-      return ctx.response.forbidden({ 
-        message: 'Platform admin access required. You do not have the required permissions to perform this action.' 
+      return ctx.response.forbidden({
+        message:
+          'Platform admin access required. You do not have the required permissions to perform this action.',
       })
     }
 

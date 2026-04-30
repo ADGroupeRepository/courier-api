@@ -28,9 +28,10 @@ export default class AuthMiddleware {
 
     try {
       console.log(`[AuthMiddleware] Verifying token.`)
-      const appwrite = (await import('#services/appwrite_service')).default
+      const appwriteModule = await import('#services/appwrite_service')
+      const appwrite = appwriteModule.default
       const { client, account } = appwrite.createSessionClient(token)
-      
+
       const user = await account.get()
 
       ctx.user = user

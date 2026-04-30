@@ -7,7 +7,7 @@ schemes:
   - https
 produces:
   - application/json
-  
+
 securityDefinitions:
   BearerAuth:
     type: apiKey
@@ -17,29 +17,29 @@ securityDefinitions:
 x-google-backend:
   # TODO: Replace this with your production Cloud Run URL
   # The /api/v1 suffix will automatically be prepended to all paths below
-  address: "{{CLOUD_RUN_URL}}/api/v1"
+  address: '{{CLOUD_RUN_URL}}/api/v1'
   path_translation: APPEND_PATH_TO_ADDRESS
 
 x-google-management:
   metrics:
-    - name: "all-requests"
-      displayName: "Total Requests"
+    - name: 'all-requests'
+      displayName: 'Total Requests'
       valueType: INT64
       metricKind: DELTA
-    - name: "auth-requests"
-      displayName: "Authentication Requests"
+    - name: 'auth-requests'
+      displayName: 'Authentication Requests'
       valueType: INT64
       metricKind: DELTA
   quota:
     limits:
-      - name: "all-limit"
-        metric: "all-requests"
-        unit: "1/min/{project}"
+      - name: 'all-limit'
+        metric: 'all-requests'
+        unit: '1/min/{project}'
         values:
           STANDARD: 1000
-      - name: "auth-limit"
-        metric: "auth-requests"
-        unit: "1/min/{project}"
+      - name: 'auth-limit'
+        metric: 'auth-requests'
+        unit: '1/min/{project}'
         values:
           STANDARD: 20
 
@@ -50,7 +50,7 @@ paths:
       operationId: healthCheck
       # We override the backend here because the health check is at the root (/), not /api/v1/
       x-google-backend:
-        address: "{{CLOUD_RUN_URL}}/"
+        address: '{{CLOUD_RUN_URL}}/'
         path_translation: CONSTANT_ADDRESS
       responses:
         '200':
@@ -61,7 +61,7 @@ paths:
       operationId: signup
       x-google-quota:
         metricCosts:
-          "auth-requests": 1
+          'auth-requests': 1
       responses:
         '200':
           description: Success
@@ -73,7 +73,7 @@ paths:
       operationId: login
       x-google-quota:
         metricCosts:
-          "auth-requests": 1
+          'auth-requests': 1
       responses:
         '200':
           description: Success
@@ -85,7 +85,7 @@ paths:
         - BearerAuth: []
       x-google-quota:
         metricCosts:
-          "all-requests": 1
+          'all-requests': 1
       responses:
         '200':
           description: Success
@@ -132,7 +132,7 @@ paths:
         - BearerAuth: []
       x-google-quota:
         metricCosts:
-          "all-requests": 1
+          'all-requests': 1
       responses:
         '200':
           description: Success
@@ -673,5 +673,3 @@ definitions:
       isArchived: { type: boolean }
       createdAt: { type: string }
       updatedAt: { type: string }
-
-

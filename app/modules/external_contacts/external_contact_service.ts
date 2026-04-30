@@ -1,7 +1,7 @@
 import appwrite from '#services/appwrite_service'
 import { ID, Query } from 'node-appwrite'
 import { Collections } from '#modules/_registry/collection_ids'
-import { CourierStructureType } from '#modules/courier/courier_enums'
+import { type CourierStructureType } from '#modules/courier/courier_enums'
 
 export interface ExternalContact {
   $id: string

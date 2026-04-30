@@ -16,9 +16,9 @@ sast:
   stage: verify
 
 variables:
-  GCP_PROJECT_ID: "bara-app-2026"
-  GCP_REGION: "europe-west1"
-  SERVICE_NAME: "bara-api"
+  GCP_PROJECT_ID: 'bara-app-2026'
+  GCP_REGION: 'europe-west1'
+  SERVICE_NAME: 'bara-api'
   # Note: GCP_SERVICE_ACCOUNT_KEY must be set in GitLab CI/CD Settings
 
 # Reusable authentication block
@@ -55,7 +55,9 @@ validate_openapi:
 
 validate_terraform:
   stage: verify
-  image: hashicorp/terraform:latest
+  image:
+    name: hashicorp/terraform:latest
+    entrypoint: [""]
   script:
     # Validate Dev
     - cd infrastructure/terraform/environments/dev
@@ -75,7 +77,7 @@ build_dev:
   stage: build
   image: google/cloud-sdk:latest
   variables:
-    IMAGE_NAME: "europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-dev/api"
+    IMAGE_NAME: 'europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-dev/api'
   script:
     - *google-auth
     - gcloud builds submit --tag ${IMAGE_NAME}:${CI_COMMIT_SHA} .
@@ -86,7 +88,7 @@ build_prod:
   stage: build
   image: google/cloud-sdk:latest
   variables:
-    IMAGE_NAME: "europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-prod/api"
+    IMAGE_NAME: 'europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-prod/api'
   script:
     - *google-auth
     - gcloud builds submit --tag ${IMAGE_NAME}:${CI_COMMIT_SHA} .
@@ -101,8 +103,8 @@ deploy_dev:
   environment:
     name: development
   variables:
-    IMAGE_NAME: "europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-dev/api"
-    ENV_SUFFIX: "-dev"
+    IMAGE_NAME: 'europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-dev/api'
+    ENV_SUFFIX: '-dev'
   script:
     - *google-auth
     - gcloud run deploy ${SERVICE_NAME}${ENV_SUFFIX} --image ${IMAGE_NAME}:${CI_COMMIT_SHA} --region ${GCP_REGION} --platform managed
@@ -117,8 +119,8 @@ deploy_prod:
   environment:
     name: production
   variables:
-    IMAGE_NAME: "europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-prod/api"
-    ENV_SUFFIX: "-prod"
+    IMAGE_NAME: 'europe-west1-docker.pkg.dev/bara-app-2026/bara-app/backend-prod/api'
+    ENV_SUFFIX: '-prod'
   script:
     - *google-auth
     - gcloud run deploy ${SERVICE_NAME}${ENV_SUFFIX} --image ${IMAGE_NAME}:${CI_COMMIT_SHA} --region ${GCP_REGION} --platform managed

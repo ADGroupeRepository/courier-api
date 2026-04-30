@@ -63,7 +63,7 @@ export default class OrganisationService {
       name,
     })
     console.log(`[OrgService] Database created: ${database.$id}`)
-    
+
     // Step 3: Provision isolated storage bucket
     console.log('[OrgService] Creating bucket...')
     const bucket = await appwrite.storage.createBucket({
@@ -81,7 +81,7 @@ export default class OrganisationService {
       encryption: true,
     })
     console.log(`[OrgService] Bucket created: ${bucket.$id}`)
-    
+
     // Step 4: Store resource IDs + metadata in team preferences
     console.log('[OrgService] Updating team prefs...')
     await appwrite.teams.updatePrefs({
@@ -96,17 +96,21 @@ export default class OrganisationService {
       },
     })
     console.log('[OrgService] Team prefs updated.')
-    
+
     // Step 5: Auto-provision core modules (like 'directory')
     console.log('[OrgService] Provisioning core modules...')
     const provisioningService = new ModuleProvisioningService()
     for (const [moduleName, moduleDef] of MODULE_REGISTRY) {
       if (moduleDef.core) {
-        console.log(`[OrgService] Activating core module: ${moduleName}. Memory: ${JSON.stringify(process.memoryUsage())}`)
+        console.log(
+          `[OrgService] Activating core module: ${moduleName}. Memory: ${JSON.stringify(process.memoryUsage())}`
+        )
         await provisioningService.activate(team.$id, moduleName)
       }
     }
-    console.log(`[OrgService] Core modules provisioned. Memory: ${JSON.stringify(process.memoryUsage())}`)
+    console.log(
+      `[OrgService] Core modules provisioned. Memory: ${JSON.stringify(process.memoryUsage())}`
+    )
 
     return {
       id: team.$id,
@@ -285,7 +289,9 @@ export default class OrganisationService {
             await appwrite.databases.delete({ databaseId: prefs.databaseId })
             console.log(`[OrgService] Deleted database: ${prefs.databaseId}`)
           } catch (err: any) {
-            console.log(`[OrgService] Failed to delete database ${prefs.databaseId}: ${err.message}`)
+            console.log(
+              `[OrgService] Failed to delete database ${prefs.databaseId}: ${err.message}`
+            )
           }
         }
       },

@@ -104,7 +104,10 @@ export default class DepartmentsService {
    * @param data - The fields to update.
    * @returns The updated department details.
    */
-  async update(departmentId: string, data: { name?: string; description?: string; managerUserId?: string }) {
+  async update(
+    departmentId: string,
+    data: { name?: string; description?: string; managerUserId?: string }
+  ) {
     const updateData: Record<string, any> = {}
     if (data.name !== undefined) updateData.name = data.name
     if (data.description !== undefined) updateData.description = data.description
