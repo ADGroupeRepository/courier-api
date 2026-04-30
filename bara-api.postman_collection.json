@@ -652,6 +652,81 @@
               "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
             }
           }
+        },
+        {
+          "name": "21. Supprimer le Courrier (Nettoyage)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK or 204 No Content', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+            }
+          }
+        },
+        {
+          "name": "22. Supprimer le Contact (Nettoyage)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK or 204 No Content', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{scenarioContactId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{scenarioContactId}}"]
+            }
+          }
+        },
+        {
+          "name": "23. Supprimer l'Organisation (Final Cleanup)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK or 204 No Content', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}"]
+            }
+          }
         }
       ]
     },
