@@ -699,7 +699,14 @@
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{scenarioContactId}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{scenarioContactId}}"]
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "contacts",
+                "{{scenarioContactId}}"
+              ]
             }
           }
         },

@@ -1,6 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import DepartmentsService from '#modules/directory/departments_service'
-import { createDepartmentValidator, updateDepartmentValidator } from '#modules/directory/departments_validator'
+import {
+  createDepartmentValidator,
+  updateDepartmentValidator,
+} from '#modules/directory/departments_validator'
 
 /**
  * Controller for the Directory module's Departments feature.

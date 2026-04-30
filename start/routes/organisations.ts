@@ -3,7 +3,8 @@ import { middleware } from '#start/kernel'
 
 const OrganisationsController = () => import('#modules/organisations/organisations_controller')
 const MembersController = () => import('#modules/organisations/members_controller')
-const OrganisationModulesController = () => import('#modules/organisations/organisation_modules_controller')
+const OrganisationModulesController = () =>
+  import('#modules/organisations/organisation_modules_controller')
 
 router
   .group(() => {
@@ -23,7 +24,10 @@ router
     router.get('modules', [OrganisationModulesController, 'indexAvailable'])
     router.get('organisations/:orgId/modules', [OrganisationModulesController, 'indexActive'])
     router.post('organisations/:orgId/modules', [OrganisationModulesController, 'activate'])
-    router.delete('organisations/:orgId/modules/:module', [OrganisationModulesController, 'deactivate'])
+    router.delete('organisations/:orgId/modules/:module', [
+      OrganisationModulesController,
+      'deactivate',
+    ])
   })
   .prefix('/api/v1')
   .use(middleware.auth())

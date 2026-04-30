@@ -7,7 +7,7 @@ schemes:
   - https
 produces:
   - application/json
-  
+
 securityDefinitions:
   BearerAuth:
     type: apiKey
@@ -17,29 +17,29 @@ securityDefinitions:
 x-google-backend:
   # TODO: Replace this with your development Cloud Run URL
   # The /api/v1 suffix will automatically be prepended to all paths below
-  address: "https://[YOUR_DEV_CLOUD_RUN_URL]/api/v1"
+  address: '{{CLOUD_RUN_URL}}/api/v1'
   path_translation: APPEND_PATH_TO_ADDRESS
 
 x-google-management:
   metrics:
-    - name: "all-requests"
-      displayName: "Total Requests"
+    - name: 'all-requests'
+      displayName: 'Total Requests'
       valueType: INT64
       metricKind: DELTA
-    - name: "auth-requests"
-      displayName: "Authentication Requests"
+    - name: 'auth-requests'
+      displayName: 'Authentication Requests'
       valueType: INT64
       metricKind: DELTA
   quota:
     limits:
-      - name: "all-limit"
-        metric: "all-requests"
-        unit: "1/min/{project}"
+      - name: 'all-limit'
+        metric: 'all-requests'
+        unit: '1/min/{project}'
         values:
           STANDARD: 1000
-      - name: "auth-limit"
-        metric: "auth-requests"
-        unit: "1/min/{project}"
+      - name: 'auth-limit'
+        metric: 'auth-requests'
+        unit: '1/min/{project}'
         values:
           STANDARD: 20
 
@@ -50,33 +50,36 @@ paths:
       operationId: healthCheck
       # We override the backend here because the health check is at the root (/), not /api/v1/
       x-google-backend:
-        address: "https://[YOUR_DEV_CLOUD_RUN_URL]/"
+        address: '{{CLOUD_RUN_URL}}/'
         path_translation: CONSTANT_ADDRESS
       responses:
         '200':
           description: Success
+
   /auth/signup:
     post:
       summary: Inscription (Signup)
       operationId: signup
       x-google-quota:
         metricCosts:
-          "auth-requests": 1
+          'auth-requests': 1
       responses:
         '200':
           description: Success
         '201':
           description: Created
+
   /auth/login:
     post:
       summary: Connexion (Login)
       operationId: login
       x-google-quota:
         metricCosts:
-          "auth-requests": 1
+          'auth-requests': 1
       responses:
         '200':
           description: Success
+
   /auth/profile:
     get:
       summary: Profil Utilisateur (Profile)
@@ -85,10 +88,11 @@ paths:
         - BearerAuth: []
       x-google-quota:
         metricCosts:
-          "all-requests": 1
+          'all-requests': 1
       responses:
         '200':
           description: Success
+
   /auth/logout:
     post:
       summary: Déconnexion (Logout)
@@ -97,12 +101,13 @@ paths:
         - BearerAuth: []
       x-google-quota:
         metricCosts:
-          "all-requests": 1
+          'all-requests': 1
       responses:
         '200':
           description: Success
         '204':
           description: No Content
+
   /auth/profile/avatar:
     post:
       summary: Uploader un Avatar
@@ -127,6 +132,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations:
     get:
       summary: Lister les organisations
@@ -135,7 +141,7 @@ paths:
         - BearerAuth: []
       x-google-quota:
         metricCosts:
-          "all-requests": 1
+          'all-requests': 1
       responses:
         '200':
           description: Success
@@ -146,12 +152,13 @@ paths:
         - BearerAuth: []
       x-google-quota:
         metricCosts:
-          "all-requests": 1
+          'all-requests': 1
       responses:
         '200':
           description: Success
         '201':
           description: Created
+
   /organisations/{orgId}:
     get:
       summary: Voir une organisation
@@ -160,7 +167,7 @@ paths:
         - BearerAuth: []
       x-google-quota:
         metricCosts:
-          "all-requests": 1
+          'all-requests': 1
       parameters:
         - name: orgId
           in: path
@@ -197,6 +204,7 @@ paths:
           description: Success
         '204':
           description: No Content
+
   /organisations/{orgId}/logo:
     post:
       summary: Uploader le Logo
@@ -217,6 +225,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations/{orgId}/members:
     get:
       summary: Lister les membres
@@ -246,6 +255,7 @@ paths:
           description: Success
         '201':
           description: Created
+
   /organisations/{orgId}/members/{memberId}:
     get:
       summary: Voir un membre
@@ -309,6 +319,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations/{orgId}/modules:
     get:
       summary: Lister les modules actifs
@@ -336,6 +347,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations/{orgId}/modules/{module}:
     delete:
       summary: Désactiver un module
@@ -354,6 +366,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /admin/marketplace:
     post:
       summary: Publier un module
@@ -363,6 +376,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /admin/marketplace/{moduleName}:
     delete:
       summary: Dépublier un module
@@ -377,6 +391,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations/{orgId}/departments:
     get:
       summary: Lister les départements
@@ -404,6 +419,7 @@ paths:
       responses:
         '201':
           description: Created
+
   /organisations/{orgId}/departments/{id}:
     get:
       summary: Voir un département
@@ -456,6 +472,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations/{orgId}/members/{membershipId}/department:
     post:
       summary: Assigner à un département
@@ -474,6 +491,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations/{orgId}/departments/{id}/members:
     get:
       summary: Lister les membres d'un département
@@ -492,6 +510,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations/{orgId}/profiles/{id}:
     delete:
       summary: Retirer d'un département
@@ -510,6 +529,7 @@ paths:
       responses:
         '200':
           description: Success
+
   /organisations/{orgId}/couriers:
     get:
       summary: Lister les courriers

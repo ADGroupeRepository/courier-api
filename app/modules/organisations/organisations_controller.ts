@@ -91,7 +91,8 @@ export default class OrganisationsController {
     const token = authHeader.slice(7).trim()
 
     // Basic check: Ensure user belongs to this team
-    const { teams } = (await import('#services/appwrite_service')).default.createSessionClient(token)
+    const appwriteModule = await import('#services/appwrite_service')
+    const { teams } = appwriteModule.default.createSessionClient(token)
     try {
       await teams.get({ teamId }) // Throws 401/404 if user is not in the team
     } catch {

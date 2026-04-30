@@ -1,6 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
-import { createExternalContactValidator, updateExternalContactValidator } from '#modules/external_contacts/external_contact_validator'
+import {
+  createExternalContactValidator,
+  updateExternalContactValidator,
+} from '#modules/external_contacts/external_contact_validator'
 import appwrite from '#services/appwrite_service'
 import { Query } from 'node-appwrite'
 

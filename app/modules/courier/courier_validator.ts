@@ -1,5 +1,10 @@
 import vine from '@vinejs/vine'
-import { CourierUrgency, CourierStatus, CourierType, CourierStructureType } from '#modules/courier/courier_enums'
+import {
+  CourierUrgency,
+  CourierStatus,
+  CourierType,
+  CourierStructureType,
+} from '#modules/courier/courier_enums'
 
 /**
  * Validator for creating a new courier.
@@ -19,10 +24,12 @@ export const createCourierValidator = vine.create(
     externalContactId: vine.string().maxLength(36).trim().optional(),
     internalEntityId: vine.string().maxLength(36).trim(),
     targetType: vine.enum(['user', 'department']),
-    file: vine.file({
-      size: '25mb',
-      extnames: ['jpg', 'png', 'pdf', 'docx', 'doc'],
-    }).optional(),
+    file: vine
+      .file({
+        size: '25mb',
+        extnames: ['jpg', 'png', 'pdf', 'docx', 'doc'],
+      })
+      .optional(),
   })
 )
 

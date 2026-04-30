@@ -16,8 +16,9 @@ export default class DepartmentsService {
   }
 
   /**
-   * Resolve the org's databaseId from team preferences.
-   * Use this factory method instead of manually constructing.
+   * Resolve the org's databaseId from team preferences and initialize the service.
+   * @param orgId - The ID of the organisation (team).
+   * @returns A new instance of DepartmentsService configured for the organisation.
    */
   static async forOrg(orgId: string): Promise<DepartmentsService> {
     const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
@@ -29,6 +30,7 @@ export default class DepartmentsService {
 
   /**
    * List all departments for the organisation.
+   * @returns A list of departments.
    */
   async list() {
     const result = await appwrite.databases.listDocuments({
@@ -49,6 +51,8 @@ export default class DepartmentsService {
 
   /**
    * Get a single department by ID.
+   * @param departmentId - The ID of the department.
+   * @returns The department details.
    */
   async get(departmentId: string) {
     const row = await appwrite.databases.getDocument({
@@ -69,6 +73,8 @@ export default class DepartmentsService {
 
   /**
    * Create a new department.
+   * @param data - The department details (name, description, manager).
+   * @returns The created department details.
    */
   async create(data: { name: string; description?: string; managerUserId?: string }) {
     const row = await appwrite.databases.createDocument({
@@ -93,9 +99,15 @@ export default class DepartmentsService {
   }
 
   /**
-   * Update a department.
+   * Update an existing department.
+   * @param departmentId - The ID of the department to update.
+   * @param data - The fields to update.
+   * @returns The updated department details.
    */
-  async update(departmentId: string, data: { name?: string; description?: string; managerUserId?: string }) {
+  async update(
+    departmentId: string,
+    data: { name?: string; description?: string; managerUserId?: string }
+  ) {
     const updateData: Record<string, any> = {}
     if (data.name !== undefined) updateData.name = data.name
     if (data.description !== undefined) updateData.description = data.description
@@ -120,6 +132,7 @@ export default class DepartmentsService {
 
   /**
    * Delete a department.
+   * @param departmentId - The ID of the department to delete.
    */
   async delete(departmentId: string) {
     await appwrite.databases.deleteDocument({

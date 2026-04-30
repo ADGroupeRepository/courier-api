@@ -4,7 +4,7 @@ import MembersService from '#modules/directory/members_service'
 import appwrite from '#services/appwrite_service'
 import { Query } from 'node-appwrite'
 import { createCourierValidator, updateCourierValidator } from '#modules/courier/courier_validator'
-import { CourierUrgency, CourierType } from '#modules/courier/courier_enums'
+import { type CourierUrgency, type CourierType } from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
 
 export default class CourierController {
@@ -99,7 +99,8 @@ export default class CourierController {
 
       // Permission Check: Manager OR Assigned User OR Assigned Department OR Creator
       const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
-      const isAssignedDept = courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isAssignedDept =
+        courier.internalEntityId === departmentId && courier.targetType === 'department'
       const isCreator = courier.createdBy === user?.$id
 
       if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
@@ -163,7 +164,8 @@ export default class CourierController {
 
       // Permission Check: Manager OR Assigned User OR Assigned Department OR Creator
       const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
-      const isAssignedDept = courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isAssignedDept =
+        courier.internalEntityId === departmentId && courier.targetType === 'department'
       const isCreator = courier.createdBy === user?.$id
 
       if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
@@ -192,7 +194,9 @@ export default class CourierController {
       const isCreator = courier.createdBy === user?.$id
 
       if (!canManage && !isCreator) {
-        return response.forbidden({ message: 'Only managers or the creator can delete this courier' })
+        return response.forbidden({
+          message: 'Only managers or the creator can delete this courier',
+        })
       }
 
       await service.softDelete(params.id)
@@ -214,7 +218,8 @@ export default class CourierController {
       const courier = await service.get(params.id)
 
       const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
-      const isAssignedDept = courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isAssignedDept =
+        courier.internalEntityId === departmentId && courier.targetType === 'department'
       const isCreator = courier.createdBy === user?.$id
 
       if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
@@ -243,7 +248,9 @@ export default class CourierController {
       const isCreator = courier.createdBy === user?.$id
 
       if (!canManage && !isCreator) {
-        return response.forbidden({ message: 'Only managers or the creator can permanently delete this courier' })
+        return response.forbidden({
+          message: 'Only managers or the creator can permanently delete this courier',
+        })
       }
 
       await service.forceDelete(params.id)

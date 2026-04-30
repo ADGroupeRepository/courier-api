@@ -6,9 +6,9 @@ import vine from '@vinejs/vine'
 export const assignMemberValidator = vine.create(
   vine.object({
     organisationId: vine.string(), // Extracted from route param
-    membershipId: vine.string(),   // Extracted from route param
-    userId: vine.string(),         // Passed in body
-    departmentId: vine.string(),   // Passed in body
+    membershipId: vine.string(), // Extracted from route param
+    userId: vine.string(), // Passed in body
+    departmentId: vine.string(), // Passed in body
     jobTitle: vine.string().optional(),
     departmentRole: vine.enum(['manager', 'member']),
   })

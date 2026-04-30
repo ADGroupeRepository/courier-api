@@ -3,7 +3,12 @@ import logger from '@adonisjs/core/services/logger'
 import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
-import { CourierUrgency, CourierStatus, CourierType, CourierStructureType } from '#modules/courier/courier_enums'
+import {
+  type CourierUrgency,
+  CourierStatus,
+  CourierType,
+  type CourierStructureType,
+} from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
 
 export interface CreateCourierPayload {
@@ -49,6 +54,11 @@ export default class CourierService {
   private readonly bucketId: string
   private readonly collectionId = Collections.COURIERS
 
+  /**
+   * Initializes the CourierService with organization-specific resources.
+   * @param databaseId - The ID of the organization's database.
+   * @param bucketId - The ID of the organization's storage bucket.
+   */
   constructor(databaseId: string, bucketId: string) {
     this.databaseId = databaseId
     this.bucketId = bucketId
@@ -56,6 +66,10 @@ export default class CourierService {
 
   /**
    * Factory method to initialize service for a specific organisation.
+   * Retrieves organization preferences to get database and bucket IDs.
+   * @param orgId - The ID of the organization.
+   * @returns A promise that resolves to an instance of CourierService.
+   * @throws Error if the organization does not have provisioned resources.
    */
   static async forOrg(orgId: string): Promise<CourierService> {
     const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
@@ -66,8 +80,10 @@ export default class CourierService {
   }
 
   /**
-   * List couriers for the organisation.
-   * If canManage is false, only returns couriers assigned to the user or their department.
+   * List couriers for the organisation based on provided filters.
+   * If canManage is false, only returns couriers assigned to the user or their department, or created by the user.
+   * @param options - Filtering and pagination options.
+   * @returns A list of couriers and the total count.
    */
   async list(options: {
     userId: string
@@ -83,11 +99,7 @@ export default class CourierService {
     const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
     const offset = Math.max(options.offset ?? 0, 0)
 
-    const baseQueries = [
-      Query.orderDesc('$createdAt'),
-      Query.limit(limit),
-      Query.offset(offset),
-    ]
+    const baseQueries = [Query.orderDesc('$createdAt'), Query.limit(limit), Query.offset(offset)]
 
     if (options.type) {
       baseQueries.push(Query.equal('type', options.type))
@@ -122,7 +134,10 @@ export default class CourierService {
     // Construct OR query for assignment
     // Note: Appwrite 1.5+ supports Query.or
     const orQueries = [
-      Query.and([Query.equal('internalEntityId', options.userId), Query.equal('targetType', 'user')]),
+      Query.and([
+        Query.equal('internalEntityId', options.userId),
+        Query.equal('targetType', 'user'),
+      ]),
       Query.equal('createdBy', options.userId),
     ]
 
@@ -150,7 +165,9 @@ export default class CourierService {
   }
 
   /**
-   * Get a single courier.
+   * Get a single courier by ID.
+   * @param courierId - The ID of the courier to retrieve.
+   * @returns The mapped courier document.
    */
   async get(courierId: string) {
     const doc = await appwrite.databases.getDocument({
@@ -163,12 +180,12 @@ export default class CourierService {
   }
 
   /**
-   * Create a new courier record with optional file.
+   * Create a new courier record with an optional file attachment.
+   * @param payload - The courier details.
+   * @param fileOptions - Optional temporary path and filename for the file attachment.
+   * @returns The created and mapped courier document.
    */
-  async create(
-    payload: CreateCourierPayload,
-    fileOptions?: { tmpPath: string; fileName: string }
-  ) {
+  async create(payload: CreateCourierPayload, fileOptions?: { tmpPath: string; fileName: string }) {
     let fileId: string | undefined
 
     if (fileOptions) {
@@ -189,7 +206,8 @@ export default class CourierService {
         data: {
           ...payload,
           fileId: fileId || null,
-          status: payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
+          status:
+            payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
           isFavorite: false,
           isArchived: false,
           isDeleted: false,
@@ -210,7 +228,11 @@ export default class CourierService {
   }
 
   /**
-   * Update a courier record.
+   * Update a courier record by ID.
+   * Automatically archives the courier if the status is set to COMPLETED.
+   * @param courierId - The ID of the courier to update.
+   * @param payload - The fields to update.
+   * @returns The updated and mapped courier document.
    */
   async update(courierId: string, payload: UpdateCourierPayload) {
     // Auto-archive when status is set to completed
@@ -230,7 +252,11 @@ export default class CourierService {
   }
 
   /**
-   * Upload a file for a courier and link it.
+   * Upload a file for a courier and link it to the document.
+   * @param courierId - The ID of the courier to link the file to.
+   * @param tmpPath - The temporary path of the file to upload.
+   * @param fileName - The name of the file.
+   * @returns The uploaded file metadata.
    */
   async uploadFile(courierId: string, tmpPath: string, fileName: string) {
     // 1. Upload to isolated bucket
@@ -255,7 +281,9 @@ export default class CourierService {
   }
 
   /**
-   * Move a courier to the bin (soft delete).
+   * Move a courier to the bin (soft delete) by setting isDeleted to true.
+   * @param courierId - The ID of the courier to soft delete.
+   * @returns The updated and mapped courier document.
    */
   async softDelete(courierId: string) {
     const doc = await appwrite.databases.updateDocument({
@@ -268,7 +296,9 @@ export default class CourierService {
   }
 
   /**
-   * Restore a soft-deleted courier from the bin.
+   * Restore a soft-deleted courier from the bin by setting isDeleted to false.
+   * @param courierId - The ID of the courier to restore.
+   * @returns The updated and mapped courier document.
    */
   async restore(courierId: string) {
     const doc = await appwrite.databases.updateDocument({
@@ -282,6 +312,8 @@ export default class CourierService {
 
   /**
    * Permanently delete a courier and its associated file if it exists.
+   * @param courierId - The ID of the courier to permanently delete.
+   * @throws Error if the courier or file cannot be deleted.
    */
   async forceDelete(courierId: string) {
     const courier = await this.get(courierId)
@@ -293,7 +325,10 @@ export default class CourierService {
           fileId: courier.fileId,
         })
       } catch (error) {
-        logger.warn({ courierId, fileId: courier.fileId, error }, 'Failed to delete courier file, continuing with document deletion')
+        logger.warn(
+          { courierId, fileId: courier.fileId, error },
+          'Failed to delete courier file, continuing with document deletion'
+        )
       }
     }
 
@@ -305,7 +340,10 @@ export default class CourierService {
   }
 
   /**
-   * Helper to map Appwrite document to our domain model.
+   * Helper to map an Appwrite document to our domain model.
+   * Calculates the public view URL for the file attachment if it exists.
+   * @param doc - The raw Appwrite document.
+   * @returns The formatted domain model object.
    */
   private mapDocument(doc: any) {
     const fileUrl = doc.fileId

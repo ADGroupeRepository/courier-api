@@ -21,7 +21,9 @@ export default class AdminMarketplaceController {
     // 1. Check if it actually exists in our codebase registry
     const moduleDef = MODULE_REGISTRY.get(moduleName)
     if (!moduleDef) {
-      return response.notFound({ message: `Module "${moduleName}" is not defined in the codebase registry. Please build it first.` })
+      return response.notFound({
+        message: `Module "${moduleName}" is not defined in the codebase registry. Please build it first.`,
+      })
     }
 
     try {

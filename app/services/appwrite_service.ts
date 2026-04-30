@@ -38,8 +38,6 @@ class AppwriteService {
     return new Databases(this.adminClient)
   }
 
-
-
   /** Admin-scoped Storage service (requires API key). */
   get storage() {
     return new Storage(this.adminClient)

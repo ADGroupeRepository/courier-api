@@ -25,7 +25,10 @@ export default class OrganisationModulesController {
 
       return response.ok({ data: modules })
     } catch (error: any) {
-      return response.internalServerError({ message: 'Error fetching available modules', error: error.message })
+      return response.internalServerError({
+        message: 'Error fetching available modules',
+        error: error.message,
+      })
     }
   }
 
@@ -36,7 +39,7 @@ export default class OrganisationModulesController {
   async indexActive({ request, response }: HttpContext) {
     const orgId = request.param('orgId')
     const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
-    
+
     return response.ok({ data: prefs.modules || [] })
   }
 
@@ -50,7 +53,9 @@ export default class OrganisationModulesController {
     const finalModule = module || moduleName
 
     if (!finalModule || typeof finalModule !== 'string') {
-      return response.badRequest({ message: 'Module name is required (use "module" or "moduleName" field)' })
+      return response.badRequest({
+        message: 'Module name is required (use "module" or "moduleName" field)',
+      })
     }
 
     const service = new ModuleProvisioningService()

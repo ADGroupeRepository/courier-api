@@ -1,0 +1,15 @@
+node_modules
+.env
+build
+tmp
+tests
+.git
+.editorconfig
+.prettierignore
+.adonisjs
+bin/test.ts
+adonisrc.ts
+tsconfig.json
+eslint.config.js
+package-lock.json
+README.md
