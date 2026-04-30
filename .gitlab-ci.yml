@@ -18,7 +18,7 @@ sast:
 variables:
   GCP_PROJECT_ID: 'bara-app-2026'
   GCP_REGION: 'europe-west1'
-  SERVICE_NAME: 'bara-api'
+  SERVICE_NAME: 'backend'
   # Note: GCP_SERVICE_ACCOUNT_KEY must be set in GitLab CI/CD Settings
 
 # Reusable authentication block
