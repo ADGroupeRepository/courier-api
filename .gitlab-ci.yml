@@ -57,7 +57,7 @@ validate_terraform:
   stage: verify
   image:
     name: hashicorp/terraform:latest
-    entrypoint: [""]
+    entrypoint: ['']
   script:
     # Validate Dev
     - cd infrastructure/terraform/environments/dev
