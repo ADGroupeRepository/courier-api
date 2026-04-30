@@ -40,6 +40,8 @@ export type ScannedRoutes = {
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.force_destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.restore': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'external_contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'external_contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'external_contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -59,6 +61,7 @@ export type ScannedRoutes = {
     'departments.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'department_members.assign': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'membershipId': ParamValue} }
     'courier.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'courier.restore': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'external_contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
   }
   GET: {
@@ -102,6 +105,7 @@ export type ScannedRoutes = {
     'departments.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'department_members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.force_destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'external_contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   PUT: {
