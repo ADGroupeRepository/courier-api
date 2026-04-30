@@ -1,5 +1,6 @@
 import { Permission, Role } from 'node-appwrite'
 import { ModuleDefinition } from '../types.js'
+import { Collections } from '#modules/_registry/collection_ids'
 
 export const directoryModule: ModuleDefinition = {
   name: 'directory',
@@ -8,7 +9,7 @@ export const directoryModule: ModuleDefinition = {
   core: true,
   collections: [
     {
-      id: 'departments',
+      id: Collections.DEPARTMENTS,
       name: 'Departments',
       documentSecurity: true,
       permissions: (orgId: string) => [
@@ -27,7 +28,7 @@ export const directoryModule: ModuleDefinition = {
       ],
     },
     {
-      id: 'org_profiles',
+      id: Collections.ORG_PROFILES,
       name: 'Org Profiles',
       documentSecurity: true,
       permissions: (orgId: string) => [

@@ -5,9 +5,10 @@
 
 export const controllers = {
   registry: {
+    CollectionIds: () => import('#modules/_registry/collection_ids'),
     definitions: {
-      Directory: () => import('#modules/_registry/definitions/directory'),
       Courier: () => import('#modules/_registry/definitions/courier'),
+      Directory: () => import('#modules/_registry/definitions/directory'),
     },
     ModuleRegistry: () => import('#modules/_registry/module_registry'),
     ProvisioningService: () => import('#modules/_registry/provisioning_service'),
@@ -21,13 +22,19 @@ export const controllers = {
     AuthService: () => import('#modules/auth/auth_service'),
     AuthValidator: () => import('#modules/auth/auth_validator'),
   },
+  courier: {
+    Courier: () => import('#modules/courier/courier_controller'),
+    CourierEnums: () => import('#modules/courier/courier_enums'),
+    CourierService: () => import('#modules/courier/courier_service'),
+    CourierValidator: () => import('#modules/courier/courier_validator'),
+  },
   directory: {
+    DepartmentMembers: () => import('#modules/directory/department_members_controller'),
     Departments: () => import('#modules/directory/departments_controller'),
     DepartmentsService: () => import('#modules/directory/departments_service'),
     DepartmentsValidator: () => import('#modules/directory/departments_validator'),
-    MembersValidator: () => import('#modules/directory/members_validator'),
     MembersService: () => import('#modules/directory/members_service'),
-    DepartmentMembers: () => import('#modules/directory/department_members_controller'),
+    MembersValidator: () => import('#modules/directory/members_validator'),
   },
   organisations: {
     Members: () => import('#modules/organisations/members_controller'),
@@ -35,10 +42,5 @@ export const controllers = {
     OrganisationService: () => import('#modules/organisations/organisation_service'),
     OrganisationValidator: () => import('#modules/organisations/organisation_validator'),
     Organisations: () => import('#modules/organisations/organisations_controller'),
-  },
-  courier: {
-    CourierValidator: () => import('#modules/courier/courier_validator'),
-    CourierService: () => import('#modules/courier/courier_service'),
-    Courier: () => import('#modules/courier/courier_controller'),
   },
 }

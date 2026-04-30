@@ -4,48 +4,85 @@ import MembersService from '#modules/directory/members_service'
 import appwrite from '#services/appwrite_service'
 import { Query } from 'node-appwrite'
 import { createCourierValidator, updateCourierValidator } from '#modules/courier/courier_validator'
+import { CourierUrgency, CourierType } from '#modules/courier/courier_enums'
+import { Collections } from '#modules/_registry/collection_ids'
 
 export default class CourierController {
+  /**
+   * Helper to get user roles and department in an organisation.
+   */
+  private async getUserContext(user: any, orgId: string) {
+    // 1. Get user membership roles in this org
+    const memberships = await appwrite.teams.listMemberships({
+      teamId: orgId,
+      queries: [Query.equal('userId', user?.$id || '')],
+    })
+
+    if (memberships.total === 0) {
+      throw new Error('User is not a member of this organisation')
+    }
+
+    const membership = memberships.memberships[0]
+    const roles = membership?.roles || []
+
+    // 2. Determine if user can manage
+    const canManage = roles.some((r) => ['owner', 'admin', 'courier_manager'].includes(r))
+
+    // 3. Get user's department assignment
+    const memberService = await MembersService.forOrg(orgId)
+    const profiles = await appwrite.databases.listDocuments({
+      databaseId: memberService.databaseId,
+      collectionId: Collections.ORG_PROFILES,
+      queries: [Query.equal('userId', user?.$id || '')],
+    })
+    const departmentId = profiles.documents[0]?.departmentId
+
+    return { roles, canManage, departmentId }
+  }
+
   /**
    * GET /api/v1/organisations/:orgId/couriers
    * List all couriers for the organisation.
    */
   async index({ user, params, request, response }: HttpContext) {
     const orgId = params.orgId
-    const type = request.input('type') as 'incoming' | 'outgoing' | undefined
+    const type = request.input('type') as CourierType | undefined
+    const archived = request.input('archived') as string | undefined
+    const favorite = request.input('favorite') as string | undefined
+    const deleted = request.input('deleted') as string | undefined
+    const limit = Number(request.input('limit')) || 25
+    const offset = Number(request.input('offset')) || 0
 
     try {
-      // 1. Get user membership roles in this org
-      const memberships = await appwrite.teams.listMemberships({
-        teamId: orgId,
-        search: user?.email || '',
-      })
-      const membership = memberships.memberships[0]
-      const roles = membership?.roles || []
+      const { canManage, departmentId } = await this.getUserContext(user, orgId)
 
-      // 2. Determine if user can manage (owner, admin, or specific manager role)
-      const canManage = roles.some((r) => ['owner', 'admin', 'courier_manager'].includes(r))
-
-      // 3. Get user's department assignment
-      const memberService = await MembersService.forOrg(orgId)
-      const profiles = await appwrite.databases.listDocuments({
-        databaseId: (memberService as any).databaseId,
-        collectionId: 'org_profiles',
-        queries: [Query.equal('userId', user?.$id || '')],
-      })
-      const departmentId = profiles.documents[0]?.departmentId
-
-      // 4. List couriers with visibility rules
+      // List couriers with visibility rules
       const service = await CourierService.forOrg(orgId)
-      const couriers = await service.list({
+      const result = await service.list({
         userId: user?.$id || '',
         departmentId,
         canManage,
         type,
+        archived: archived === 'true',
+        favorite: favorite === 'true' ? true : undefined,
+        deleted: deleted === 'true',
+        limit,
+        offset,
       })
 
-      return response.ok({ data: couriers })
+      return response.ok({
+        data: result.documents,
+        pagination: {
+          total: result.total,
+          limit,
+          offset,
+          hasMore: offset + result.documents.length < result.total,
+        },
+      })
     } catch (error: any) {
+      if (error.message === 'User is not a member of this organisation') {
+        return response.forbidden({ message: error.message })
+      }
       return response.internalServerError({ message: error.message })
     }
   }
@@ -54,10 +91,21 @@ export default class CourierController {
    * GET /api/v1/organisations/:orgId/couriers/:id
    * Get a single courier.
    */
-  async show({ params, response }: HttpContext) {
+  async show({ user, params, response }: HttpContext) {
     try {
+      const { canManage, departmentId } = await this.getUserContext(user, params.orgId)
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id)
+
+      // Permission Check: Manager OR Assigned User OR Assigned Department OR Creator
+      const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
+      const isAssignedDept = courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isCreator = courier.createdBy === user?.$id
+
+      if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
+        return response.forbidden({ message: 'You do not have permission to view this courier' })
+      }
+
       return response.ok({ data: courier })
     } catch (error: any) {
       if (error.code === 404) return response.notFound({ message: 'Courier not found' })
@@ -76,11 +124,17 @@ export default class CourierController {
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.create(
         {
-          type: payload.type as 'incoming' | 'outgoing',
+          type: payload.type as CourierType,
+          urgency: payload.urgency as CourierUrgency,
           subject: payload.subject,
-          sender: payload.sender,
-          recipient: payload.recipient,
-          assignedTo: payload.assignedTo,
+          contactName: payload.contactName,
+          contactNumber: payload.contactNumber,
+          contactStructureType: payload.contactStructureType,
+          contactStructureName: payload.contactStructureName,
+          contactIdNumber: payload.contactIdNumber,
+          contactPhone: payload.contactPhone,
+          contactEmail: payload.contactEmail,
+          internalEntityId: payload.internalEntityId,
           targetType: payload.targetType as 'user' | 'department',
           createdBy: user?.$id || '',
         },
@@ -99,13 +153,25 @@ export default class CourierController {
    * PATCH /api/v1/organisations/:orgId/couriers/:id
    * Update a courier record.
    */
-  async update({ params, request, response }: HttpContext) {
+  async update({ user, params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateCourierValidator)
 
     try {
+      const { canManage, departmentId } = await this.getUserContext(user, params.orgId)
       const service = await CourierService.forOrg(params.orgId)
-      const courier = await service.update(params.id, payload)
-      return response.ok({ data: courier })
+      const courier = await service.get(params.id)
+
+      // Permission Check: Manager OR Assigned User OR Assigned Department OR Creator
+      const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
+      const isAssignedDept = courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isCreator = courier.createdBy === user?.$id
+
+      if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
+        return response.forbidden({ message: 'You do not have permission to update this courier' })
+      }
+
+      const updatedCourier = await service.update(params.id, payload)
+      return response.ok({ data: updatedCourier })
     } catch (error: any) {
       if (error.code === 404) return response.notFound({ message: 'Courier not found' })
       return response.internalServerError({ message: error.message })
@@ -114,13 +180,74 @@ export default class CourierController {
 
   /**
    * DELETE /api/v1/organisations/:orgId/couriers/:id
-   * Delete a courier.
+   * Move a courier to the bin (soft delete).
    */
-  async destroy({ params, response }: HttpContext) {
+  async destroy({ user, params, response }: HttpContext) {
     try {
+      const { canManage } = await this.getUserContext(user, params.orgId)
       const service = await CourierService.forOrg(params.orgId)
-      await service.delete(params.id)
-      return response.ok({ message: 'Courier deleted successfully' })
+      const courier = await service.get(params.id)
+
+      // Permission Check: Manager OR Creator
+      const isCreator = courier.createdBy === user?.$id
+
+      if (!canManage && !isCreator) {
+        return response.forbidden({ message: 'Only managers or the creator can delete this courier' })
+      }
+
+      await service.softDelete(params.id)
+      return response.ok({ message: 'Courier moved to bin' })
+    } catch (error: any) {
+      if (error.code === 404) return response.notFound({ message: 'Courier not found' })
+      return response.internalServerError({ message: error.message })
+    }
+  }
+
+  /**
+   * POST /api/v1/organisations/:orgId/couriers/:id/restore
+   * Restore a courier from the bin.
+   */
+  async restore({ user, params, response }: HttpContext) {
+    try {
+      const { canManage, departmentId } = await this.getUserContext(user, params.orgId)
+      const service = await CourierService.forOrg(params.orgId)
+      const courier = await service.get(params.id)
+
+      const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
+      const isAssignedDept = courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isCreator = courier.createdBy === user?.$id
+
+      if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
+        return response.forbidden({ message: 'You do not have permission to restore this courier' })
+      }
+
+      const restoredCourier = await service.restore(params.id)
+      return response.ok({ data: restoredCourier, message: 'Courier restored successfully' })
+    } catch (error: any) {
+      if (error.code === 404) return response.notFound({ message: 'Courier not found' })
+      return response.internalServerError({ message: error.message })
+    }
+  }
+
+  /**
+   * DELETE /api/v1/organisations/:orgId/couriers/:id/force
+   * Permanently delete a courier.
+   */
+  async forceDestroy({ user, params, response }: HttpContext) {
+    try {
+      const { canManage } = await this.getUserContext(user, params.orgId)
+      const service = await CourierService.forOrg(params.orgId)
+      const courier = await service.get(params.id)
+
+      // Permission Check: Manager OR Creator
+      const isCreator = courier.createdBy === user?.$id
+
+      if (!canManage && !isCreator) {
+        return response.forbidden({ message: 'Only managers or the creator can permanently delete this courier' })
+      }
+
+      await service.forceDelete(params.id)
+      return response.ok({ message: 'Courier permanently deleted' })
     } catch (error: any) {
       if (error.code === 404) return response.notFound({ message: 'Courier not found' })
       return response.internalServerError({ message: error.message })

@@ -1,5 +1,6 @@
 import appwrite from '#services/appwrite_service'
 import { ID, Query } from 'node-appwrite'
+import { Collections } from '#modules/_registry/collection_ids'
 
 export interface AssignMemberPayload {
   userId: string
@@ -13,8 +14,8 @@ export interface AssignMemberPayload {
  * Service for managing organisation profiles (linking users to departments).
  */
 export default class MembersService {
-  private readonly databaseId: string
-  private readonly collectionId = 'org_profiles'
+  public readonly databaseId: string
+  private readonly collectionId = Collections.ORG_PROFILES
 
   constructor(databaseId: string) {
     this.databaseId = databaseId

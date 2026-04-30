@@ -6,18 +6,739 @@
   },
   "item": [
     {
+      "name": "Scenario - Flux Complet Courier",
+      "description": "Ce scénario automatise le cycle de vie complet : Inscription d'un propriétaire, création d'une organisation, activation des modules, invitation d'un membre, assignation à un département, création de courriers et vérification des permissions par le membre.",
+      "item": [
+        {
+          "name": "1. Inscription Propriétaire (User A)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const email = 'owner_' + Math.random().toString(36).substring(7) + '@test.com';",
+                  "pm.collectionVariables.set('owner_email', email);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{owner_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Owner User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "2. Connexion Propriétaire",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('token', jsonData.data.token);",
+                  "pm.collectionVariables.set('ownerId', jsonData.data.user.$id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{owner_email}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "3. Créer une Organisation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('orgId', jsonData.data.id || jsonData.data.$id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Corp {{owner_email}}\",\n  \"description\": \"Test description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations"]
+            }
+          }
+        },
+        {
+          "name": "4. Inscription Membre (User B)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const email = 'member_' + Math.random().toString(36).substring(7) + '@test.com';",
+                  "pm.collectionVariables.set('member_email', email);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{member_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Member User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "5. Inviter Membre à l'Organisation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('membershipId', jsonData.data.id || jsonData.data.$id);",
+                  "pm.collectionVariables.set('memberUserId', jsonData.data.userId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{member_email}}\",\n  \"roles\": [\"member\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "members"]
+            }
+          }
+        },
+        {
+          "name": "6. Créer un Département",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('deptId', jsonData.data.$id || jsonData.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Support Client\",\n  \"description\": \"Support for customers\",\n  \"organisationId\": \"{{orgId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "departments"]
+            }
+          }
+        },
+        {
+          "name": "7. Assigner Membre au Département",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{memberUserId}}\",\n  \"departmentId\": \"{{deptId}}\",\n  \"departmentRole\": \"member\",\n  \"jobTitle\": \"Support Agent\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{membershipId}}/department",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "members",
+                "{{membershipId}}",
+                "department"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. Activer le Module Courrier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"module\": \"courier\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "modules"]
+            }
+          }
+        },
+        {
+          "name": "8.5. Créer un Contact Externe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && (jsonData.data.$id || jsonData.data.id)) {",
+                  "    pm.collectionVariables.set('scenarioContactId', jsonData.data.$id || jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Dubois\",\n  \"email\": \"alice.dubois@company.com\",\n  \"phone\": \"+1234567890\",\n  \"structureType\": \"physique\",\n  \"address\": \"456 Enterprise Ave\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts"]
+            }
+          }
+        },
+        {
+          "name": "9. Créer Courrier (Assigné au Membre)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.collectionVariables.set('courierId_user', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "type", "value": "incoming", "type": "text" },
+                { "key": "urgency", "value": "normal", "type": "text" },
+                { "key": "subject", "value": "Courrier Assigné à l'Utilisateur", "type": "text" },
+                { "key": "contactName", "value": "Expéditeur Externe", "type": "text" },
+                { "key": "contactNumber", "value": "REF-123", "type": "text" },
+                { "key": "externalContactId", "value": "{{scenarioContactId}}", "type": "text" },
+                { "key": "internalEntityId", "value": "{{memberUserId}}", "type": "text" },
+                { "key": "targetType", "value": "user", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+            }
+          }
+        },
+        {
+          "name": "10. Créer Courrier (Assigné au Département)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.collectionVariables.set('courierId_dept', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "type", "value": "incoming", "type": "text" },
+                { "key": "urgency", "value": "normal", "type": "text" },
+                { "key": "subject", "value": "Courrier Assigné au Département", "type": "text" },
+                { "key": "contactName", "value": "Expéditeur Externe", "type": "text" },
+                { "key": "contactNumber", "value": "REF-456", "type": "text" },
+                { "key": "internalEntityId", "value": "{{deptId}}", "type": "text" },
+                { "key": "targetType", "value": "department", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+            }
+          }
+        },
+        {
+          "name": "11. Créer Courrier Sortant (Assigné au Membre)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "type", "value": "outgoing", "type": "text" },
+                { "key": "urgency", "value": "normal", "type": "text" },
+                { "key": "subject", "value": "Réponse Sortante", "type": "text" },
+                { "key": "contactName", "value": "Bara Corp", "type": "text" },
+                { "key": "contactNumber", "value": "OUT-789", "type": "text" },
+                { "key": "internalEntityId", "value": "{{memberUserId}}", "type": "text" },
+                { "key": "targetType", "value": "user", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+            }
+          }
+        },
+        {
+          "name": "12. Connexion Membre (User B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('token_member', jsonData.data.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{member_email}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "13. Lister les Courriers (Perspective Membre)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Le membre voit au moins les 2 courriers assignés', function () {",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "    pm.expect(jsonData.data.length).to.be.at.least(2);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_member}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+            }
+          }
+        },
+        {
+          "name": "14. Mettre à jour Courrier (Permission Membre)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_member}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+            }
+          }
+        },
+        {
+          "name": "15. Supprimer Courrier (Permission Membre) - 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden', function () { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_member}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+            }
+          }
+        },
+        {
+          "name": "16. Inscription Membre Non Assigné (User C)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const email = 'unassigned_' + Math.random().toString(36).substring(7) + '@test.com';",
+                  "pm.collectionVariables.set('unassigned_email', email);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{unassigned_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Unassigned User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "17. Connexion Membre Non Assigné",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('token_unassigned', jsonData.data.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{unassigned_email}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "18. Inviter Membre Non Assigné à l'Organisation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{unassigned_email}}\",\n  \"roles\": [\"member\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "members"]
+            }
+          }
+        },
+        {
+          "name": "19. Lister les Courriers (Perspective Membre Non Assigné) - 0 items",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Le membre non assigné ne voit aucun courrier', function () {",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "    pm.expect(jsonData.data.length).to.equal(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_unassigned}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+            }
+          }
+        },
+        {
+          "name": "20. Mettre à jour Courrier (Permission Membre Non Assigné) - 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden', function () { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_unassigned}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+            }
+          }
+        },
+        {
+          "name": "21. Supprimer le Courrier (Nettoyage)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK or 204 No Content', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+            }
+          }
+        },
+        {
+          "name": "22. Supprimer le Contact (Nettoyage)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK or 204 No Content', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{scenarioContactId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{scenarioContactId}}"]
+            }
+          }
+        },
+        {
+          "name": "23. Supprimer l'Organisation (Final Cleanup)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK or 204 No Content', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Health Check",
       "request": {
         "method": "GET",
         "header": [],
         "url": {
           "raw": "{{base_url}}/",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            ""
-          ]
+          "host": ["{{base_url}}"],
+          "path": [""]
         },
         "description": "Vérifie l'état de santé du serveur."
       },
@@ -56,15 +777,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/signup",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "signup"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "signup"]
             },
             "description": "Permet de créer un nouvel utilisateur."
           },
@@ -99,15 +813,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
             },
             "description": "Authentifie l'utilisateur et retourne un token JWT."
           },
@@ -146,15 +853,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/auth/profile",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "profile"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "profile"]
             },
             "description": "Récupère les informations de l'utilisateur actuellement connecté."
           },
@@ -185,15 +885,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/auth/logout",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "logout"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "logout"]
             },
             "description": "Déconnecte l'utilisateur et invalide le token."
           },
@@ -234,16 +927,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/profile/avatar",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "profile",
-                "avatar"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "profile", "avatar"]
             },
             "description": "Met à jour la photo de profil de l'utilisateur."
           },
@@ -261,16 +946,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/auth/profile/avatar",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "profile",
-                "avatar"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "profile", "avatar"]
             },
             "description": "Supprime la photo de profil de l'utilisateur."
           },
@@ -294,14 +971,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations"]
             },
             "description": "Affiche la liste des organisations auxquelles l'utilisateur appartient."
           },
@@ -340,14 +1011,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/organisations",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations"]
             },
             "description": "Crée une nouvelle organisation et définit l'utilisateur comme propriétaire."
           },
@@ -388,15 +1053,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}"]
             },
             "description": "Affiche les détails d'une organisation spécifique."
           },
@@ -435,15 +1093,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}"]
             },
             "description": "Met à jour les informations de l'organisation."
           },
@@ -474,15 +1125,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}"]
             },
             "description": "Supprime une organisation (nécessite des droits d'administration)."
           },
@@ -523,16 +1167,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/logo",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "logo"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "logo"]
             },
             "description": "Met à jour le logo de l'organisation."
           },
@@ -556,16 +1192,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "members"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "members"]
             },
             "description": "Affiche tous les membres d'une organisation donnée."
           },
@@ -604,16 +1232,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "members"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "members"]
             },
             "description": "Ajoute un nouvel utilisateur ou invite un utilisateur existant à rejoindre l'organisation."
           },
@@ -654,17 +1274,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "members",
-                "{{memberId}}"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "members", "{{memberId}}"]
             },
             "description": "Récupère les détails d'un membre spécifique au sein de l'organisation."
           },
@@ -703,17 +1314,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "members",
-                "{{memberId}}"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "members", "{{memberId}}"]
             },
             "description": "Met à jour les rôles attribués à un membre spécifique."
           },
@@ -744,17 +1346,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "members",
-                "{{memberId}}"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "members", "{{memberId}}"]
             },
             "description": "Supprime un utilisateur de l'organisation."
           },
@@ -791,16 +1384,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "modules"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "modules"]
             },
             "description": "Récupère la liste des modules actuellement activés pour l'organisation."
           },
@@ -822,20 +1407,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"moduleName\": \"directory\"\n}"
+              "raw": "{\n  \"module\": \"directory\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "modules"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "modules"]
             },
             "description": "Active un nouveau module pour l'organisation et provisionne les ressources nécessaires."
           },
@@ -853,17 +1430,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules/directory",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "modules",
-                "directory"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "modules", "directory"]
             },
             "description": "Désactive un module pour l'organisation (les données sont conservées)."
           },
@@ -887,14 +1455,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/modules",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "modules"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "modules"]
             },
             "description": "Affiche tous les modules publiés et disponibles à l'activation."
           },
@@ -926,15 +1488,8 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/admin/marketplace",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "marketplace"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "marketplace"]
             },
             "description": "Publie un module du code vers le marketplace."
           },
@@ -952,16 +1507,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/admin/marketplace/directory",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "marketplace",
-                "directory"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "marketplace", "directory"]
             },
             "description": "Retire un module du marketplace."
           },
@@ -989,16 +1536,8 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "organisations",
-                    "{{orgId}}",
-                    "departments"
-                  ]
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments"]
                 },
                 "description": "Affiche tous les départements d'une organisation donnée."
               },
@@ -1024,16 +1563,8 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "organisations",
-                    "{{orgId}}",
-                    "departments"
-                  ]
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments"]
                 },
                 "description": "Crée un nouveau département dans l'organisation."
               },
@@ -1072,17 +1603,8 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "organisations",
-                    "{{orgId}}",
-                    "departments",
-                    "{{deptId}}"
-                  ]
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments", "{{deptId}}"]
                 },
                 "description": "Récupère les détails d'un département spécifique."
               },
@@ -1108,17 +1630,8 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "organisations",
-                    "{{orgId}}",
-                    "departments",
-                    "{{deptId}}"
-                  ]
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments", "{{deptId}}"]
                 },
                 "description": "Met à jour les informations d'un département."
               },
@@ -1136,17 +1649,8 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "organisations",
-                    "{{orgId}}",
-                    "departments",
-                    "{{deptId}}"
-                  ]
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments", "{{deptId}}"]
                 },
                 "description": "Supprime un département de l'organisation."
               },
@@ -1178,9 +1682,7 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}/department",
-                  "host": [
-                    "{{base_url}}"
-                  ],
+                  "host": ["{{base_url}}"],
                   "path": [
                     "api",
                     "v1",
@@ -1207,9 +1709,7 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}/members",
-                  "host": [
-                    "{{base_url}}"
-                  ],
+                  "host": ["{{base_url}}"],
                   "path": [
                     "api",
                     "v1",
@@ -1236,17 +1736,8 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/profiles/{{profileId}}",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "organisations",
-                    "{{orgId}}",
-                    "profiles",
-                    "{{profileId}}"
-                  ]
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "organisations", "{{orgId}}", "profiles", "{{profileId}}"]
                 },
                 "description": "Supprime le profil d'un membre (le retire de son département)."
               },
@@ -1272,20 +1763,25 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "couriers"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
             },
             "description": "Affiche tous les courriers d'une organisation."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Créer un courrier",
@@ -1301,29 +1797,44 @@
               "mode": "formdata",
               "formdata": [
                 { "key": "type", "value": "incoming", "type": "text" },
+                { "key": "urgency", "value": "normal", "type": "text" },
                 { "key": "subject", "value": "Facture Mars 2026", "type": "text" },
-                { "key": "sender", "value": "EDF", "type": "text" },
-                { "key": "assignedTo", "value": "{{memberId}}", "type": "text" },
+                { "key": "contactName", "value": "EDF", "type": "text" },
+                { "key": "contactNumber", "value": "REF-001", "type": "text" },
+                { "key": "internalEntityId", "value": "{{memberId}}", "type": "text" },
                 { "key": "targetType", "value": "user", "type": "text" },
                 { "key": "file", "type": "file", "src": [] }
               ]
             },
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "couriers"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
             },
             "description": "Enregistre un nouveau courrier dans le système."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 201 (Créé)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Enregistre l'ID du courrier dans les variables\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData && jsonData.data && jsonData.data.$id) {",
+                  "        pm.collectionVariables.set(\"courierId\", jsonData.data.$id);",
+                  "    } else if (jsonData && jsonData.data && jsonData.data.id) {",
+                  "        pm.collectionVariables.set(\"courierId\", jsonData.data.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Créer un courrier sortant",
@@ -1339,29 +1850,191 @@
               "mode": "formdata",
               "formdata": [
                 { "key": "type", "value": "outgoing", "type": "text" },
+                { "key": "urgency", "value": "normal", "type": "text" },
                 { "key": "subject", "value": "Réponse Facture Mars", "type": "text" },
-                { "key": "recipient", "value": "EDF Service Client", "type": "text" },
-                { "key": "assignedTo", "value": "{{memberId}}", "type": "text" },
+                { "key": "contactName", "value": "EDF Service Client", "type": "text" },
+                { "key": "contactNumber", "value": "OUT-002", "type": "text" },
+                { "key": "internalEntityId", "value": "{{memberId}}", "type": "text" },
                 { "key": "targetType", "value": "user", "type": "text" },
+                { "key": "externalContactId", "value": "{{contactId}}", "type": "text" },
                 { "key": "file", "type": "file", "src": [] }
               ]
             },
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "organisations",
-                "{{orgId}}",
-                "couriers"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
             },
             "description": "Enregistre un nouveau courrier sortant."
           },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 201 (Créé)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Contacts Externes (Carnet d'adresses)",
+      "description": "Gestion des contacts externes. Fait partie du module Courrier — activez le module 'courier' pour utiliser ces endpoints.",
+      "item": [
+        {
+          "name": "Lister les contacts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Créer un contact",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 201 (Créé)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Enregistre l'ID du contact dans les variables\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData && jsonData.data && jsonData.data.$id) {",
+                  "        pm.collectionVariables.set('contactId', jsonData.data.$id);",
+                  "    } else if (jsonData && jsonData.data && jsonData.data.id) {",
+                  "        pm.collectionVariables.set('contactId', jsonData.data.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+123456789\",\n  \"structureType\": \"physique\",\n  \"address\": \"123 Main St\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts"]
+            }
+          },
           "response": []
+        },
+        {
+          "name": "Modifier un contact",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{contactId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer un contact",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{contactId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut est soit 204 (Sans contenu) soit 200 (OK)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     }

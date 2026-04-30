@@ -1,5 +1,6 @@
 import appwrite from '#services/appwrite_service'
 import { ID, Query } from 'node-appwrite'
+import { Collections } from '#modules/_registry/collection_ids'
 
 /**
  * Service for managing departments within an organisation's isolated database.
@@ -8,7 +9,7 @@ import { ID, Query } from 'node-appwrite'
  */
 export default class DepartmentsService {
   private readonly databaseId: string
-  private readonly collectionId = 'departments'
+  private readonly collectionId = Collections.DEPARTMENTS
 
   constructor(databaseId: string) {
     this.databaseId = databaseId
