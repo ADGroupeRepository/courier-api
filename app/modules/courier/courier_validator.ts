@@ -4,6 +4,7 @@ import {
   CourierStatus,
   CourierType,
   CourierStructureType,
+  DocumentStatus,
 } from '#modules/courier/courier_enums'
 
 /**
@@ -26,7 +27,7 @@ export const createCourierValidator = vine.create(
     targetType: vine.enum(['user', 'department']),
     file: vine
       .file({
-        size: '25mb',
+        size: '10mb',
         extnames: ['jpg', 'png', 'pdf', 'docx', 'doc'],
       })
       .optional(),
@@ -53,5 +54,44 @@ export const updateCourierValidator = vine.create(
     status: vine.enum(CourierStatus).optional(),
     isFavorite: vine.boolean().optional(),
     isArchived: vine.boolean().optional(),
+  })
+)
+
+/**
+ * Validator for creating a courier reply.
+ */
+export const createCourierReplyValidator = vine.create(
+  vine.object({
+    content: vine.string().maxLength(10000).trim(),
+    file: vine
+      .file({
+        size: '10mb',
+        extnames: ['jpg', 'png', 'pdf', 'docx', 'doc'],
+      })
+      .optional(),
+  })
+)
+
+/**
+ * Validator for updating a courier reply.
+ */
+export const updateCourierReplyValidator = vine.create(
+  vine.object({
+    documentStatus: vine.enum(DocumentStatus).optional(),
+  })
+)
+
+/**
+ * Validator for creating a courier chat message.
+ */
+export const createCourierMessageValidator = vine.create(
+  vine.object({
+    content: vine.string().maxLength(5000).trim(),
+    file: vine
+      .file({
+        size: '10mb',
+        extnames: ['jpg', 'png', 'pdf', 'docx', 'doc'],
+      })
+      .optional(),
   })
 )

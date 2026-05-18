@@ -4,6 +4,7 @@ import {
   addMemberValidator,
   updateMemberValidator,
 } from '#modules/organisations/organisation_validator'
+import PlanService from '#modules/plans/plan_service'
 
 export default class MembersController {
   /**
@@ -25,6 +26,15 @@ export default class MembersController {
    */
   async store({ request, response }: HttpContext) {
     const orgId = request.param('orgId')
+
+    // Check Plan Limit for Max Members
+    const usage = await PlanService.getOrgUsage(orgId)
+    if (usage.members.max !== -1 && usage.members.used >= usage.members.max) {
+      return response.forbidden({
+        message: `Plan limit reached: You can only have ${usage.members.max} members on your current plan.`,
+      })
+    }
+
     const { email, roles } = await request.validateUsing(addMemberValidator)
 
     const service = new OrganisationService()

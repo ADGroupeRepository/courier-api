@@ -4,8 +4,10 @@ import MembersService from '#modules/directory/members_service'
 import appwrite from '#services/appwrite_service'
 import { Query } from 'node-appwrite'
 import { createCourierValidator, updateCourierValidator } from '#modules/courier/courier_validator'
-import { type CourierUrgency, type CourierType } from '#modules/courier/courier_enums'
+import { type CourierType } from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
+import emitter from '@adonisjs/core/services/emitter'
+import CourierAssigned from '#events/courier_assigned'
 
 export default class CourierController {
   /**
@@ -123,10 +125,11 @@ export default class CourierController {
 
     try {
       const service = await CourierService.forOrg(params.orgId)
+
       const courier = await service.create(
         {
-          type: payload.type as CourierType,
-          urgency: payload.urgency as CourierUrgency,
+          type: payload.type,
+          urgency: payload.urgency,
           subject: payload.subject,
           contactName: payload.contactName,
           contactNumber: payload.contactNumber,
@@ -136,13 +139,25 @@ export default class CourierController {
           contactPhone: payload.contactPhone,
           contactEmail: payload.contactEmail,
           internalEntityId: payload.internalEntityId,
-          targetType: payload.targetType as 'user' | 'department',
+          targetType: payload.targetType,
           createdBy: user?.$id || '',
         },
         payload.file
           ? { tmpPath: payload.file.tmpPath!, fileName: payload.file.clientName }
           : undefined
       )
+
+      if (courier.internalEntityId) {
+        emitter.emit(
+          CourierAssigned,
+          new CourierAssigned(
+            params.orgId,
+            courier.id,
+            courier.targetType as 'user' | 'department',
+            courier.internalEntityId
+          )
+        )
+      }
 
       return response.created({ data: courier })
     } catch (error: any) {
@@ -173,6 +188,19 @@ export default class CourierController {
       }
 
       const updatedCourier = await service.update(params.id, payload)
+
+      if (payload.internalEntityId && payload.internalEntityId !== courier.internalEntityId) {
+        emitter.emit(
+          CourierAssigned,
+          new CourierAssigned(
+            params.orgId,
+            updatedCourier.id,
+            (payload.targetType || updatedCourier.targetType) as 'user' | 'department',
+            payload.internalEntityId
+          )
+        )
+      }
+
       return response.ok({ data: updatedCourier })
     } catch (error: any) {
       if (error.code === 404) return response.notFound({ message: 'Courier not found' })

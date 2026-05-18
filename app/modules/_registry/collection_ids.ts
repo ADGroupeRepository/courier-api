@@ -12,9 +12,15 @@ export const Collections = {
 
   // Courier module
   COURIERS: 'couriers',
+  COURIER_REPLIES: 'courier_replies',
+  COURIER_MESSAGES: 'courier_messages',
 
   // Courier module (external contacts address book)
   EXTERNAL_CONTACTS: 'external_contacts',
+
+  // Plans & Licenses (global — bara-platform database)
+  PLANS: 'plans',
+  LICENSES: 'licenses',
 } as const
 
 export type CollectionId = (typeof Collections)[keyof typeof Collections]

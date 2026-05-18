@@ -76,7 +76,7 @@ validate_terraform:
 .build-kaniko: &build-kaniko
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+    entrypoint: ['']
   script:
     - echo "$GCP_SERVICE_ACCOUNT_KEY" > /kaniko/gcp-key.json
     - export GOOGLE_APPLICATION_CREDENTIALS=/kaniko/gcp-key.json

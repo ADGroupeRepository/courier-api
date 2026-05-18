@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import ModuleProvisioningService from '#modules/_registry/provisioning_service'
 import appwrite from '#services/appwrite_service'
 import { Query } from 'node-appwrite'
+import PlanService from '#modules/plans/plan_service'
 
 export default class OrganisationModulesController {
   /**
@@ -55,6 +56,14 @@ export default class OrganisationModulesController {
     if (!finalModule || typeof finalModule !== 'string') {
       return response.badRequest({
         message: 'Module name is required (use "module" or "moduleName" field)',
+      })
+    }
+
+    // Check Plan Limit for Max Modules
+    const usage = await PlanService.getOrgUsage(orgId)
+    if (usage.modulesActive.max !== -1 && usage.modulesActive.used >= usage.modulesActive.max) {
+      return response.forbidden({
+        message: `Plan limit reached: You can only have ${usage.modulesActive.max} active modules on your current plan.`,
       })
     }
 

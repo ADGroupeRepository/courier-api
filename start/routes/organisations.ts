@@ -18,12 +18,19 @@ router
     router
       .resource('organisations.members', MembersController)
       .apiOnly()
+      .except(['store'])
       .params({ organisations: 'orgId', members: 'memberId' })
+
+    router
+      .post('organisations/:orgId/members', [MembersController, 'store'])
+      .use(middleware.planGuard('limit:maxMembers'))
 
     // Module Management
     router.get('modules', [OrganisationModulesController, 'indexAvailable'])
     router.get('organisations/:orgId/modules', [OrganisationModulesController, 'indexActive'])
-    router.post('organisations/:orgId/modules', [OrganisationModulesController, 'activate'])
+    router
+      .post('organisations/:orgId/modules', [OrganisationModulesController, 'activate'])
+      .use(middleware.planGuard('limit:maxModules'))
     router.delete('organisations/:orgId/modules/:module', [
       OrganisationModulesController,
       'deactivate',
