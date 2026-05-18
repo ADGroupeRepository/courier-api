@@ -557,8 +557,6 @@ paths:
     delete:
       summary: Supprimer un courrier
       operationId: deleteCourier
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
