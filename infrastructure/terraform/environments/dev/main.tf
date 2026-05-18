@@ -55,6 +55,8 @@ module "api_gateway_dev" {
     "{{CLOUD_RUN_URL}}",
     var.cloud_run_url
   )
+
+  gateway_service_account = "gateway-sa@bara-app-2026.iam.gserviceaccount.com"
 }
 
 output "gateway_url" {

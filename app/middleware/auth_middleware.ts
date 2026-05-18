@@ -12,7 +12,8 @@ import type { NextFn } from '@adonisjs/core/types/http'
  */
 export default class AuthMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
-    const authHeader = ctx.request.header('Authorization')
+    const authHeader =
+      ctx.request.header('X-Forwarded-Authorization') || ctx.request.header('Authorization')
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return ctx.response.unauthorized({

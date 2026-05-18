@@ -28,3 +28,9 @@ variable "openapi_spec_content" {
   type        = string
   description = "The content of the OpenAPI spec file"
 }
+
+variable "gateway_service_account" {
+  type        = string
+  description = "The service account email to be used by the gateway config for backend authentication (OIDC)."
+  default     = null
+}

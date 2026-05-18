@@ -8,16 +8,10 @@ schemes:
 produces:
   - application/json
 
-securityDefinitions:
-  BearerAuth:
-    type: apiKey
-    name: Authorization
-    in: header
 
 x-google-backend:
-  # TODO: Replace this with your development Cloud Run URL
   # The /api/v1 suffix will automatically be prepended to all paths below
-  address: '{{CLOUD_RUN_URL}}/api/v1'
+  address: 'https://backend-dev-n4xxd6pd2q-ew.a.run.app/api/v1'
   path_translation: APPEND_PATH_TO_ADDRESS
 
 x-google-management:
@@ -50,7 +44,7 @@ paths:
       operationId: healthCheck
       # We override the backend here because the health check is at the root (/), not /api/v1/
       x-google-backend:
-        address: '{{CLOUD_RUN_URL}}/'
+        address: 'https://backend-dev-n4xxd6pd2q-ew.a.run.app/'
         path_translation: CONSTANT_ADDRESS
       responses:
         '200':
@@ -84,8 +78,6 @@ paths:
     get:
       summary: Profil Utilisateur (Profile)
       operationId: getProfile
-      security:
-        - BearerAuth: []
       x-google-quota:
         metricCosts:
           'all-requests': 1
@@ -97,8 +89,6 @@ paths:
     post:
       summary: Déconnexion (Logout)
       operationId: logout
-      security:
-        - BearerAuth: []
       x-google-quota:
         metricCosts:
           'all-requests': 1
@@ -112,14 +102,12 @@ paths:
     post:
       summary: Uploader un Avatar
       operationId: uploadAvatar
-      security:
-        - BearerAuth: []
       consumes:
         - multipart/form-data
       parameters:
         - name: avatar
           in: formData
-          type: file
+          type: string
           required: true
       responses:
         '200':
@@ -127,8 +115,6 @@ paths:
     delete:
       summary: Supprimer l'Avatar
       operationId: deleteAvatar
-      security:
-        - BearerAuth: []
       responses:
         '200':
           description: Success
@@ -137,8 +123,6 @@ paths:
     get:
       summary: Lister les organisations
       operationId: listOrganisations
-      security:
-        - BearerAuth: []
       x-google-quota:
         metricCosts:
           'all-requests': 1
@@ -148,8 +132,6 @@ paths:
     post:
       summary: Créer une organisation
       operationId: createOrganisation
-      security:
-        - BearerAuth: []
       x-google-quota:
         metricCosts:
           'all-requests': 1
@@ -163,8 +145,6 @@ paths:
     get:
       summary: Voir une organisation
       operationId: getOrganisation
-      security:
-        - BearerAuth: []
       x-google-quota:
         metricCosts:
           'all-requests': 1
@@ -179,8 +159,6 @@ paths:
     put:
       summary: Mettre à jour une organisation
       operationId: updateOrganisation
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -192,8 +170,6 @@ paths:
     delete:
       summary: Supprimer une organisation
       operationId: deleteOrganisation
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -209,8 +185,6 @@ paths:
     post:
       summary: Uploader le Logo
       operationId: uploadOrganisationLogo
-      security:
-        - BearerAuth: []
       consumes:
         - multipart/form-data
       parameters:
@@ -220,7 +194,7 @@ paths:
           type: string
         - name: logo
           in: formData
-          type: file
+          type: string
           required: true
       responses:
         '200':
@@ -230,8 +204,6 @@ paths:
     get:
       summary: Lister les membres
       operationId: listMembers
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -243,8 +215,6 @@ paths:
     post:
       summary: Ajouter un membre
       operationId: addMember
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -260,8 +230,6 @@ paths:
     get:
       summary: Voir un membre
       operationId: getMember
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -277,8 +245,6 @@ paths:
     put:
       summary: Modifier les rôles d'un membre
       operationId: updateMemberRoles
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -294,8 +260,6 @@ paths:
     delete:
       summary: Retirer un membre
       operationId: removeMember
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -314,8 +278,6 @@ paths:
     get:
       summary: Lister les modules disponibles
       operationId: listAvailableModules
-      security:
-        - BearerAuth: []
       responses:
         '200':
           description: Success
@@ -324,8 +286,6 @@ paths:
     get:
       summary: Lister les modules actifs
       operationId: listActiveModules
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -337,8 +297,6 @@ paths:
     post:
       summary: Activer un module
       operationId: activateModule
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -352,8 +310,6 @@ paths:
     delete:
       summary: Désactiver un module
       operationId: deactivateModule
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -371,8 +327,6 @@ paths:
     post:
       summary: Publier un module
       operationId: publishModule
-      security:
-        - BearerAuth: []
       responses:
         '200':
           description: Success
@@ -381,8 +335,6 @@ paths:
     delete:
       summary: Dépublier un module
       operationId: unpublishModule
-      security:
-        - BearerAuth: []
       parameters:
         - name: moduleName
           in: path
@@ -396,8 +348,6 @@ paths:
     get:
       summary: Lister les départements
       operationId: listDepartments
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -409,8 +359,6 @@ paths:
     post:
       summary: Créer un département
       operationId: createDepartment
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -424,8 +372,6 @@ paths:
     get:
       summary: Voir un département
       operationId: getDepartment
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -441,8 +387,6 @@ paths:
     put:
       summary: Modifier un département
       operationId: updateDepartment
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -458,8 +402,6 @@ paths:
     delete:
       summary: Supprimer un département
       operationId: deleteDepartment
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -477,8 +419,6 @@ paths:
     post:
       summary: Assigner à un département
       operationId: assignMemberToDepartment
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -496,8 +436,6 @@ paths:
     get:
       summary: Lister les membres d'un département
       operationId: listDepartmentMembers
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -515,8 +453,6 @@ paths:
     delete:
       summary: Retirer d'un département
       operationId: unassignMember
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -534,8 +470,6 @@ paths:
     get:
       summary: Lister les courriers
       operationId: listCouriers
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -552,8 +486,6 @@ paths:
     post:
       summary: Créer un courrier
       operationId: createCourier
-      security:
-        - BearerAuth: []
       consumes:
         - multipart/form-data
       parameters:
@@ -587,7 +519,7 @@ paths:
           required: true
         - name: file
           in: formData
-          type: file
+          type: string
       responses:
         '201':
           description: Created
@@ -595,8 +527,6 @@ paths:
     get:
       summary: Voir un courrier
       operationId: getCourier
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -612,8 +542,6 @@ paths:
     patch:
       summary: Modifier un courrier
       operationId: updateCourier
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
@@ -629,8 +557,6 @@ paths:
     delete:
       summary: Supprimer un courrier
       operationId: deleteCourier
-      security:
-        - BearerAuth: []
       parameters:
         - name: orgId
           in: path
