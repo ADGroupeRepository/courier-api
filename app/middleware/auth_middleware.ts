@@ -21,6 +21,8 @@ export default class AuthMiddleware {
       })
     }
 
+    console.log(`[AuthMiddleware] authHeader: ${authHeader}`)
+
     const token = authHeader.slice(7).trim()
 
     if (!token) {
