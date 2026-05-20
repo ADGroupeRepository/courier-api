@@ -15,12 +15,12 @@ const PLATFORM_DB = 'bara-platform'
  */
 const GRACE_PERIOD_DAYS = 5
 
-export type LicenseStatus = 'active' | 'grace_period' | 'expired' | 'none'
+export type SubscriptionStatus = 'active' | 'grace_period' | 'expired' | 'none'
 
-export interface LicenseInfo {
-  license: any
+export interface SubscriptionInfo {
+  subscription: any
   plan: any
-  status: LicenseStatus
+  status: SubscriptionStatus
   daysRemaining: number | null
   daysInGrace: number | null
 }
@@ -77,15 +77,15 @@ export default class PlanService {
     return result.documents[0] || null
   }
 
-  // ── License management ────────────────────────────────────────────────
+  // ── Subscription management ──────────────────────────────────────────
 
   /**
-   * Get the active license for an organisation (returns the most recent active one).
+   * Get the active subscription for an organisation (returns the most recent active one).
    */
-  static async getOrgLicense(orgId: string): Promise<any | null> {
+  static async getOrgSubscription(orgId: string): Promise<any | null> {
     const result = await appwrite.databases.listDocuments({
       databaseId: PLATFORM_DB,
-      collectionId: Collections.LICENSES,
+      collectionId: Collections.SUBSCRIPTIONS,
       queries: [
         Query.equal('orgId', orgId),
         Query.equal('isActive', true),
@@ -97,21 +97,21 @@ export default class PlanService {
   }
 
   /**
-   * Get the full license info for an organisation, including the associated plan
-   * and computed license status (active, grace_period, expired, or none).
+   * Get the full subscription info for an organisation, including the associated plan
+   * and computed subscription status (active, grace_period, expired, or none).
    */
-  static async getOrgLicenseInfo(orgId: string): Promise<LicenseInfo> {
-    const cacheKey = `license:info:${orgId}`
-    const cached = await CacheService.get<LicenseInfo>(cacheKey)
+  static async getOrgSubscriptionInfo(orgId: string): Promise<SubscriptionInfo> {
+    const cacheKey = `subscription:info:${orgId}`
+    const cached = await CacheService.get<SubscriptionInfo>(cacheKey)
     if (cached) {
       return cached
     }
 
-    const license = await this.getOrgLicense(orgId)
+    const subscription = await this.getOrgSubscription(orgId)
 
-    if (!license) {
-      const result: LicenseInfo = {
-        license: null,
+    if (!subscription) {
+      const result: SubscriptionInfo = {
+        subscription: null,
         plan: null,
         status: 'none',
         daysRemaining: null,
@@ -121,30 +121,30 @@ export default class PlanService {
       return result
     }
 
-    const plan = await this.getPlan(license.planId)
-    const { status, daysRemaining, daysInGrace } = this.computeLicenseStatus(license)
+    const plan = await this.getPlan(subscription.planId)
+    const { status, daysRemaining, daysInGrace } = this.computeSubscriptionStatus(subscription)
 
-    const result: LicenseInfo = { license, plan, status, daysRemaining, daysInGrace }
+    const result: SubscriptionInfo = { subscription, plan, status, daysRemaining, daysInGrace }
     await CacheService.set(cacheKey, result, 300) // cache positive result for 5 mins
     return result
   }
 
   /**
-   * Compute the current status of a license based on its expiresAt date
+   * Compute the current status of a subscription based on its expiresAt date
    * and the 5-day grace period.
    */
-  static computeLicenseStatus(license: any): {
-    status: LicenseStatus
+  static computeSubscriptionStatus(subscription: any): {
+    status: SubscriptionStatus
     daysRemaining: number | null
     daysInGrace: number | null
   } {
-    if (!license.expiresAt) {
+    if (!subscription.expiresAt) {
       // No expiration — always active
       return { status: 'active', daysRemaining: null, daysInGrace: null }
     }
 
     const now = new Date()
-    const expiresAt = new Date(license.expiresAt)
+    const expiresAt = new Date(subscription.expiresAt)
     const diffMs = expiresAt.getTime() - now.getTime()
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
 
@@ -167,14 +167,98 @@ export default class PlanService {
     return { status: 'expired', daysRemaining: 0, daysInGrace: 0 }
   }
 
+  // ── Seat License management ──────────────────────────────────────────
+
+  /**
+   * Get the active seat license for a specific user in an org.
+   */
+  static async getUserLicense(orgId: string, userId: string): Promise<any | null> {
+    const result = await appwrite.databases.listDocuments({
+      databaseId: PLATFORM_DB,
+      collectionId: Collections.LICENSES,
+      queries: [
+        Query.equal('orgId', orgId),
+        Query.equal('userId', userId),
+        Query.equal('isActive', true),
+        Query.limit(1),
+      ],
+    })
+    return result.documents[0] || null
+  }
+
+  /**
+   * Assign a seat license to a user.
+   */
+  static async assignLicenseToUser(orgId: string, adminUserId: string, targetUserId: string) {
+    const subInfo = await this.getOrgSubscriptionInfo(orgId)
+    if (subInfo.status === 'none' || subInfo.status === 'expired') {
+      throw new Error('Organisation does not have an active subscription.')
+    }
+
+    const existing = await this.getUserLicense(orgId, targetUserId)
+    if (existing) {
+      throw new Error('User already has an active license.')
+    }
+
+    const totalPurchased = subInfo.subscription.totalSeatsPurchased
+    const activeSeatsResult = await appwrite.databases.listDocuments({
+      databaseId: PLATFORM_DB,
+      collectionId: Collections.LICENSES,
+      queries: [
+        Query.equal('orgId', orgId),
+        Query.equal('isActive', true)
+      ],
+    })
+
+    if (activeSeatsResult.total >= totalPurchased) {
+      throw new Error(`Maximum seats reached. You have ${totalPurchased} seats.`)
+    }
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { ID } = await import('node-appwrite')
+
+    return appwrite.databases.createDocument({
+      databaseId: PLATFORM_DB,
+      collectionId: Collections.LICENSES,
+      documentId: ID.unique(),
+      data: {
+        subscriptionId: subInfo.subscription.$id,
+        orgId,
+        userId: targetUserId,
+        assignedBy: adminUserId,
+        assignedAt: new Date().toISOString(),
+        isActive: true,
+      },
+    })
+  }
+
+  /**
+   * Revoke a seat license from a user.
+   */
+  static async revokeLicenseFromUser(orgId: string, targetUserId: string) {
+    const existing = await this.getUserLicense(orgId, targetUserId)
+    if (!existing) {
+      throw new Error('User does not have an active license.')
+    }
+
+    return appwrite.databases.updateDocument({
+      databaseId: PLATFORM_DB,
+      collectionId: Collections.LICENSES,
+      documentId: existing.$id,
+      data: { isActive: false },
+    })
+  }
+
   // ── Plan enforcement ──────────────────────────────────────────────────
 
   /**
-   * Check if the org's plan allows a specific feature.
-   * Features are stored as string[] on the plan (e.g., 'notifications.push').
+   * Check if a specific user's seat license allows a specific feature.
    */
-  static async checkFeature(orgId: string, feature: string): Promise<boolean> {
-    const info = await this.getOrgLicenseInfo(orgId)
+  static async checkUserFeature(orgId: string, userId: string, feature: string): Promise<boolean> {
+    const userLicense = await this.getUserLicense(orgId, userId)
+    if (!userLicense) return false
+
+    const info = await this.getOrgSubscriptionInfo(orgId)
     if (info.status === 'expired' || info.status === 'none') return false
     if (!info.plan) return false
 
@@ -183,10 +267,13 @@ export default class PlanService {
   }
 
   /**
-   * Check if the org's plan allows a specific module.
+   * Check if a specific user's seat license allows a specific module.
    */
-  static async checkModule(orgId: string, moduleName: string): Promise<boolean> {
-    const info = await this.getOrgLicenseInfo(orgId)
+  static async checkUserModule(orgId: string, userId: string, moduleName: string): Promise<boolean> {
+    const userLicense = await this.getUserLicense(orgId, userId)
+    if (!userLicense) return false
+
+    const info = await this.getOrgSubscriptionInfo(orgId)
     if (info.status === 'expired' || info.status === 'none') return false
     if (!info.plan) return false
 
@@ -200,7 +287,7 @@ export default class PlanService {
    * A limit of -1 means unlimited.
    */
   static async checkLimit(orgId: string, limitKey: string, currentCount: number): Promise<boolean> {
-    const info = await this.getOrgLicenseInfo(orgId)
+    const info = await this.getOrgSubscriptionInfo(orgId)
     if (info.status === 'expired' || info.status === 'none') return false
     if (!info.plan) return false
 
@@ -216,7 +303,7 @@ export default class PlanService {
    * Calculate resource usage for an org against its plan limits.
    */
   static async getOrgUsage(orgId: string): Promise<PlanUsage> {
-    const info = await this.getOrgLicenseInfo(orgId)
+    const info = await this.getOrgSubscriptionInfo(orgId)
     if (!info.plan) {
       return {
         members: { used: 0, max: 0 },
@@ -286,21 +373,21 @@ export default class PlanService {
   // ── Admin helpers ─────────────────────────────────────────────────────
 
   /**
-   * Count how many active licenses have been issued for a specific plan.
+   * Count how many active subscriptions have been issued for a specific plan.
    */
-  static async countIssuedLicenses(planId: string): Promise<number> {
+  static async countIssuedSubscriptions(planId: string): Promise<number> {
     const result = await appwrite.databases.listDocuments({
       databaseId: PLATFORM_DB,
-      collectionId: Collections.LICENSES,
+      collectionId: Collections.SUBSCRIPTIONS,
       queries: [Query.equal('planId', planId), Query.equal('isActive', true), Query.limit(1)],
     })
     return result.total
   }
 
   /**
-   * List all licenses (admin), with optional filters.
+   * List all subscriptions (admin), with optional filters.
    */
-  static async listLicenses(filters?: { orgId?: string; planId?: string; isActive?: boolean }) {
+  static async listSubscriptions(filters?: { orgId?: string; planId?: string; isActive?: boolean }) {
     const queries: string[] = []
 
     if (filters?.orgId) queries.push(Query.equal('orgId', filters.orgId))
@@ -311,7 +398,7 @@ export default class PlanService {
 
     const result = await appwrite.databases.listDocuments({
       databaseId: PLATFORM_DB,
-      collectionId: Collections.LICENSES,
+      collectionId: Collections.SUBSCRIPTIONS,
       queries,
     })
 

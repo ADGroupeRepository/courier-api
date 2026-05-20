@@ -6,9 +6,19 @@ import { ID, Query } from 'node-appwrite'
 import {
   createPlanValidator,
   updatePlanValidator,
-  issueLicenseValidator,
-  updateLicenseValidator,
+  issueSubscriptionValidator,
+  updateSubscriptionValidator,
 } from '#modules/plans/plan_validator'
+
+/**
+ * Helper to remove Appwrite-internal metadata properties from API responses,
+ * while leaving $id intact.
+ */
+function cleanAppwriteDoc(doc: any) {
+  if (!doc) return doc
+  const { $databaseId, $collectionId, $permissions, $createdAt, $updatedAt, $sequence, sortOrder, ...clean } = doc
+  return clean
+}
 
 /**
  * Admin-scoped controller for managing global plans and licenses.
@@ -30,7 +40,8 @@ export default class AdminPlansController {
         collectionId: Collections.PLANS,
         queries: [Query.orderAsc('sortOrder')],
       })
-      return response.ok({ data: result.documents, total: result.total })
+      const cleanDocs = result.documents.map(cleanAppwriteDoc)
+      return response.ok({ data: cleanDocs, total: result.total })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }
@@ -61,7 +72,7 @@ export default class AdminPlansController {
           slug: payload.slug,
           description: payload.description || '',
           price: payload.price,
-          maxLicenses: payload.maxLicenses,
+
           maxMembers: payload.maxMembers,
           maxStorageMB: payload.maxStorageMB,
           maxCouriersPerMonth: payload.maxCouriersPerMonth,
@@ -73,7 +84,7 @@ export default class AdminPlansController {
         },
       })
 
-      return response.created({ data: plan, message: 'Plan created successfully.' })
+      return response.created({ data: cleanAppwriteDoc(plan), message: 'Plan created successfully.' })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }
@@ -113,7 +124,7 @@ export default class AdminPlansController {
         data,
       })
 
-      return response.ok({ data: plan, message: 'Plan updated successfully.' })
+      return response.ok({ data: cleanAppwriteDoc(plan), message: 'Plan updated successfully.' })
     } catch (error: any) {
       if (error.code === 404) {
         return response.notFound({ message: 'Plan not found' })
@@ -148,22 +159,20 @@ export default class AdminPlansController {
 
   /**
    * GET /api/v1/admin/plans/:planId/usage
-   * Get plan usage stats: how many licenses issued vs max allowed.
+   * Get plan usage stats: how many subscriptions issued vs max allowed.
    */
   async planUsage({ request, response }: HttpContext) {
     const planId = request.param('planId')
 
     try {
       const plan = await PlanService.getPlan(planId)
-      const issuedCount = await PlanService.countIssuedLicenses(planId)
+      const issuedCount = await PlanService.countIssuedSubscriptions(planId)
 
       return response.ok({
         data: {
           planId: plan.$id,
           planName: plan.name,
-          maxLicenses: plan.maxLicenses,
-          issuedLicenses: issuedCount,
-          remainingLicenses: plan.maxLicenses === -1 ? -1 : plan.maxLicenses - issuedCount,
+          issuedSubscriptions: issuedCount,
         },
       })
     } catch (error: any) {
@@ -174,14 +183,14 @@ export default class AdminPlansController {
     }
   }
 
-  // ── License Management ────────────────────────────────────────────────
+  // ── Subscription Management ────────────────────────────────────────────────
 
   /**
-   * POST /api/v1/admin/licenses
-   * Issue a new license to an organisation.
+   * POST /api/v1/admin/subscriptions
+   * Issue a new subscription to an organisation.
    */
-  async issueLicense({ request, response, user }: HttpContext) {
-    const payload = await request.validateUsing(issueLicenseValidator)
+  async issueSubscription({ request, response, user }: HttpContext) {
+    const payload = await request.validateUsing(issueSubscriptionValidator)
 
     if (!user) {
       return response.unauthorized({ message: 'Authentication required' })
@@ -192,35 +201,26 @@ export default class AdminPlansController {
       const plan = await PlanService.getPlan(payload.planId)
       if (!plan.isActive) {
         return response.badRequest({
-          message: 'Cannot issue a license for an inactive plan.',
+          message: 'Cannot issue a subscription for an inactive plan.',
         })
       }
 
-      // 2. Check if max licenses for this plan have been reached
-      if (plan.maxLicenses !== -1) {
-        const issuedCount = await PlanService.countIssuedLicenses(payload.planId)
-        if (issuedCount >= plan.maxLicenses) {
-          return response.conflict({
-            message: `Maximum license count (${plan.maxLicenses}) reached for plan "${plan.name}".`,
-          })
-        }
-      }
 
-      // 3. Deactivate any existing active license for this org
-      const existingLicense = await PlanService.getOrgLicense(payload.orgId)
-      if (existingLicense) {
+      // 3. Deactivate any existing active subscription for this org
+      const existingSub = await PlanService.getOrgSubscription(payload.orgId)
+      if (existingSub) {
         await appwrite.databases.updateDocument({
           databaseId: this.databaseId,
-          collectionId: Collections.LICENSES,
-          documentId: existingLicense.$id,
+          collectionId: Collections.SUBSCRIPTIONS,
+          documentId: existingSub.$id,
           data: { isActive: false },
         })
       }
 
-      // 4. Create new license
-      const license = await appwrite.databases.createDocument({
+      // 4. Create new subscription
+      const subscription = await appwrite.databases.createDocument({
         databaseId: this.databaseId,
-        collectionId: Collections.LICENSES,
+        collectionId: Collections.SUBSCRIPTIONS,
         documentId: ID.unique(),
         data: {
           planId: payload.planId,
@@ -228,12 +228,13 @@ export default class AdminPlansController {
           activatedAt: new Date().toISOString(),
           expiresAt: payload.expiresAt || null,
           isActive: true,
+          totalSeatsPurchased: payload.totalSeatsPurchased,
           issuedBy: user.$id,
           notes: payload.notes || '',
         },
       })
 
-      return response.created({ data: license, message: 'License issued successfully.' })
+      return response.created({ data: cleanAppwriteDoc(subscription), message: 'Subscription issued successfully.' })
     } catch (error: any) {
       if (error.code === 404) {
         return response.notFound({ message: 'Plan or organisation not found' })
@@ -243,34 +244,35 @@ export default class AdminPlansController {
   }
 
   /**
-   * GET /api/v1/admin/licenses
-   * List all licenses. Supports filtering by orgId, planId, isActive.
+   * GET /api/v1/admin/subscriptions
+   * List all subscriptions. Supports filtering by orgId, planId, isActive.
    */
-  async indexLicenses({ request, response }: HttpContext) {
+  async indexSubscriptions({ request, response }: HttpContext) {
     const orgId = request.qs().orgId as string | undefined
     const planId = request.qs().planId as string | undefined
     const isActive = request.qs().isActive as string | undefined
 
     try {
-      const result = await PlanService.listLicenses({
+      const result = await PlanService.listSubscriptions({
         orgId,
         planId,
         isActive: isActive !== undefined ? isActive === 'true' : undefined,
       })
 
-      return response.ok({ data: result.documents, total: result.total })
+      const cleanDocs = result.documents.map(cleanAppwriteDoc)
+      return response.ok({ data: cleanDocs, total: result.total })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }
   }
 
   /**
-   * PATCH /api/v1/admin/licenses/:licenseId
-   * Update or revoke a license.
+   * PATCH /api/v1/admin/subscriptions/:subscriptionId
+   * Update or revoke a subscription.
    */
-  async updateLicense({ request, response }: HttpContext) {
-    const licenseId = request.param('licenseId')
-    const payload = await request.validateUsing(updateLicenseValidator)
+  async updateSubscription({ request, response }: HttpContext) {
+    const subscriptionId = request.param('subscriptionId')
+    const payload = await request.validateUsing(updateSubscriptionValidator)
 
     try {
       const data: Record<string, any> = {}
@@ -280,17 +282,17 @@ export default class AdminPlansController {
         }
       }
 
-      const license = await appwrite.databases.updateDocument({
+      const subscription = await appwrite.databases.updateDocument({
         databaseId: this.databaseId,
-        collectionId: Collections.LICENSES,
-        documentId: licenseId,
+        collectionId: Collections.SUBSCRIPTIONS,
+        documentId: subscriptionId,
         data,
       })
 
-      return response.ok({ data: license, message: 'License updated successfully.' })
+      return response.ok({ data: cleanAppwriteDoc(subscription), message: 'Subscription updated successfully.' })
     } catch (error: any) {
       if (error.code === 404) {
-        return response.notFound({ message: 'License not found' })
+        return response.notFound({ message: 'Subscription not found' })
       }
       return response.internalServerError({ message: error.message })
     }

@@ -11,13 +11,3 @@ export const signupValidator = vine.create(
     password: vine.string().minLength(8).maxLength(256),
   })
 )
-
-/**
- * Validator for user login.
- */
-export const loginValidator = vine.create(
-  vine.object({
-    email: vine.string().email().normalizeEmail().trim(),
-    password: vine.string().minLength(1),
-  })
-)

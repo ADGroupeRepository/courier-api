@@ -20,6 +20,7 @@ export class PlanProvisioner {
     console.log('[PlanProvisioner] Starting provisioning...')
 
     await this.createPlansCollection()
+    await this.createSubscriptionsCollection()
     await this.createLicensesCollection()
 
     console.log('[PlanProvisioner] Provisioning complete.')
@@ -87,13 +88,7 @@ export class PlanProvisioner {
       min: 0,
     })
 
-    await appwrite.databases.createIntegerAttribute({
-      databaseId: this.DATABASE_ID,
-      collectionId,
-      key: 'maxLicenses',
-      required: true,
-      min: -1,
-    })
+
 
     await appwrite.databases.createIntegerAttribute({
       databaseId: this.DATABASE_ID,
@@ -188,10 +183,10 @@ export class PlanProvisioner {
   }
 
   /**
-   * Create the `licenses` collection with all attributes and indexes.
+   * Create the `subscriptions` collection with all attributes and indexes.
    */
-  private static async createLicensesCollection() {
-    const collectionId = Collections.LICENSES
+  private static async createSubscriptionsCollection() {
+    const collectionId = Collections.SUBSCRIPTIONS
 
     try {
       await appwrite.databases.getCollection({
@@ -209,7 +204,7 @@ export class PlanProvisioner {
     await appwrite.databases.createCollection({
       databaseId: this.DATABASE_ID,
       collectionId,
-      name: 'Licenses',
+      name: 'Subscriptions',
       permissions: [],
       documentSecurity: false,
     })
@@ -271,8 +266,17 @@ export class PlanProvisioner {
       xdefault: true,
     })
 
+    // ── Integer attributes ──────────────────────────────────────────────
+    await appwrite.databases.createIntegerAttribute({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'totalSeatsPurchased',
+      required: true,
+      min: 1,
+    })
+
     // Wait for attributes to be ready before creating indexes
-    console.log('[PlanProvisioner] Waiting for license attributes to be ready...')
+    console.log('[PlanProvisioner] Waiting for subscription attributes to be ready...')
     await this.waitForAttributes(collectionId)
 
     // ── Indexes ─────────────────────────────────────────────────────────
@@ -298,6 +302,115 @@ export class PlanProvisioner {
       key: 'active_plan_idx',
       type: IndexType.Key,
       attributes: ['orgId', 'isActive'],
+    })
+
+    console.log(`[PlanProvisioner] Collection "${collectionId}" created successfully.`)
+  }
+
+  /**
+   * Create the `licenses` collection (per-user seats) with all attributes and indexes.
+   */
+  private static async createLicensesCollection() {
+    const collectionId = Collections.LICENSES
+
+    try {
+      await appwrite.databases.getCollection({
+        databaseId: this.DATABASE_ID,
+        collectionId,
+      })
+      console.log(`[PlanProvisioner] Collection "${collectionId}" already exists. Skipping.`)
+      return
+    } catch {
+      // Collection doesn't exist, create it
+    }
+
+    console.log(`[PlanProvisioner] Creating collection "${collectionId}"...`)
+
+    await appwrite.databases.createCollection({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      name: 'Licenses',
+      permissions: [],
+      documentSecurity: false,
+    })
+
+    // ── String attributes ───────────────────────────────────────────────
+    await appwrite.databases.createStringAttribute({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'subscriptionId',
+      size: 36,
+      required: true,
+    })
+
+    await appwrite.databases.createStringAttribute({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'orgId',
+      size: 36,
+      required: true,
+    })
+
+    await appwrite.databases.createStringAttribute({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'userId',
+      size: 36,
+      required: true,
+    })
+
+    await appwrite.databases.createStringAttribute({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'assignedBy',
+      size: 36,
+      required: true,
+    })
+
+    // ── DateTime attributes ─────────────────────────────────────────────
+    await appwrite.databases.createDatetimeAttribute({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'assignedAt',
+      required: true,
+    })
+
+    // ── Boolean attributes ──────────────────────────────────────────────
+    await appwrite.databases.createBooleanAttribute({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'isActive',
+      required: true,
+      xdefault: true,
+    })
+
+    // Wait for attributes to be ready before creating indexes
+    console.log('[PlanProvisioner] Waiting for license (seat) attributes to be ready...')
+    await this.waitForAttributes(collectionId)
+
+    // ── Indexes ─────────────────────────────────────────────────────────
+    await appwrite.databases.createIndex({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'orgId_idx',
+      type: IndexType.Key,
+      attributes: ['orgId'],
+    })
+
+    await appwrite.databases.createIndex({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'userId_idx',
+      type: IndexType.Key,
+      attributes: ['userId'],
+    })
+
+    await appwrite.databases.createIndex({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'active_seat_idx',
+      type: IndexType.Key,
+      attributes: ['userId', 'orgId', 'isActive'],
     })
 
     console.log(`[PlanProvisioner] Collection "${collectionId}" created successfully.`)

@@ -62,16 +62,6 @@ paths:
         '201':
           description: Created
 
-  /auth/login:
-    post:
-      summary: Connexion (Login)
-      operationId: login
-      x-google-quota:
-        metricCosts:
-          'auth-requests': 1
-      responses:
-        '200':
-          description: Success
 
   /auth/profile:
     get:
@@ -84,18 +74,6 @@ paths:
         '200':
           description: Success
 
-  /auth/logout:
-    post:
-      summary: Déconnexion (Logout)
-      operationId: logout
-      x-google-quota:
-        metricCosts:
-          'all-requests': 1
-      responses:
-        '200':
-          description: Success
-        '204':
-          description: No Content
 
   /auth/profile/avatar:
     post:

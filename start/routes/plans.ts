@@ -9,8 +9,9 @@ router
     router.get('plans', [PlansController, 'index'])
     router.get('plans/:planId', [PlansController, 'show'])
 
-    // Org-scoped license + usage (org owner sees full details, members see slim)
-    router.get('organisations/:orgId/license', [PlansController, 'orgLicense'])
+    // Org-scoped subscription + usage (org owner sees full details, members see slim)
+    router.get('organisations/:orgId/subscription', [PlansController, 'orgSubscription'])
+    router.post('organisations/:orgId/subscription', [PlansController, 'subscribe'])
   })
   .prefix('/api/v1')
   .use(middleware.auth())

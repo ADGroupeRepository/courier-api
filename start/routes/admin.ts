@@ -17,10 +17,10 @@ router
     router.delete('plans/:planId', [AdminPlansController, 'destroyPlan'])
     router.get('plans/:planId/usage', [AdminPlansController, 'planUsage'])
 
-    // License management
-    router.get('licenses', [AdminPlansController, 'indexLicenses'])
-    router.post('licenses', [AdminPlansController, 'issueLicense'])
-    router.patch('licenses/:licenseId', [AdminPlansController, 'updateLicense'])
+    // Subscription management
+    router.get('subscriptions', [AdminPlansController, 'indexSubscriptions'])
+    router.post('subscriptions', [AdminPlansController, 'issueSubscription'])
+    router.patch('subscriptions/:subscriptionId', [AdminPlansController, 'updateSubscription'])
   })
   .prefix('/api/v1/admin')
   .use(middleware.auth())

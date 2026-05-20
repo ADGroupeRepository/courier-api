@@ -40,42 +40,45 @@ export default class PlanGuardMiddleware {
     }
 
     try {
-      const licenseInfo = await PlanService.getOrgLicenseInfo(orgId)
+      const subInfo = await PlanService.getOrgSubscriptionInfo(orgId)
 
-      // No license at all
-      if (licenseInfo.status === 'none') {
+      // No subscription at all
+      if (subInfo.status === 'none') {
         return ctx.response.forbidden({
           message:
-            'No active license found for this organisation. Please contact an administrator.',
-          code: 'NO_LICENSE',
+            'No active subscription found for this organisation. Please contact an administrator.',
+          code: 'NO_SUBSCRIPTION',
         })
       }
 
       // Expired beyond grace period
-      if (licenseInfo.status === 'expired') {
+      if (subInfo.status === 'expired') {
         return ctx.response.forbidden({
           message:
-            "Your organisation's license has expired. Please renew to continue using this feature.",
-          code: 'LICENSE_EXPIRED',
+            "Your organisation's subscription has expired. Please renew to continue using this feature.",
+          code: 'SUBSCRIPTION_EXPIRED',
         })
       }
 
       // If in grace period, attach a warning header so the frontend can show a banner
-      if (licenseInfo.status === 'grace_period') {
-        ctx.response.header('X-License-Warning', 'grace_period')
-        ctx.response.header('X-Grace-Days-Remaining', String(licenseInfo.daysInGrace ?? 0))
+      if (subInfo.status === 'grace_period') {
+        ctx.response.header('X-Subscription-Warning', 'grace_period')
+        ctx.response.header('X-Grace-Days-Remaining', String(subInfo.daysInGrace ?? 0))
       }
 
       // Perform the specific guard check
       let allowed = true
+      const userId = ctx.user?.$id
 
       switch (guardType) {
         case 'feature':
-          allowed = await PlanService.checkFeature(orgId, guardKey)
+          if (!userId) return ctx.response.unauthorized({ message: 'User must be authenticated for feature checks.' })
+          allowed = await PlanService.checkUserFeature(orgId, userId, guardKey)
           break
 
         case 'module':
-          allowed = await PlanService.checkModule(orgId, guardKey)
+          if (!userId) return ctx.response.unauthorized({ message: 'User must be authenticated for module checks.' })
+          allowed = await PlanService.checkUserModule(orgId, userId, guardKey)
           break
 
         case 'limit':

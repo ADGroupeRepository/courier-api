@@ -47,15 +47,15 @@
           }
         },
         {
-          "name": "2. Connexion Propriétaire",
+          "name": "2a. Connexion Appwrite (Propriétaire)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });",
                   "var jsonData = pm.response.json();",
-                  "pm.collectionVariables.set('token', jsonData.data.token);",
-                  "pm.collectionVariables.set('ownerId', jsonData.data.user.$id);"
+                  "pm.collectionVariables.set('ownerId', jsonData.userId);"
                 ],
                 "type": "text/javascript"
               }
@@ -63,15 +63,50 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{owner_email}}\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "raw": "{{appwrite_endpoint}}/account/sessions/email",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "sessions", "email"]
+            }
+          }
+        },
+        {
+          "name": "2b. Générer JWT (Propriétaire)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('token', jsonData.jwt);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{appwrite_endpoint}}/account/jwts",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "jwts"]
             }
           }
         },
@@ -403,14 +438,13 @@
           }
         },
         {
-          "name": "12. Connexion Membre (User B)",
+          "name": "12a. Connexion Appwrite (Membre)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "pm.collectionVariables.set('token_member', jsonData.data.token);"
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });"
                 ],
                 "type": "text/javascript"
               }
@@ -418,15 +452,50 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{member_email}}\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "raw": "{{appwrite_endpoint}}/account/sessions/email",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "sessions", "email"]
+            }
+          }
+        },
+        {
+          "name": "12b. Générer JWT (Membre)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('token_member', jsonData.jwt);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{appwrite_endpoint}}/account/jwts",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "jwts"]
             }
           }
         },
@@ -539,14 +608,13 @@
           }
         },
         {
-          "name": "17. Connexion Membre Non Assigné",
+          "name": "17a. Connexion Appwrite (Membre Non Assigné)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "pm.collectionVariables.set('token_unassigned', jsonData.data.token);"
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });"
                 ],
                 "type": "text/javascript"
               }
@@ -554,15 +622,50 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{unassigned_email}}\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "raw": "{{appwrite_endpoint}}/account/sessions/email",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "sessions", "email"]
+            }
+          }
+        },
+        {
+          "name": "17b. Générer JWT (Membre Non Assigné)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('token_unassigned', jsonData.jwt);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{appwrite_endpoint}}/account/jwts",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "jwts"]
             }
           }
         },
@@ -805,13 +908,17 @@
           ]
         },
         {
-          "name": "Connexion (Login)",
+          "name": "Connexion Appwrite (Login)",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
               }
             ],
             "body": {
@@ -819,11 +926,11 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"SuperSecret123!\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "raw": "{{appwrite_endpoint}}/account/sessions/email",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "sessions", "email"]
             },
-            "description": "Authentifie l'utilisateur et retourne un token JWT."
+            "description": "Authentifie l'utilisateur directement auprès d'Appwrite et crée une session active."
           },
           "response": [],
           "event": [
@@ -831,15 +938,53 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Le statut doit être 200\", function () {",
-                  "    pm.response.to.have.status(200);",
+                  "pm.test(\"Le statut doit être 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Générer JWT Appwrite (Create JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{appwrite_endpoint}}/account/jwts",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "jwts"]
+            },
+            "description": "Génère un token JWT client-side temporaire pour signer les requêtes vers l'API Bara."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 201\", function () {",
+                  "    pm.response.to.have.status(201);",
                   "});",
                   "pm.test(\"Enregistrement du token dans les variables\", function () {",
                   "    var jsonData = pm.response.json();",
-                  "    if (jsonData && jsonData.token) {",
-                  "        pm.collectionVariables.set(\"token\", jsonData.token);",
-                  "    } else if (jsonData && jsonData.data && jsonData.data.token) {",
-                  "        pm.collectionVariables.set(\"token\", jsonData.data.token);",
+                  "    if (jsonData && jsonData.jwt) {",
+                  "        pm.collectionVariables.set(\"token\", jsonData.jwt);",
                   "    }",
                   "});"
                 ],
@@ -881,21 +1026,21 @@
           ]
         },
         {
-          "name": "Déconnexion (Logout)",
+          "name": "Déconnexion Appwrite (Logout)",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/logout",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "logout"]
+              "raw": "{{appwrite_endpoint}}/account/sessions/current",
+              "host": ["{{appwrite_endpoint}}"],
+              "path": ["account", "sessions", "current"]
             },
-            "description": "Déconnecte l'utilisateur et invalide le token."
+            "description": "Déconnecte l'utilisateur en supprimant sa session active sur Appwrite."
           },
           "response": [],
           "event": [
@@ -903,7 +1048,7 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Le statut est soit 204 (Sans contenu) soit 200 (OK)\", function () {",
+                  "pm.test(\"Le statut est 204 (Sans contenu)\", function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
                   "});"
                 ],
@@ -1178,6 +1323,125 @@
               "path": ["api", "v1", "organisations", "{{orgId}}", "logo"]
             },
             "description": "Met à jour le logo de l'organisation."
+          },
+          "response": []
+        },
+        {
+          "name": "Voir l'abonnement actif (Subscription)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/subscription",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "subscription"]
+            },
+            "description": "Affiche les détails de l'abonnement actif et la consommation."
+          },
+          "response": []
+        },
+        {
+          "name": "S'abonner à un plan (Subscribe)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"plan_id_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/subscription",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "subscription"]
+            },
+            "description": "Permet à l'owner de l'organisation de s'abonner à un plan."
+          },
+          "response": []
+        },
+        {
+          "name": "Lister les licences de sièges (List seat licenses)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/licenses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "licenses"]
+            },
+            "description": "Lister tous les sièges (licences) assignés aux membres."
+          },
+          "response": []
+        },
+        {
+          "name": "Assigner une licence de siège (Assign seat license)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{memberId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/licenses/assign",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "licenses", "assign"]
+            },
+            "description": "Assigne une licence de siège à un membre spécifique."
+          },
+          "response": []
+        },
+        {
+          "name": "Révoquer une licence de siège (Revoke seat license)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{memberId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/licenses/revoke",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "licenses", "revoke"]
+            },
+            "description": "Révoque une licence de siège d'un membre spécifique."
           },
           "response": []
         }
@@ -1518,6 +1782,171 @@
               "path": ["api", "v1", "admin", "marketplace", "directory"]
             },
             "description": "Retire un module du marketplace."
+          },
+          "response": []
+        },
+        {
+          "name": "Lister les plans (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/plans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "plans"]
+            },
+            "description": "Affiche tous les plans."
+          },
+          "response": []
+        },
+        {
+          "name": "Créer un plan (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Enterprise Plan\",\n  \"slug\": \"enterprise\",\n  \"description\": \"Custom enterprise plan\",\n  \"price\": 15000,\n  \"maxMembers\": -1,\n  \"maxStorageMB\": 100000,\n  \"maxCouriersPerMonth\": -1,\n  \"maxModules\": -1,\n  \"allowedModules\": [\"directory\", \"courier\"],\n  \"features\": [\"Priority Support\", \"Dedicated SLA\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/plans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "plans"]
+            },
+            "description": "Crée un nouveau plan de tarification."
+          },
+          "response": []
+        },
+        {
+          "name": "Modifier un plan (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Enterprise Plan Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/plans/{{planId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "plans", "{{planId}}"]
+            },
+            "description": "Met à jour un plan existant."
+          },
+          "response": []
+        },
+        {
+          "name": "Supprimer un plan (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/plans/{{planId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "plans", "{{planId}}"]
+            },
+            "description": "Supprime un plan existant."
+          },
+          "response": []
+        },
+        {
+          "name": "Lister les abonnements (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "subscriptions"]
+            },
+            "description": "Affiche tous les abonnements émis."
+          },
+          "response": []
+        },
+        {
+          "name": "Émettre un abonnement (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"plan_id_here\",\n  \"orgId\": \"org_id_here\",\n  \"totalSeatsPurchased\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "subscriptions"]
+            },
+            "description": "Émet un abonnement manuel pour une organisation."
+          },
+          "response": []
+        },
+        {
+          "name": "Modifier un abonnement (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalSeatsPurchased\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/subscriptions/{{subscriptionId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "subscriptions", "{{subscriptionId}}"]
+            },
+            "description": "Modifie les limites d'un abonnement."
           },
           "response": []
         }
@@ -2051,6 +2480,16 @@
     {
       "key": "base_url",
       "value": "http://localhost:3333",
+      "type": "string"
+    },
+    {
+      "key": "appwrite_endpoint",
+      "value": "https://bara-appwrite.akumba.io/v1",
+      "type": "string"
+    },
+    {
+      "key": "appwrite_project_id",
+      "value": "bara-app-adg",
       "type": "string"
     },
     {

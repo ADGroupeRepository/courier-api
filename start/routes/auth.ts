@@ -10,12 +10,7 @@ router
       .post('/signup', [AuthController, 'signup'])
       .use(middleware.rateLimit({ max: 10, windowMs: 60_000 }))
 
-    router
-      .post('/login', [AuthController, 'login'])
-      .use(middleware.rateLimit({ max: 10, windowMs: 60_000 }))
-
     // Protected
-    router.post('/logout', [AuthController, 'logout']).use(middleware.auth())
     router.get('/profile', [AuthController, 'profile']).use(middleware.auth())
     router.post('/profile/avatar', [AuthController, 'uploadAvatar']).use(middleware.auth())
     router.delete('/profile/avatar', [AuthController, 'deleteAvatar']).use(middleware.auth())

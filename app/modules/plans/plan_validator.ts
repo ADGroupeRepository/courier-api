@@ -14,7 +14,7 @@ export const createPlanValidator = vine.create(
       .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
     description: vine.string().maxLength(500).trim().optional(),
     price: vine.number().min(0),
-    maxLicenses: vine.number().min(-1),
+
     maxMembers: vine.number().min(-1),
     maxStorageMB: vine.number().min(-1),
     maxCouriersPerMonth: vine.number().min(-1),
@@ -41,7 +41,7 @@ export const updatePlanValidator = vine.create(
       .optional(),
     description: vine.string().maxLength(500).trim().optional(),
     price: vine.number().min(0).optional(),
-    maxLicenses: vine.number().min(-1).optional(),
+
     maxMembers: vine.number().min(-1).optional(),
     maxStorageMB: vine.number().min(-1).optional(),
     maxCouriersPerMonth: vine.number().min(-1).optional(),
@@ -54,24 +54,44 @@ export const updatePlanValidator = vine.create(
 )
 
 /**
- * Validator for issuing a license to an org (admin only).
+ * Validator for issuing a subscription to an org (admin only).
  */
-export const issueLicenseValidator = vine.create(
+export const issueSubscriptionValidator = vine.create(
   vine.object({
     planId: vine.string().maxLength(36).trim(),
     orgId: vine.string().maxLength(36).trim(),
+    totalSeatsPurchased: vine.number().min(1),
     expiresAt: vine.string().optional(), // ISO 8601 datetime string
     notes: vine.string().maxLength(500).trim().optional(),
   })
 )
 
 /**
- * Validator for updating a license (admin only).
+ * Validator for updating a subscription (admin only).
  */
-export const updateLicenseValidator = vine.create(
+export const updateSubscriptionValidator = vine.create(
   vine.object({
     isActive: vine.boolean().optional(),
+    totalSeatsPurchased: vine.number().min(1).optional(),
     expiresAt: vine.string().optional(), // ISO 8601 datetime string
     notes: vine.string().maxLength(500).trim().optional(),
+  })
+)
+
+/**
+ * Validator for assigning a seat license to a user (org admin only).
+ */
+export const assignLicenseValidator = vine.create(
+  vine.object({
+    userId: vine.string().maxLength(36).trim(),
+  })
+)
+
+/**
+ * Validator for a user subscribing to a plan.
+ */
+export const subscribeToPlanValidator = vine.create(
+  vine.object({
+    planId: vine.string().maxLength(36).trim(),
   })
 )

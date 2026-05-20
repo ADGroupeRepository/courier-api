@@ -18,8 +18,9 @@ export const Collections = {
   // Courier module (external contacts address book)
   EXTERNAL_CONTACTS: 'external_contacts',
 
-  // Plans & Licenses (global — bara-platform database)
+  // Plans, Subscriptions & Licenses (global — bara-platform database)
   PLANS: 'plans',
+  SUBSCRIPTIONS: 'subscriptions',
   LICENSES: 'licenses',
 } as const
 
