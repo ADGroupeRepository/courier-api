@@ -5,6 +5,7 @@ const OrganisationsController = () => import('#modules/organisations/organisatio
 const MembersController = () => import('#modules/organisations/members_controller')
 const OrganisationModulesController = () =>
   import('#modules/organisations/organisation_modules_controller')
+const OrgLicensesController = () => import('#modules/organisations/org_licenses_controller')
 
 router
   .group(() => {
@@ -18,12 +19,24 @@ router
     router
       .resource('organisations.members', MembersController)
       .apiOnly()
+      .except(['store'])
       .params({ organisations: 'orgId', members: 'memberId' })
+
+    router
+      .post('organisations/:orgId/members', [MembersController, 'store'])
+      .use(middleware.planGuard('limit:maxMembers'))
+
+    // Seat Licenses
+    router.get('organisations/:orgId/licenses', [OrgLicensesController, 'index'])
+    router.post('organisations/:orgId/licenses/assign', [OrgLicensesController, 'assign'])
+    router.post('organisations/:orgId/licenses/revoke', [OrgLicensesController, 'revoke'])
 
     // Module Management
     router.get('modules', [OrganisationModulesController, 'indexAvailable'])
     router.get('organisations/:orgId/modules', [OrganisationModulesController, 'indexActive'])
-    router.post('organisations/:orgId/modules', [OrganisationModulesController, 'activate'])
+    router
+      .post('organisations/:orgId/modules', [OrganisationModulesController, 'activate'])
+      .use(middleware.planGuard('limit:maxModules'))
     router.delete('organisations/:orgId/modules/:module', [
       OrganisationModulesController,
       'deactivate',

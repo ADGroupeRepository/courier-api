@@ -1,9 +1,8 @@
-import { ID, Account, Client, AppwriteException } from 'node-appwrite'
+import { ID, AppwriteException } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
 import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
 import logger from '@adonisjs/core/services/logger'
-import OrganisationService from '#modules/organisations/organisation_service'
 
 interface SignupPayload {
   name: string
@@ -18,21 +17,6 @@ interface SignupPayload {
  * AppwriteService so controllers stay thin.
  */
 export default class AuthService {
-  /**
-   * Create an unauthenticated Appwrite Account service.
-   *
-   * `createEmailPasswordSession` is a public endpoint — no API key or
-   * session token required, just the project ID.
-   * @returns An unauthenticated Account service instance.
-   */
-  private publicAccountService() {
-    const client = new Client()
-      .setEndpoint(appwriteConfig.endpoint)
-      .setProject(appwriteConfig.projectId)
-      .setSelfSigned(true)
-    return new Account(client)
-  }
-
   /**
    * Register a new user account.
    *
@@ -71,55 +55,6 @@ export default class AuthService {
       emailVerification: user.emailVerification,
       createdAt: user.$createdAt,
     }
-  }
-
-  /**
-   * Authenticate a user with email + password and return a JWT.
-   *
-   * 1. Verify credentials via the public Account API (createEmailPasswordSession).
-   * 2. Generate a JWT via the admin Users API (users.createJWT).
-   *
-   * The returned `token` (JWT) must be sent by the client as
-   * `Authorization: Bearer <token>` on all subsequent protected requests.
-   * @param email - The user's email.
-   * @param password - The user's password.
-   * @returns Authentication details including JWT, user profile, and organisations.
-   */
-  async login(email: string, password: string) {
-    // Step 1 — Verify credentials (public client, no API key needed)
-    const account = this.publicAccountService()
-    const session = await account.createEmailPasswordSession({ email, password })
-
-    // Step 2 — Generate a JWT via admin Users API
-    const { jwt } = await appwrite.users.createJWT({
-      userId: session.userId,
-      sessionId: session.$id,
-      duration: 3600, // 1 hour (maximum allowed by Appwrite)
-    })
-
-    // Step 3 — Fetch profile and organisations for UI bootstrapping
-    const organisationService = new OrganisationService()
-    const [user, organisations] = await Promise.all([
-      this.getUserProfile(jwt),
-      organisationService.list(jwt),
-    ])
-
-    return {
-      token: jwt,
-      expiresAt: session.expire,
-      user,
-      organisations,
-    }
-  }
-
-  /**
-   * Invalidate the current session (logout).
-   * @param jwt - The user's session JWT.
-   * @param sessionId - The ID of the session to delete.
-   */
-  async logout(jwt: string, sessionId: string) {
-    const { account } = appwrite.createSessionClient(jwt)
-    await account.deleteSession({ sessionId })
   }
 
   /**

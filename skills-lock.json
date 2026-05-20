@@ -1,10 +1,17 @@
 {
   "version": 1,
   "skills": {
+    "appwrite-cli": {
+      "source": "appwrite/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/appwrite-cli/SKILL.md",
+      "computedHash": "b67da9e5d539e8534da2a3bc215ebd63002612a1d8eaa88f42cedc9b2b01abd7"
+    },
     "appwrite-typescript": {
       "source": "appwrite/agent-skills",
       "sourceType": "github",
-      "computedHash": "c2654d10a77e48197df43d29b3dcfe230b6f3b8efc81c5566f0f45afffb28e09"
+      "skillPath": "skills/appwrite-typescript/SKILL.md",
+      "computedHash": "3efb5d412ca6602cf13058c2671f06d2710a0280c2310b2d32638769e7db3f38"
     },
     "caveman": {
       "source": "JuliusBrussee/caveman",

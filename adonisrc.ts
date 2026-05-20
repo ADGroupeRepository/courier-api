@@ -22,7 +22,11 @@ export default defineConfig({
   | will be scanned automatically from the "./commands" directory.
   |
   */
-  commands: [() => import('@adonisjs/core/commands')],
+  commands: [
+    () => import('@adonisjs/core/commands'),
+    () => import('@adonisjs/cache/commands'),
+    () => import('@jrmc/adonis-mcp/commands'),
+  ],
 
   /*
   |--------------------------------------------------------------------------
@@ -41,6 +45,13 @@ export default defineConfig({
       file: () => import('@adonisjs/core/providers/repl_provider'),
       environment: ['repl', 'test'],
     },
+    () => import('@adonisjs/cache/cache_provider'),
+    () => import('@adonisjs/redis/redis_provider'),
+    () => import('@adonisjs/limiter/limiter_provider'),
+    () => import('@adonisjs/cors/cors_provider'),
+    () => import('@adonisjs/lock/lock_provider'),
+    () => import('@jrmc/adonis-mcp/mcp_provider'),
+    () => import('@jrmc/adonis-mcp/vinejs_provider'),
   ],
 
   /*
@@ -55,6 +66,7 @@ export default defineConfig({
     () => import('#start/bootstrap'),
     () => import('#start/routes'),
     () => import('#start/kernel'),
+    () => import('#start/events'),
   ],
 
   /*

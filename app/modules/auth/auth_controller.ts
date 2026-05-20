@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#modules/auth/auth_service'
-import { signupValidator, loginValidator } from '#modules/auth/auth_validator'
+import { signupValidator } from '#modules/auth/auth_validator'
+import OrganisationService from '#modules/organisations/organisation_service'
 
 export default class AuthController {
   /**
@@ -15,32 +16,6 @@ export default class AuthController {
   }
 
   /**
-   * POST /api/v1/auth/login
-   * Authenticate with email + password, receive a session token.
-   */
-  async login({ request, response }: HttpContext) {
-    const { email, password } = await request.validateUsing(loginValidator)
-    const authService = new AuthService()
-    const session = await authService.login(email, password)
-    return response.ok({ message: 'Login successful', data: session })
-  }
-
-  /**
-   * POST /api/v1/auth/logout
-   * Invalidate the current session. Requires auth middleware.
-   */
-  async logout({ request, response }: HttpContext) {
-    const authHeader = request.header('Authorization')!
-    const token = authHeader.slice(7).trim()
-
-    const sessionId = request.input('sessionId', 'current')
-    const authService = new AuthService()
-    await authService.logout(token, sessionId)
-
-    return response.ok({ message: 'Logged out successfully' })
-  }
-
-  /**
    * GET /api/v1/auth/profile
    * Return the authenticated user's profile and their organisations.
    */
@@ -52,11 +27,13 @@ export default class AuthController {
     const authService = new AuthService()
 
     const profile = await authService.getUserProfile(token!)
+    const orgService = new OrganisationService()
+    const organisations = await orgService.list(token!)
 
     return response.ok({
       data: {
         user: { ...profile, avatarUrl },
-        organisations: [],
+        organisations,
       },
     })
   }

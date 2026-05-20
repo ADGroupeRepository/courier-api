@@ -5,6 +5,7 @@ import {
   CourierStatus,
   CourierType,
   CourierStructureType,
+  DocumentStatus,
 } from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
 
@@ -75,6 +76,10 @@ export const courierModule: ModuleDefinition = {
         { key: 'isFavorite', type: 'boolean', required: true, default: false },
         { key: 'isArchived', type: 'boolean', required: true, default: false },
         { key: 'isDeleted', type: 'boolean', required: true, default: false },
+        { key: 'requiresPickup', type: 'boolean', required: false, default: false },
+        { key: 'pickedUpAt', type: 'datetime', required: false },
+        { key: 'pickedUpBy', type: 'string', size: 36, required: false },
+        { key: 'replyCount', type: 'integer', required: true, default: 0 },
       ],
       indexes: [
         { key: 'subject_idx', type: 'key', attributes: ['subject'] },
@@ -116,6 +121,54 @@ export const courierModule: ModuleDefinition = {
         { key: 'structure_type_idx', type: 'key', attributes: ['structureType'] },
         { key: 'creator_idx', type: 'key', attributes: ['createdBy'] },
       ],
+    },
+    {
+      id: Collections.COURIER_REPLIES,
+      name: 'Courier Replies',
+      documentSecurity: true,
+      permissions: (orgId: string) => [
+        Permission.read(Role.team(orgId)),
+        Permission.create(Role.team(orgId)),
+        Permission.update(Role.team(orgId)),
+        Permission.delete(Role.team(orgId, 'admin')),
+      ],
+      attributes: [
+        { key: 'courierId', type: 'string', size: 36, required: true },
+        { key: 'content', type: 'string', size: 10000, required: true },
+        { key: 'fileId', type: 'string', size: 36, required: false },
+        { key: 'createdBy', type: 'string', size: 36, required: true },
+        { key: 'createdAt', type: 'datetime', required: true, default: new Date() },
+        {
+          key: 'documentStatus',
+          type: 'enum',
+          elements: Object.values(DocumentStatus),
+          required: true,
+          default: DocumentStatus.DRAFT,
+        },
+      ],
+      indexes: [
+        { key: 'courier_idx', type: 'key', attributes: ['courierId'] },
+        { key: 'creator_idx', type: 'key', attributes: ['createdBy'] },
+      ],
+    },
+    {
+      id: Collections.COURIER_MESSAGES,
+      name: 'Courier Messages',
+      documentSecurity: true,
+      permissions: (orgId: string) => [
+        Permission.read(Role.team(orgId)),
+        Permission.create(Role.team(orgId)),
+        Permission.update(Role.team(orgId)),
+        Permission.delete(Role.team(orgId, 'admin')),
+      ],
+      attributes: [
+        { key: 'courierId', type: 'string', size: 36, required: true },
+        { key: 'content', type: 'string', size: 5000, required: true },
+        { key: 'fileId', type: 'string', size: 36, required: false },
+        { key: 'createdBy', type: 'string', size: 36, required: true },
+        { key: 'createdAt', type: 'datetime', required: true, default: new Date() },
+      ],
+      indexes: [{ key: 'courier_idx', type: 'key', attributes: ['courierId'] }],
     },
   ],
 }

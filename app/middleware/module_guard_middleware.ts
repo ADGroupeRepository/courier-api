@@ -2,10 +2,13 @@ import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import appwrite from '#services/appwrite_service'
 import { MODULE_REGISTRY } from '#modules/_registry/module_registry'
+import PlanService from '#modules/plans/plan_service'
+import locks from '@adonisjs/lock/services/main'
 
 /**
  * Middleware to guard routes that belong to a specific module.
  * It checks if the organisation has activated the requested module.
+ * If not activated, it attempts to auto-provision the module if the plan allows it.
  *
  * Usage:
  * router.get('...', [...]).use(middleware.moduleGuard('invoicing'))
@@ -34,10 +37,93 @@ export default class ModuleGuardMiddleware {
       const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
       const activeModules: string[] = prefs.modules || []
 
-      if (!activeModules.includes(moduleName)) {
-        return ctx.response.forbidden({
-          message: `Module "${moduleName}" is not activated for this organisation. Please activate it first.`,
-          module: moduleName,
+      if (activeModules.includes(moduleName)) {
+        return next()
+      }
+
+      // 4. Module is not activated. Attempt auto-provisioning with a lock to avoid race conditions.
+      const lockKey = `org_provision:${orgId}`
+      const lock = locks.createLock(lockKey, '30s')
+
+      const [executed, result] = await lock.run(async () => {
+        // Re-read team prefs inside the lock to ensure we have the most fresh state
+        const freshPrefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
+        const freshActive: string[] = freshPrefs.modules || []
+
+        if (freshActive.includes(moduleName)) {
+          return { success: true }
+        }
+
+        // Fetch subscription details
+        const info = await PlanService.getOrgSubscriptionInfo(orgId)
+
+        if (info.status === 'none') {
+          return {
+            success: false,
+            status: 403,
+            message:
+              'No active subscription found for this organisation. Please contact an administrator.',
+            code: 'NO_SUBSCRIPTION',
+          }
+        }
+
+        if (info.status === 'expired') {
+          return {
+            success: false,
+            status: 403,
+            message:
+              "Your organisation's subscription has expired. Please renew to access this module.",
+            code: 'SUBSCRIPTION_EXPIRED',
+          }
+        }
+
+        // Check if the plan allows this module
+        const allowed: string[] = info.plan?.allowedModules || []
+        const isAllowed = allowed.includes(moduleName) || allowed.includes('*')
+
+        if (!isAllowed) {
+          return {
+            success: false,
+            status: 403,
+            message: `Your current plan does not include access to the "${moduleName}" module. Please upgrade your plan.`,
+            code: 'PLAN_LIMIT_REACHED',
+          }
+        }
+
+        // Check maxModules limit if defined
+        const maxModules = info.plan?.maxModules
+        if (maxModules !== undefined && maxModules !== -1 && freshActive.length >= maxModules) {
+          return {
+            success: false,
+            status: 403,
+            message: `Module "${moduleName}" cannot be activated. You have reached the limit of ${maxModules} active modules for your current plan. Please upgrade your plan.`,
+            code: 'PLAN_LIMIT_REACHED',
+          }
+        }
+
+        // Add module to the team preferences
+        const updatedModules = [...freshActive, moduleName]
+        await appwrite.teams.updatePrefs({
+          teamId: orgId,
+          prefs: {
+            ...freshPrefs,
+            modules: updatedModules,
+          },
+        })
+
+        return { success: true }
+      })
+
+      if (!executed) {
+        return ctx.response.conflict({
+          message: 'Another module activation is currently in progress. Please try again.',
+        })
+      }
+
+      if (result && !result.success) {
+        return ctx.response.status(result.status || 403).send({
+          message: result.message,
+          code: result.code,
         })
       }
     } catch (error: any) {
@@ -45,12 +131,12 @@ export default class ModuleGuardMiddleware {
         return ctx.response.notFound({ message: 'Organisation not found' })
       }
       return ctx.response.internalServerError({
-        message: 'Error verifying module access',
+        message: 'Error verifying or activating module access',
         error: error.message,
       })
     }
 
-    // If we reach here, the module is active. Proceed to the controller.
+    // Proceed to the controller
     return next()
   }
 }

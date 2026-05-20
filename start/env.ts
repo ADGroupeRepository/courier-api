@@ -24,4 +24,17 @@ export default await Env.create(new URL('../', import.meta.url), {
   APPWRITE_PROJECT_ID: Env.schema.string(),
   APPWRITE_KEY: Env.schema.string(),
   TEMP_MEMBER_PASSWORD: Env.schema.string(),
+
+  REDIS_HOST: Env.schema.string({ format: 'host' }),
+  REDIS_PORT: Env.schema.number(),
+  REDIS_PASSWORD: Env.schema.secret.optional(),
+  REDIS_KEY_PREFIX: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the limiter package
+  |----------------------------------------------------------
+  */
+  LIMITER_STORE: Env.schema.enum(['redis', 'memory'] as const),
+  LOCK_STORE: Env.schema.enum(['redis', 'memory'] as const),
 })

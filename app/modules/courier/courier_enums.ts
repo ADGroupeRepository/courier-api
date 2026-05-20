@@ -24,3 +24,8 @@ export enum CourierStructureType {
   ONG = 'ong',
   AUTRE = 'autre',
 }
+
+export enum DocumentStatus {
+  DRAFT = 'draft',
+  FINALIZED = 'finalized',
+}

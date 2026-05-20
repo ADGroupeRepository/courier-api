@@ -5,6 +5,7 @@ import { Compression, ID, Permission, Query, Role } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
 import ModuleProvisioningService from '#modules/_registry/provisioning_service'
 import { MODULE_REGISTRY } from '#modules/_registry/module_registry'
+import PlanService from '#modules/plans/plan_service'
 
 interface CreateOrganisationPayload {
   name: string
@@ -443,6 +444,25 @@ export default class OrganisationService {
    * @param membershipId - The ID of the membership record to remove.
    */
   async removeMember(teamId: string, membershipId: string) {
+    try {
+      // 1. Get membership details to retrieve the userId
+      const membership = await appwrite.teams.getMembership({ teamId, membershipId })
+
+      // 2. Revoke their seat license if it exists
+      await PlanService.revokeLicenseFromUser(teamId, membership.userId)
+      logger.info(
+        { userId: membership.userId, teamId },
+        '[Member] Automatically revoked seat license upon removal'
+      )
+    } catch (err: any) {
+      // Non-fatal: user might not have had an active license or membership fetch failed
+      logger.warn(
+        { membershipId, error: err.message },
+        '[Member] Non-fatal: Failed to auto-revoke license during removal'
+      )
+    }
+
+    // 3. Delete the team membership
     await appwrite.teams.deleteMembership({ teamId, membershipId })
   }
 }

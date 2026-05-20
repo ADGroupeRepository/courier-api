@@ -372,6 +372,7 @@ export default class CourierService {
       isFavorite: doc.isFavorite ?? false,
       isArchived: doc.isArchived ?? false,
       isDeleted: doc.isDeleted ?? false,
+      replyCount: doc.replyCount ?? 0,
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
     }
