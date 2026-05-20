@@ -9,7 +9,9 @@ import { defineConfig } from '@adonisjs/cors'
  */
 const corsConfig = defineConfig({
   enabled: true,
-  origin: app.inDev ? true : ['https://bara-phi.vercel.app', 'http://localhost:3000'],
+  origin: app.inDev
+    ? true
+    : ['https://bara-phi.vercel.app', 'http://localhost:3000', 'https://courrier.adgroupe.io'],
   methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'],
   headers: true,
   exposeHeaders: [],
