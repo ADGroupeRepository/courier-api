@@ -3,5 +3,13 @@
   "compilerOptions": {
     "rootDir": "./",
     "outDir": "./build"
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "build",
+    "tests/**/*",
+    "app/mcp/**/*",
+    ".agents/**/*",
+    ".continue/**/*"
+  ]
 }

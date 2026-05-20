@@ -1,5 +1,7 @@
 import { defineConfig } from '@adonisjs/core/app'
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 export default defineConfig({
   /*
   |--------------------------------------------------------------------------
@@ -9,6 +11,7 @@ export default defineConfig({
   | The following features will be enabled by default in the next major release
   | of AdonisJS. You can opt into them today to avoid any breaking changes
   | during upgrade.
+  |
   |
   */
   experimental: {},
@@ -25,7 +28,7 @@ export default defineConfig({
   commands: [
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/cache/commands'),
-    () => import('@jrmc/adonis-mcp/commands'),
+    ...(!isProduction ? [() => import('@jrmc/adonis-mcp/commands')] : []),
   ],
 
   /*
@@ -50,8 +53,12 @@ export default defineConfig({
     () => import('@adonisjs/limiter/limiter_provider'),
     () => import('@adonisjs/cors/cors_provider'),
     () => import('@adonisjs/lock/lock_provider'),
-    () => import('@jrmc/adonis-mcp/mcp_provider'),
-    () => import('@jrmc/adonis-mcp/vinejs_provider'),
+    ...(!isProduction
+      ? [
+          () => import('@jrmc/adonis-mcp/mcp_provider'),
+          () => import('@jrmc/adonis-mcp/vinejs_provider'),
+        ]
+      : []),
   ],
 
   /*
