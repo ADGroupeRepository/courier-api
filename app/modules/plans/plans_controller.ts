@@ -52,10 +52,10 @@ export default class PlansController {
    * GET /api/v1/plans/:planId
    * Get details for a specific plan.
    */
-  async show({ params: { id }, response }: HttpContext) {
+  async show({ params: { planId }, response }: HttpContext) {
     try {
-      const plan = await PlanService.getPlan(id)
-      return response.ok({ data: this.cleanPlan(plan) })
+      const plan = await PlanService.getPlan(planId)
+      return response.ok(this.cleanPlan(plan))
     } catch (error: any) {
       if (error.code === 404) {
         return response.notFound({ message: 'Plan not found' })
@@ -71,13 +71,13 @@ export default class PlansController {
    * - Org owners get the full response including usage breakdown.
    * - Regular members get plan name + features only.
    */
-  async orgSubscription({ params: { id }, response, user }: HttpContext) {
+  async orgSubscription({ params: { orgId }, response, user }: HttpContext) {
     if (!user) {
       return response.unauthorized({ message: 'Authentication required' })
     }
 
     try {
-      const subInfo = await PlanService.getOrgSubscriptionInfo(id)
+      const subInfo = await PlanService.getOrgSubscriptionInfo(orgId)
 
       if (subInfo.status === 'none') {
         return response.ok({
@@ -91,11 +91,11 @@ export default class PlansController {
       }
 
       // Check if user is an owner of this org
-      const isOwner = await this.isOrgOwner(id, user.$id)
+      const isOwner = await this.isOrgOwner(orgId, user.$id)
 
       if (isOwner) {
         // Owners get full usage stats
-        const usage = await PlanService.getOrgUsage(id)
+        const usage = await PlanService.getOrgUsage(orgId)
 
         return response.ok({
           data: {
