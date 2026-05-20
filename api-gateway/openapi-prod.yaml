@@ -629,6 +629,289 @@ paths:
           schema:
             $ref: '#/definitions/Courier'
 
+  /plans:
+    get:
+      summary: Lister les plans actifs (List active plans)
+      operationId: listActivePlans
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Plan'
+
+  /plans/{planId}:
+    get:
+      summary: Voir un plan actif (Show active plan)
+      operationId: showActivePlan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Plan'
+        '404':
+          description: Plan not found
+
+  /organisations/{orgId}/subscription:
+    get:
+      summary: Voir l'abonnement actif (Show active subscription and usage)
+      operationId: getOrganisationSubscription
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: S'abonner à un plan (Subscribe to a plan)
+      operationId: subscribeToPlan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - planId
+            properties:
+              planId:
+                type: string
+      responses:
+        '201':
+          description: Created
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Subscription'
+              message: { type: string }
+
+  /organisations/{orgId}/licenses:
+    get:
+      summary: Lister les licences de sièges (List seat licenses)
+      operationId: listSeatLicenses
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+
+  /organisations/{orgId}/licenses/assign:
+    post:
+      summary: Assigner une licence de siège (Assign seat license)
+      operationId: assignSeatLicense
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - userId
+            properties:
+              userId:
+                type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/License'
+
+  /organisations/{orgId}/licenses/revoke:
+    post:
+      summary: Révoquer une licence de siège (Revoke seat license)
+      operationId: revokeSeatLicense
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - userId
+            properties:
+              userId:
+                type: string
+      responses:
+        '200':
+          description: Success
+
+  /admin/plans:
+    get:
+      summary: Lister les plans (Admin)
+      operationId: adminListPlans
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Créer un plan (Admin)
+      operationId: adminCreatePlan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Plan'
+      responses:
+        '201':
+          description: Created
+
+  /admin/plans/{planId}:
+    patch:
+      summary: Modifier un plan (Admin)
+      operationId: adminUpdatePlan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name: { type: string }
+              slug: { type: string }
+              description: { type: string }
+              price: { type: number }
+              maxMembers: { type: integer }
+              maxStorageMB: { type: integer }
+              maxCouriersPerMonth: { type: integer }
+              maxModules: { type: integer }
+              allowedModules:
+                type: array
+                items: { type: string }
+              features:
+                type: array
+                items: { type: string }
+              isActive: { type: boolean }
+              sortOrder: { type: integer }
+      responses:
+        '200':
+          description: Success
+    delete:
+      summary: Supprimer un plan (Admin)
+      operationId: adminDeletePlan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+
+  /admin/subscriptions:
+    get:
+      summary: Lister les abonnements (Admin)
+      operationId: adminListSubscriptions
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Émettre un abonnement (Admin)
+      operationId: adminIssueSubscription
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - planId
+              - orgId
+              - totalSeatsPurchased
+            properties:
+              planId: { type: string }
+              orgId: { type: string }
+              totalSeatsPurchased: { type: integer }
+              expiresAt: { type: string }
+              notes: { type: string }
+      responses:
+        '201':
+          description: Created
+
+  /admin/subscriptions/{subscriptionId}:
+    patch:
+      summary: Modifier un abonnement (Admin)
+      operationId: adminUpdateSubscription
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              isActive: { type: boolean }
+              totalSeatsPurchased: { type: integer }
+              expiresAt: { type: string }
+              notes: { type: string }
+      responses:
+        '200':
+          description: Success
+
 definitions:
   Courier:
     type: object
@@ -652,3 +935,47 @@ definitions:
       isArchived: { type: boolean }
       createdAt: { type: string }
       updatedAt: { type: string }
+
+  Plan:
+    type: object
+    properties:
+      id: { type: string }
+      name: { type: string }
+      slug: { type: string }
+      description: { type: string }
+      price: { type: number }
+      maxMembers: { type: integer }
+      maxStorageMB: { type: integer }
+      maxCouriersPerMonth: { type: integer }
+      maxModules: { type: integer }
+      allowedModules:
+        type: array
+        items: { type: string }
+      features:
+        type: array
+        items: { type: string }
+      isActive: { type: boolean }
+      sortOrder: { type: integer }
+
+  Subscription:
+    type: object
+    properties:
+      id: { type: string }
+      planId: { type: string }
+      orgId: { type: string }
+      activatedAt: { type: string }
+      expiresAt: { type: string }
+      isActive: { type: boolean }
+      totalSeatsPurchased: { type: integer }
+      issuedBy: { type: string }
+
+  License:
+    type: object
+    properties:
+      id: { type: string }
+      subscriptionId: { type: string }
+      orgId: { type: string }
+      userId: { type: string }
+      assignedBy: { type: string }
+      assignedAt: { type: string }
+      isActive: { type: boolean }

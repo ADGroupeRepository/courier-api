@@ -868,6 +868,50 @@
       ]
     },
     {
+      "name": "Plans (Public)",
+      "description": "Consultation des plans de tarification disponibles.",
+      "item": [
+        {
+          "name": "Lister les plans actifs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/plans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "plans"]
+            },
+            "description": "Affiche la liste des plans actifs disponibles pour inscription."
+          },
+          "response": []
+        },
+        {
+          "name": "Voir les détails d'un plan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/plans/{{planId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "plans", "{{planId}}"]
+            },
+            "description": "Affiche les détails complets d'un plan spécifique."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Authentification",
       "description": "Routes d'authentification des utilisateurs (inscription, connexion, déconnexion).",
       "item": [
