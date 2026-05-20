@@ -8,6 +8,7 @@
     "node_modules",
     "build",
     "tests/**/*",
+    "bin/test.ts",
     "app/mcp/**/*",
     ".agents/**/*",
     ".continue/**/*"

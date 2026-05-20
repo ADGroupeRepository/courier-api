@@ -7,3 +7,4 @@ tmp
 .continue
 tests
 app/mcp
+bin/test.ts
