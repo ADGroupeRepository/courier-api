@@ -61,7 +61,8 @@ export default class ModuleGuardMiddleware {
           return {
             success: false,
             status: 403,
-            message: 'No active subscription found for this organisation. Please contact an administrator.',
+            message:
+              'No active subscription found for this organisation. Please contact an administrator.',
             code: 'NO_SUBSCRIPTION',
           }
         }
@@ -70,7 +71,8 @@ export default class ModuleGuardMiddleware {
           return {
             success: false,
             status: 403,
-            message: "Your organisation's subscription has expired. Please renew to access this module.",
+            message:
+              "Your organisation's subscription has expired. Please renew to access this module.",
             code: 'SUBSCRIPTION_EXPIRED',
           }
         }

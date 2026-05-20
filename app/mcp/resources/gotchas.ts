@@ -10,7 +10,8 @@ export default class GotchasResource extends Resource {
     'Critical mistakes that break AdonisJS apps silently. Read this before writing any code.'
 
   async handle({ response }: ResourceContext) {
-    return response.text(`
+    return response.text(
+      `
 # AdonisJS GOTCHAS — Read before writing any code
 
 These are silent failures. No loud error. Just wrong behavior at runtime.
@@ -214,6 +215,7 @@ ORDER: register() → boot() → [preload files run] → start() → ready()
 
 RULE: Routes, event listeners, and middleware registration belong in preload files.
       Service registration and extension belong in providers.
-`.trim())
+`.trim()
+    )
   }
 }

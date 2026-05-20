@@ -16,7 +16,16 @@ import {
  */
 function cleanAppwriteDoc(doc: any) {
   if (!doc) return doc
-  const { $databaseId, $collectionId, $permissions, $createdAt, $updatedAt, $sequence, sortOrder, ...clean } = doc
+  const {
+    $databaseId,
+    $collectionId,
+    $permissions,
+    $createdAt,
+    $updatedAt,
+    $sequence,
+    sortOrder,
+    ...clean
+  } = doc
   return clean
 }
 
@@ -84,7 +93,10 @@ export default class AdminPlansController {
         },
       })
 
-      return response.created({ data: cleanAppwriteDoc(plan), message: 'Plan created successfully.' })
+      return response.created({
+        data: cleanAppwriteDoc(plan),
+        message: 'Plan created successfully.',
+      })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }
@@ -205,7 +217,6 @@ export default class AdminPlansController {
         })
       }
 
-
       // 3. Deactivate any existing active subscription for this org
       const existingSub = await PlanService.getOrgSubscription(payload.orgId)
       if (existingSub) {
@@ -234,7 +245,10 @@ export default class AdminPlansController {
         },
       })
 
-      return response.created({ data: cleanAppwriteDoc(subscription), message: 'Subscription issued successfully.' })
+      return response.created({
+        data: cleanAppwriteDoc(subscription),
+        message: 'Subscription issued successfully.',
+      })
     } catch (error: any) {
       if (error.code === 404) {
         return response.notFound({ message: 'Plan or organisation not found' })
@@ -289,7 +303,10 @@ export default class AdminPlansController {
         data,
       })
 
-      return response.ok({ data: cleanAppwriteDoc(subscription), message: 'Subscription updated successfully.' })
+      return response.ok({
+        data: cleanAppwriteDoc(subscription),
+        message: 'Subscription updated successfully.',
+      })
     } catch (error: any) {
       if (error.code === 404) {
         return response.notFound({ message: 'Subscription not found' })

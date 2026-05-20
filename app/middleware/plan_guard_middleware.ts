@@ -72,12 +72,18 @@ export default class PlanGuardMiddleware {
 
       switch (guardType) {
         case 'feature':
-          if (!userId) return ctx.response.unauthorized({ message: 'User must be authenticated for feature checks.' })
+          if (!userId)
+            return ctx.response.unauthorized({
+              message: 'User must be authenticated for feature checks.',
+            })
           allowed = await PlanService.checkUserFeature(orgId, userId, guardKey)
           break
 
         case 'module':
-          if (!userId) return ctx.response.unauthorized({ message: 'User must be authenticated for module checks.' })
+          if (!userId)
+            return ctx.response.unauthorized({
+              message: 'User must be authenticated for module checks.',
+            })
           allowed = await PlanService.checkUserModule(orgId, userId, guardKey)
           break
 

@@ -21,7 +21,16 @@ export default class PlansController {
    */
   private cleanPlan(plan: any) {
     if (!plan) return plan
-    const { $databaseId, $collectionId, $permissions, $createdAt, $updatedAt, $sequence, sortOrder, ...clean } = plan
+    const {
+      $databaseId,
+      $collectionId,
+      $permissions,
+      $createdAt,
+      $updatedAt,
+      $sequence,
+      sortOrder,
+      ...clean
+    } = plan
     return clean
   }
 
@@ -151,7 +160,9 @@ export default class PlansController {
       // 1. Verify user is owner
       const isOwner = await this.isOrgOwner(orgId, user.$id)
       if (!isOwner) {
-        return response.unauthorized({ message: 'Only organisation owners can manage subscriptions.' })
+        return response.unauthorized({
+          message: 'Only organisation owners can manage subscriptions.',
+        })
       }
 
       // 2. Verify plan exists and is active
@@ -162,7 +173,7 @@ export default class PlansController {
 
       // 3. Process payment
       // TODO: Integrate Stripe/payment gateway here to charge for `plan.price`
-      
+
       const totalSeatsPurchased = plan.maxMembers === -1 ? 999999 : plan.maxMembers
 
       // 4. Deactivate any existing active subscription for this org
@@ -195,7 +206,7 @@ export default class PlansController {
       try {
         await PlanService.assignLicenseToUser(orgId, user.$id, user.$id)
       } catch (err: any) {
-        // If seat assignment fails, we shouldn't fail the whole subscription, 
+        // If seat assignment fails, we shouldn't fail the whole subscription,
         // but we should log it. E.g. they already have an active license somehow.
         console.warn(`[PlansController] Failed to auto-assign seat to owner: ${err.message}`)
       }
@@ -214,9 +225,6 @@ export default class PlansController {
    */
   private async isOrgOwner(orgId: string, userId: string): Promise<boolean> {
     try {
-      const appwriteModule = await import('#services/appwrite_service')
-      const appwrite = appwriteModule.default
-
       const memberships = await appwrite.teams.listMemberships({
         teamId: orgId,
       })

@@ -204,17 +204,13 @@ export default class PlanService {
     const activeSeatsResult = await appwrite.databases.listDocuments({
       databaseId: PLATFORM_DB,
       collectionId: Collections.LICENSES,
-      queries: [
-        Query.equal('orgId', orgId),
-        Query.equal('isActive', true)
-      ],
+      queries: [Query.equal('orgId', orgId), Query.equal('isActive', true)],
     })
 
     if (activeSeatsResult.total >= totalPurchased) {
       throw new Error(`Maximum seats reached. You have ${totalPurchased} seats.`)
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { ID } = await import('node-appwrite')
 
     return appwrite.databases.createDocument({
@@ -269,7 +265,11 @@ export default class PlanService {
   /**
    * Check if a specific user's seat license allows a specific module.
    */
-  static async checkUserModule(orgId: string, userId: string, moduleName: string): Promise<boolean> {
+  static async checkUserModule(
+    orgId: string,
+    userId: string,
+    moduleName: string
+  ): Promise<boolean> {
     const userLicense = await this.getUserLicense(orgId, userId)
     if (!userLicense) return false
 
@@ -387,7 +387,11 @@ export default class PlanService {
   /**
    * List all subscriptions (admin), with optional filters.
    */
-  static async listSubscriptions(filters?: { orgId?: string; planId?: string; isActive?: boolean }) {
+  static async listSubscriptions(filters?: {
+    orgId?: string
+    planId?: string
+    isActive?: boolean
+  }) {
     const queries: string[] = []
 
     if (filters?.orgId) queries.push(Query.equal('orgId', filters.orgId))

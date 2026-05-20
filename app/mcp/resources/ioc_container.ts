@@ -10,7 +10,8 @@ export default class IocContainerResource extends Resource {
     'How the AdonisJS IoC container works, how to inject dependencies, register bindings, and test with swaps.'
 
   async handle({ response }: ResourceContext) {
-    return response.text(`
+    return response.text(
+      `
 # IoC Container & Dependency Injection
 
 ## MENTAL MODEL
@@ -156,6 +157,7 @@ Not everything needs to be a container binding. Keep it simple:
   - Value objects / DTOs
   - Simple helper classes with no dependencies
   - Config objects (use the config service directly)
-`.trim())
+`.trim()
+    )
   }
 }

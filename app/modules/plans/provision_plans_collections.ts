@@ -88,8 +88,6 @@ export class PlanProvisioner {
       min: 0,
     })
 
-
-
     await appwrite.databases.createIntegerAttribute({
       databaseId: this.DATABASE_ID,
       collectionId,
