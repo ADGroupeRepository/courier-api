@@ -8,3 +8,7 @@ tmp
 tests
 app/mcp
 bin/test.ts
+infrastructure
+api-gateway
+bara-api.postman_collection.json
+
