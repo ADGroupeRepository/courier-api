@@ -15,7 +15,13 @@ const PLATFORM_DB = 'bara-platform'
  */
 const GRACE_PERIOD_DAYS = 5
 
-export type SubscriptionStatus = 'active' | 'grace_period' | 'expired' | 'none'
+export type SubscriptionStatus =
+  | 'active'
+  | 'grace_period'
+  | 'expired'
+  | 'pending'
+  | 'rejected'
+  | 'none'
 
 export interface SubscriptionInfo {
   subscription: any
@@ -80,25 +86,20 @@ export default class PlanService {
   // ── Subscription management ──────────────────────────────────────────
 
   /**
-   * Get the active subscription for an organisation (returns the most recent active one).
+   * Get the latest subscription for an organisation (returns the most recent one).
    */
   static async getOrgSubscription(orgId: string): Promise<any | null> {
     const result = await appwrite.databases.listDocuments({
       databaseId: PLATFORM_DB,
       collectionId: Collections.SUBSCRIPTIONS,
-      queries: [
-        Query.equal('orgId', orgId),
-        Query.equal('isActive', true),
-        Query.orderDesc('$createdAt'),
-        Query.limit(1),
-      ],
+      queries: [Query.equal('orgId', orgId), Query.orderDesc('$createdAt'), Query.limit(1)],
     })
     return result.documents[0] || null
   }
 
   /**
    * Get the full subscription info for an organisation, including the associated plan
-   * and computed subscription status (active, grace_period, expired, or none).
+   * and computed subscription status (active, grace_period, expired, pending, rejected, or none).
    */
   static async getOrgSubscriptionInfo(orgId: string): Promise<SubscriptionInfo> {
     const cacheKey = `subscription:info:${orgId}`
@@ -122,7 +123,25 @@ export default class PlanService {
     }
 
     const plan = await this.getPlan(subscription.planId)
-    const { status, daysRemaining, daysInGrace } = this.computeSubscriptionStatus(subscription)
+
+    let status: SubscriptionStatus = 'none'
+    let daysRemaining: number | null = null
+    let daysInGrace: number | null = null
+
+    const subStatus = subscription.status || (subscription.isActive ? 'active' : 'none')
+
+    if (subStatus === 'pending') {
+      status = 'pending'
+    } else if (subStatus === 'rejected') {
+      status = 'rejected'
+    } else if (subscription.isActive) {
+      const computed = this.computeSubscriptionStatus(subscription)
+      status = computed.status
+      daysRemaining = computed.daysRemaining
+      daysInGrace = computed.daysInGrace
+    } else {
+      status = 'none'
+    }
 
     const result: SubscriptionInfo = { subscription, plan, status, daysRemaining, daysInGrace }
     await CacheService.set(cacheKey, result, 300) // cache positive result for 5 mins

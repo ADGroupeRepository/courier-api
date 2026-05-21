@@ -152,10 +152,11 @@ export default class OrganisationService {
         const logoUrl = prefs.logoFileId
           ? OrganisationService.buildPreviewUrl(prefs.logoFileId)
           : null
+
         return {
           id: team.$id,
           name: team.name,
-          total: team.total,
+          membersCount: team.total,
           logoUrl,
           createdAt: team.$createdAt,
           updatedAt: team.$updatedAt,
@@ -180,7 +181,7 @@ export default class OrganisationService {
     return {
       id: team.$id,
       name: team.name,
-      total: team.total,
+      membersCount: team.total,
       description: prefs.description ?? null,
       address: prefs.address ?? null,
       databaseId: prefs.databaseId,

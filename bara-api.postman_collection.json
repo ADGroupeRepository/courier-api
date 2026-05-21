@@ -34,7 +34,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{owner_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Owner User\"\n}"
@@ -64,8 +69,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -96,8 +107,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -127,8 +144,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -157,7 +180,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{member_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Member User\"\n}"
@@ -187,8 +215,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -218,8 +252,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -237,8 +277,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -275,8 +321,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -309,8 +361,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -342,18 +400,55 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "type", "value": "incoming", "type": "text" },
-                { "key": "urgency", "value": "normal", "type": "text" },
-                { "key": "subject", "value": "Courrier Assigné à l'Utilisateur", "type": "text" },
-                { "key": "contactName", "value": "Expéditeur Externe", "type": "text" },
-                { "key": "contactNumber", "value": "REF-123", "type": "text" },
-                { "key": "externalContactId", "value": "{{scenarioContactId}}", "type": "text" },
-                { "key": "internalEntityId", "value": "{{memberUserId}}", "type": "text" },
-                { "key": "targetType", "value": "user", "type": "text" }
+                {
+                  "key": "type",
+                  "value": "incoming",
+                  "type": "text"
+                },
+                {
+                  "key": "urgency",
+                  "value": "normal",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "Courrier Assigné à l'Utilisateur",
+                  "type": "text"
+                },
+                {
+                  "key": "contactName",
+                  "value": "Expéditeur Externe",
+                  "type": "text"
+                },
+                {
+                  "key": "contactNumber",
+                  "value": "REF-123",
+                  "type": "text"
+                },
+                {
+                  "key": "externalContactId",
+                  "value": "{{scenarioContactId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "internalEntityId",
+                  "value": "{{memberUserId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "targetType",
+                  "value": "user",
+                  "type": "text"
+                }
               ]
             },
             "url": {
@@ -382,17 +477,50 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "type", "value": "incoming", "type": "text" },
-                { "key": "urgency", "value": "normal", "type": "text" },
-                { "key": "subject", "value": "Courrier Assigné au Département", "type": "text" },
-                { "key": "contactName", "value": "Expéditeur Externe", "type": "text" },
-                { "key": "contactNumber", "value": "REF-456", "type": "text" },
-                { "key": "internalEntityId", "value": "{{deptId}}", "type": "text" },
-                { "key": "targetType", "value": "department", "type": "text" }
+                {
+                  "key": "type",
+                  "value": "incoming",
+                  "type": "text"
+                },
+                {
+                  "key": "urgency",
+                  "value": "normal",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "Courrier Assigné au Département",
+                  "type": "text"
+                },
+                {
+                  "key": "contactName",
+                  "value": "Expéditeur Externe",
+                  "type": "text"
+                },
+                {
+                  "key": "contactNumber",
+                  "value": "REF-456",
+                  "type": "text"
+                },
+                {
+                  "key": "internalEntityId",
+                  "value": "{{deptId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "targetType",
+                  "value": "department",
+                  "type": "text"
+                }
               ]
             },
             "url": {
@@ -417,17 +545,50 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "type", "value": "outgoing", "type": "text" },
-                { "key": "urgency", "value": "normal", "type": "text" },
-                { "key": "subject", "value": "Réponse Sortante", "type": "text" },
-                { "key": "contactName", "value": "Bara Corp", "type": "text" },
-                { "key": "contactNumber", "value": "OUT-789", "type": "text" },
-                { "key": "internalEntityId", "value": "{{memberUserId}}", "type": "text" },
-                { "key": "targetType", "value": "user", "type": "text" }
+                {
+                  "key": "type",
+                  "value": "outgoing",
+                  "type": "text"
+                },
+                {
+                  "key": "urgency",
+                  "value": "normal",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "Réponse Sortante",
+                  "type": "text"
+                },
+                {
+                  "key": "contactName",
+                  "value": "Bara Corp",
+                  "type": "text"
+                },
+                {
+                  "key": "contactNumber",
+                  "value": "OUT-789",
+                  "type": "text"
+                },
+                {
+                  "key": "internalEntityId",
+                  "value": "{{memberUserId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "targetType",
+                  "value": "user",
+                  "type": "text"
+                }
               ]
             },
             "url": {
@@ -453,8 +614,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -485,8 +652,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -506,21 +679,6 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "pm.test('Le membre voit au moins les 2 courriers assignés', function () {",
-                  "    pm.expect(jsonData.data).to.be.an('array');",
-                  "    pm.expect(jsonData.data.length).to.be.at.least(2);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
                   "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });"
                 ],
                 "type": "text/javascript"
@@ -529,7 +687,12 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_member}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_member}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
               "host": ["{{base_url}}"],
@@ -542,8 +705,14 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_member}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_member}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -571,7 +740,12 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_member}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_member}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
               "host": ["{{base_url}}"],
@@ -595,7 +769,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{unassigned_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Unassigned User\"\n}"
@@ -623,8 +802,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -655,8 +840,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Appwrite-Project", "value": "{{appwrite_project_id}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -685,8 +876,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -718,7 +915,12 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_unassigned}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_unassigned}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
               "host": ["{{base_url}}"],
@@ -742,8 +944,14 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_unassigned}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_unassigned}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -773,7 +981,12 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
               "host": ["{{base_url}}"],
@@ -798,7 +1011,12 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{scenarioContactId}}",
               "host": ["{{base_url}}"],
@@ -830,7 +1048,12 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
               "host": ["{{base_url}}"],
@@ -1052,7 +1275,7 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "auth", "profile"]
             },
-            "description": "Récupère les informations de l'utilisateur actuellement connecté."
+            "description": "Récupère les informations de l'utilisateur actuellement connecté (id, name, email, phone, avatarUrl), y compris la liste de ses organisations avec une structure à plat simplifiée contenant : les rôles du membre ('roles'), le statut de l'abonnement ('subscriptionStatus': 'none'|'pending'|'active'|'grace_period'|'expired'), si l'abonnement est actif ('hasActiveSubscription'), si le membre possède une licence active ('hasValidLicense'), le nom du plan ('planName'), le slug du plan ('planSlug'), la date d'expiration de l'abonnement ('expiresAt') et les jours restants ('daysRemaining')."
           },
           "response": [],
           "event": [
@@ -1170,7 +1393,7 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "organisations"]
             },
-            "description": "Affiche la liste des organisations auxquelles l'utilisateur appartient."
+            "description": "Affiche la liste des organisations auxquelles l'utilisateur appartient avec leurs informations de base (id, name, membersCount, logoUrl, createdAt, updatedAt)."
           },
           "response": [],
           "event": [
@@ -1385,7 +1608,7 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "organisations", "{{orgId}}", "subscription"]
             },
-            "description": "Affiche les détails de l'abonnement actif et la consommation."
+            "description": "Affiche les détails de la souscription de l'organisation (statut calculé: 'active', 'grace_period', 'expired', 'pending', 'rejected' ou 'none') ainsi que la consommation des ressources et sièges de licence."
           },
           "response": []
         },
@@ -1412,9 +1635,28 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "organisations", "{{orgId}}", "subscription"]
             },
-            "description": "Permet à l'owner de l'organisation de s'abonner à un plan."
+            "description": "Permet à l'owner de l'organisation de s'abonner à un plan. La souscription est créée à l'état en attente ('status': 'pending', 'isActive': false) et doit être approuvée par un administrateur pour être active."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Enregistre l'ID de l'abonnement dans les variables\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData && jsonData.data && jsonData.data.$id) {",
+                  "        pm.collectionVariables.set(\"subscriptionId\", jsonData.data.$id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Lister les licences de sièges (List seat licenses)",
@@ -1983,16 +2225,102 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"totalSeatsPurchased\": 15\n}"
+              "raw": "{\n  \"totalSeatsPurchased\": 15,\n  \"status\": \"active\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/admin/subscriptions/{{subscriptionId}}",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "admin", "subscriptions", "{{subscriptionId}}"]
             },
-            "description": "Modifie les limites d'un abonnement."
+            "description": "Modifie les détails ou le statut ('pending', 'active', 'rejected') d'un abonnement."
           },
           "response": []
+        },
+        {
+          "name": "Approuver un abonnement (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/subscriptions/{{subscriptionId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "subscriptions", "{{subscriptionId}}"]
+            },
+            "description": "Approuve un abonnement en attente en le passant à l'état actif, ce qui provisionne automatiquement le premier siège de licence pour l'organisation."
+          },
+          "response": []
+        },
+        {
+          "name": "Rejeter un abonnement (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"rejected\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/subscriptions/{{subscriptionId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "subscriptions", "{{subscriptionId}}"]
+            },
+            "description": "Rejette un abonnement, interdisant toute opération ultérieure pour l'organisation."
+          },
+          "response": []
+        },
+        {
+          "name": "Voir l'utilisation d'un plan (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/plans/{{planId}}/usage",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "plans", "{{planId}}", "usage"]
+            },
+            "description": "Permet de voir le nombre de souscriptions actives/émises pour un plan donné."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2276,14 +2604,46 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "type", "value": "incoming", "type": "text" },
-                { "key": "urgency", "value": "normal", "type": "text" },
-                { "key": "subject", "value": "Facture Mars 2026", "type": "text" },
-                { "key": "contactName", "value": "EDF", "type": "text" },
-                { "key": "contactNumber", "value": "REF-001", "type": "text" },
-                { "key": "internalEntityId", "value": "{{memberId}}", "type": "text" },
-                { "key": "targetType", "value": "user", "type": "text" },
-                { "key": "file", "type": "file", "src": [] }
+                {
+                  "key": "type",
+                  "value": "incoming",
+                  "type": "text"
+                },
+                {
+                  "key": "urgency",
+                  "value": "normal",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "Facture Mars 2026",
+                  "type": "text"
+                },
+                {
+                  "key": "contactName",
+                  "value": "EDF",
+                  "type": "text"
+                },
+                {
+                  "key": "contactNumber",
+                  "value": "REF-001",
+                  "type": "text"
+                },
+                {
+                  "key": "internalEntityId",
+                  "value": "{{memberId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "targetType",
+                  "value": "user",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
               ]
             },
             "url": {
@@ -2329,15 +2689,51 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "type", "value": "outgoing", "type": "text" },
-                { "key": "urgency", "value": "normal", "type": "text" },
-                { "key": "subject", "value": "Réponse Facture Mars", "type": "text" },
-                { "key": "contactName", "value": "EDF Service Client", "type": "text" },
-                { "key": "contactNumber", "value": "OUT-002", "type": "text" },
-                { "key": "internalEntityId", "value": "{{memberId}}", "type": "text" },
-                { "key": "targetType", "value": "user", "type": "text" },
-                { "key": "externalContactId", "value": "{{contactId}}", "type": "text" },
-                { "key": "file", "type": "file", "src": [] }
+                {
+                  "key": "type",
+                  "value": "outgoing",
+                  "type": "text"
+                },
+                {
+                  "key": "urgency",
+                  "value": "normal",
+                  "type": "text"
+                },
+                {
+                  "key": "subject",
+                  "value": "Réponse Facture Mars",
+                  "type": "text"
+                },
+                {
+                  "key": "contactName",
+                  "value": "EDF Service Client",
+                  "type": "text"
+                },
+                {
+                  "key": "contactNumber",
+                  "value": "OUT-002",
+                  "type": "text"
+                },
+                {
+                  "key": "internalEntityId",
+                  "value": "{{memberId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "targetType",
+                  "value": "user",
+                  "type": "text"
+                },
+                {
+                  "key": "externalContactId",
+                  "value": "{{contactId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
               ]
             },
             "url": {
@@ -2355,6 +2751,449 @@
                 "exec": [
                   "pm.test(\"Le statut doit être 201 (Créé)\", function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Voir un courrier",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+            },
+            "description": "Affiche les informations complètes d'un courrier spécifique par son identifiant."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modifier un courrier",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Sujet de courrier modifié\",\n  \"urgency\": \"urgent\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+            },
+            "description": "Permet de modifier les métadonnées d'un courrier (sujet, urgence, assignation, etc.)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer un courrier (Panier)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+            },
+            "description": "Déplace le courrier dans la corbeille (panier)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer définitivement un courrier",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/force",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "force"
+              ]
+            },
+            "description": "Supprime définitivement un courrier."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Restaurer un courrier",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/restore",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "restore"
+              ]
+            },
+            "description": "Restaure un courrier depuis la corbeille."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lister les messages (Chat)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "x-org-id",
+                "value": "{{orgId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/messages",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "messages"
+              ]
+            },
+            "description": "Récupère l'historique du chat interne pour ce courrier."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Envoyer un message (Chat)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "x-org-id",
+                "value": "{{orgId}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "content",
+                  "value": "Message de chat pour le courrier",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/messages",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "messages"
+              ]
+            },
+            "description": "Envoie un message de chat avec option de fichier attaché pour ce courrier."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lister les réponses (Replies)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "x-org-id",
+                "value": "{{orgId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/replies",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "replies"
+              ]
+            },
+            "description": "Récupère les réponses officielles associées à ce courrier."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Créer une réponse (Replies)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "x-org-id",
+                "value": "{{orgId}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "content",
+                  "value": "Contenu de la réponse officielle",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/replies",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "replies"
+              ]
+            },
+            "description": "Initie une réponse officielle pour ce courrier (form-data)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modifier une réponse (Replies)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-org-id",
+                "value": "{{orgId}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentStatus\": \"finalized\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/replies/{{replyId}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "replies",
+                "{{replyId}}"
+              ]
+            },
+            "description": "Change l'état d'une réponse de 'draft' à 'finalized'."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -2515,11 +3354,42 @@
               }
             }
           ]
+        },
+        {
+          "name": "Voir un contact",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{contactId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+            },
+            "description": "Récupère les détails d'un contact externe par son identifiant unique."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     }
   ],
-
   "variable": [
     {
       "key": "base_url",

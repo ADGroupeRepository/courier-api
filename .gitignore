@@ -29,5 +29,9 @@ yarn-error.log
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+.terraform.tfstate.lock.info
 *.tfvars
 *.tfvars.json
+tfplan
+*tfplan*
+

@@ -28,8 +28,65 @@ export default class ModuleGuardMiddleware {
       })
     }
 
-    // 3. Get the organisation preferences to check active modules
+    // 3. Authenticate the user
+    const userId = ctx.user?.$id
+    if (!userId) {
+      return ctx.response.unauthorized({ message: 'Authentication required' })
+    }
+
     try {
+      // 4. Fetch subscription details and verify status
+      const subInfo = await PlanService.getOrgSubscriptionInfo(orgId)
+
+      if (subInfo.status === 'none') {
+        return ctx.response.forbidden({
+          message:
+            'No active subscription found for this organisation. Please contact an administrator.',
+          code: 'NO_SUBSCRIPTION',
+        })
+      }
+
+      if (subInfo.status === 'pending') {
+        return ctx.response.forbidden({
+          message:
+            'Your subscription is pending admin approval. Please wait for an administrator to activate it.',
+          code: 'SUBSCRIPTION_PENDING',
+        })
+      }
+
+      if (subInfo.status === 'rejected') {
+        return ctx.response.forbidden({
+          message:
+            'Your subscription has been rejected by an administrator. Please contact support.',
+          code: 'SUBSCRIPTION_REJECTED',
+        })
+      }
+
+      if (subInfo.status === 'expired') {
+        return ctx.response.forbidden({
+          message:
+            "Your organisation's subscription has expired. Please renew to continue using this feature.",
+          code: 'SUBSCRIPTION_EXPIRED',
+        })
+      }
+
+      // If in grace period, attach a warning header so the frontend can show a banner
+      if (subInfo.status === 'grace_period') {
+        ctx.response.header('X-Subscription-Warning', 'grace_period')
+        ctx.response.header('X-Grace-Days-Remaining', String(subInfo.daysInGrace ?? 0))
+      }
+
+      // 5. Verify the user has a valid active seat license in the organisation
+      const userLicense = await PlanService.getUserLicense(orgId, userId)
+      if (!userLicense) {
+        return ctx.response.forbidden({
+          message:
+            'You do not have an active seat license in this organisation. Please contact the owner.',
+          code: 'NO_LICENSE',
+        })
+      }
+
+      // 6. Get the organisation preferences to check active modules
       // Use the sessionClient if it exists (so it respects user permissions to read team prefs),
       // or fallback to admin client if not explicitly required. We prefer admin client here
       // because not all users might have permission to read `prefs` directly,
@@ -41,7 +98,7 @@ export default class ModuleGuardMiddleware {
         return next()
       }
 
-      // 4. Module is not activated. Attempt auto-provisioning with a lock to avoid race conditions.
+      // 7. Module is not activated. Attempt auto-provisioning with a lock to avoid race conditions.
       const lockKey = `org_provision:${orgId}`
       const lock = locks.createLock(lockKey, '30s')
 
@@ -54,31 +111,8 @@ export default class ModuleGuardMiddleware {
           return { success: true }
         }
 
-        // Fetch subscription details
-        const info = await PlanService.getOrgSubscriptionInfo(orgId)
-
-        if (info.status === 'none') {
-          return {
-            success: false,
-            status: 403,
-            message:
-              'No active subscription found for this organisation. Please contact an administrator.',
-            code: 'NO_SUBSCRIPTION',
-          }
-        }
-
-        if (info.status === 'expired') {
-          return {
-            success: false,
-            status: 403,
-            message:
-              "Your organisation's subscription has expired. Please renew to access this module.",
-            code: 'SUBSCRIPTION_EXPIRED',
-          }
-        }
-
         // Check if the plan allows this module
-        const allowed: string[] = info.plan?.allowedModules || []
+        const allowed: string[] = subInfo.plan?.allowedModules || []
         const isAllowed = allowed.includes(moduleName) || allowed.includes('*')
 
         if (!isAllowed) {
@@ -91,7 +125,7 @@ export default class ModuleGuardMiddleware {
         }
 
         // Check maxModules limit if defined
-        const maxModules = info.plan?.maxModules
+        const maxModules = subInfo.plan?.maxModules
         if (maxModules !== undefined && maxModules !== -1 && freshActive.length >= maxModules) {
           return {
             success: false,

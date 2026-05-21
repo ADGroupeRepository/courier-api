@@ -22,7 +22,7 @@ import PlanService from '#modules/plans/plan_service'
  */
 export default class PlanGuardMiddleware {
   async handle(ctx: HttpContext, next: NextFn, guardString: string) {
-    const orgId = ctx.request.param('orgId')
+    const orgId = ctx.request.param('orgId') || ctx.request.param('id')
 
     if (!orgId) {
       return ctx.response.badRequest({
@@ -48,6 +48,24 @@ export default class PlanGuardMiddleware {
           message:
             'No active subscription found for this organisation. Please contact an administrator.',
           code: 'NO_SUBSCRIPTION',
+        })
+      }
+
+      // Pending approval
+      if (subInfo.status === 'pending') {
+        return ctx.response.forbidden({
+          message:
+            'Your subscription is pending admin approval. Please wait for an administrator to activate it.',
+          code: 'SUBSCRIPTION_PENDING',
+        })
+      }
+
+      // Rejected subscription
+      if (subInfo.status === 'rejected') {
+        return ctx.response.forbidden({
+          message:
+            'Your subscription has been rejected by an administrator. Please contact support.',
+          code: 'SUBSCRIPTION_REJECTED',
         })
       }
 
