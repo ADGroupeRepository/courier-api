@@ -35,3 +35,6 @@ yarn-error.log
 tfplan
 *tfplan*
 
+# Caspian security scan suggested exclusions
+credentials.json
+serviceAccountKey

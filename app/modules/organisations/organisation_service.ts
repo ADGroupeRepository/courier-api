@@ -375,7 +375,7 @@ export default class OrganisationService {
       })
       userId = newUser.$id
 
-      logger.info({ email }, '[Member] Created account (using TEMP_MEMBER_PASSWORD)')
+      logger.info({ userId }, '[Member] Provisioned new user account for membership')
     }
 
     // 2. Add to team by userId — auto-confirmed, no email sent

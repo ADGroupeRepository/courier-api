@@ -71,6 +71,10 @@
     "extends": "@adonisjs/eslint-config/app"
   },
   "prettier": "@adonisjs/prettier-config",
+  "overrides": {
+    "lodash-es": "^4.18.1",
+    "brace-expansion": "^5.0.6"
+  },
   "bundleDependencies": [
     "@adonisjs/core",
     "reflect-metadata"

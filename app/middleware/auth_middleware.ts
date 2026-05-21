@@ -21,7 +21,7 @@ export default class AuthMiddleware {
       })
     }
 
-    console.log(`[AuthMiddleware] authHeader: ${authHeader}`)
+    ctx.logger.info('Authenticating incoming request')
 
     const token = authHeader.slice(7).trim()
 
@@ -30,7 +30,7 @@ export default class AuthMiddleware {
     }
 
     try {
-      console.log(`[AuthMiddleware] Verifying token.`)
+      ctx.logger.debug('Validating session credentials')
       const appwriteModule = await import('#services/appwrite_service')
       const appwrite = appwriteModule.default
       const { client, account } = appwrite.createSessionClient(token)
@@ -41,7 +41,7 @@ export default class AuthMiddleware {
       ctx.token = token
       ctx.sessionClient = client
     } catch (error: any) {
-      console.log('[AuthMiddleware] Token verification failed:', error.message)
+      ctx.logger.warn('Session authentication failed')
       return ctx.response.unauthorized({
         message: 'Invalid or expired token. Please log in again.',
       })
