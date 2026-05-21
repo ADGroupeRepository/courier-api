@@ -12,11 +12,10 @@ const corsConfig = defineConfig({
   origin: app.inDev
     ? true
     : [
-        'https://bara-phi.vercel.app',
-        'http://localhost:3000',
-        'https://courrier.adgroupe.io',
-        'https://obara-8664563433.europe-west4.run.app',
-      ],
+      'http://localhost:3000',
+      'https://courrier.adgroupe.io',
+      'https://obara-8664563433.europe-west4.run.app',
+    ],
   methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'],
   headers: true,
   exposeHeaders: [],
