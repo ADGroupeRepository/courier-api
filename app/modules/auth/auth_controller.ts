@@ -53,21 +53,30 @@ export default class AuthController {
             : { status: 'none' as const, plan: null, subscription: null, daysRemaining: null }
 
         if (subInfoResult.status === 'rejected') {
-          logger.warn({ orgId: org.id, error: subInfoResult.reason?.message }, '[Profile] Failed to fetch subscription info')
+          logger.warn(
+            { orgId: org.id, error: subInfoResult.reason?.message },
+            '[Profile] Failed to fetch subscription info'
+          )
         }
 
         const userLicense =
           userLicenseResult.status === 'fulfilled' ? userLicenseResult.value : null
 
         if (userLicenseResult.status === 'rejected') {
-          logger.warn({ orgId: org.id, error: userLicenseResult.reason?.message }, '[Profile] Failed to fetch user license')
+          logger.warn(
+            { orgId: org.id, error: userLicenseResult.reason?.message },
+            '[Profile] Failed to fetch user license'
+          )
         }
 
         let roles: string[] = []
         if (membershipResult.status === 'fulfilled' && membershipResult.value.total > 0) {
           roles = membershipResult.value.memberships[0].roles
         } else if (membershipResult.status === 'rejected') {
-          logger.warn({ orgId: org.id, error: membershipResult.reason?.message }, '[Profile] Failed to fetch membership roles')
+          logger.warn(
+            { orgId: org.id, error: membershipResult.reason?.message },
+            '[Profile] Failed to fetch membership roles'
+          )
         }
 
         const subscriptionStatus = subInfo.status

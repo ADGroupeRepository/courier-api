@@ -40,28 +40,32 @@ export default class ModuleGuardMiddleware {
 
       if (subInfo.status === 'none') {
         return ctx.response.forbidden({
-          message: 'No active subscription found for this organisation. Please contact an administrator.',
+          message:
+            'No active subscription found for this organisation. Please contact an administrator.',
           code: 'NO_SUBSCRIPTION',
         })
       }
 
       if (subInfo.status === 'pending') {
         return ctx.response.forbidden({
-          message: 'Your subscription is pending admin approval. Please wait for an administrator to activate it.',
+          message:
+            'Your subscription is pending admin approval. Please wait for an administrator to activate it.',
           code: 'SUBSCRIPTION_PENDING',
         })
       }
 
       if (subInfo.status === 'rejected') {
         return ctx.response.forbidden({
-          message: 'Your subscription has been rejected by an administrator. Please contact support.',
+          message:
+            'Your subscription has been rejected by an administrator. Please contact support.',
           code: 'SUBSCRIPTION_REJECTED',
         })
       }
 
       if (subInfo.status === 'expired') {
         return ctx.response.forbidden({
-          message: "Your organisation's subscription has expired. Please renew to continue using this feature.",
+          message:
+            "Your organisation's subscription has expired. Please renew to continue using this feature.",
           code: 'SUBSCRIPTION_EXPIRED',
         })
       }
@@ -76,7 +80,8 @@ export default class ModuleGuardMiddleware {
       const userLicense = await PlanService.getUserLicense(orgId, userId)
       if (!userLicense) {
         return ctx.response.forbidden({
-          message: 'You do not have an active seat license in this organisation. Please contact the owner.',
+          message:
+            'You do not have an active seat license in this organisation. Please contact the owner.',
           code: 'NO_LICENSE',
         })
       }

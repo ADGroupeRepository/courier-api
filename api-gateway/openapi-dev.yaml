@@ -62,7 +62,6 @@ paths:
         '201':
           description: Created
 
-
   /auth/profile:
     get:
       summary: Profil Utilisateur (Profile)
@@ -75,7 +74,6 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/ProfileResponse'
-
 
   /auth/profile/avatar:
     post:

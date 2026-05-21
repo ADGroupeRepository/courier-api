@@ -40,7 +40,9 @@ router
 
         // Organisation logo, update, and deactivation
         router.post('organisations/:id/logo', [OrganisationsController, 'uploadLogo'])
-        router.route('organisations/:id', ['PUT', 'PATCH'], [OrganisationsController, 'update']).as('organisations.update')
+        router
+          .route('organisations/:id', ['PUT', 'PATCH'], [OrganisationsController, 'update'])
+          .as('organisations.update')
         router.delete('organisations/:id', [OrganisationsController, 'destroy'])
       })
       .use(middleware.planGuard('limit:subscription'))
@@ -49,7 +51,10 @@ router
     // We only expose index, store, and show outside of subscription checks,
     // so users can list/create orgs and view their dashboard details
     // (which includes displaying banners if subscription is pending/expired).
-    router.resource('organisations', OrganisationsController).apiOnly().only(['index', 'store', 'show'])
+    router
+      .resource('organisations', OrganisationsController)
+      .apiOnly()
+      .only(['index', 'store', 'show'])
 
     // Module Management (Available modules list)
     router.get('modules', [OrganisationModulesController, 'indexAvailable'])

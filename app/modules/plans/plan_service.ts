@@ -15,7 +15,13 @@ const PLATFORM_DB = 'bara-platform'
  */
 const GRACE_PERIOD_DAYS = 5
 
-export type SubscriptionStatus = 'active' | 'grace_period' | 'expired' | 'pending' | 'rejected' | 'none'
+export type SubscriptionStatus =
+  | 'active'
+  | 'grace_period'
+  | 'expired'
+  | 'pending'
+  | 'rejected'
+  | 'none'
 
 export interface SubscriptionInfo {
   subscription: any
@@ -86,11 +92,7 @@ export default class PlanService {
     const result = await appwrite.databases.listDocuments({
       databaseId: PLATFORM_DB,
       collectionId: Collections.SUBSCRIPTIONS,
-      queries: [
-        Query.equal('orgId', orgId),
-        Query.orderDesc('$createdAt'),
-        Query.limit(1),
-      ],
+      queries: [Query.equal('orgId', orgId), Query.orderDesc('$createdAt'), Query.limit(1)],
     })
     return result.documents[0] || null
   }
@@ -121,7 +123,7 @@ export default class PlanService {
     }
 
     const plan = await this.getPlan(subscription.planId)
-    
+
     let status: SubscriptionStatus = 'none'
     let daysRemaining: number | null = null
     let daysInGrace: number | null = null
