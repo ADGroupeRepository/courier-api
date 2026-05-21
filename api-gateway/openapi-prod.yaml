@@ -87,13 +87,6 @@ paths:
       operationId: uploadAvatar
       security:
         - BearerAuth: []
-      consumes:
-        - multipart/form-data
-      parameters:
-        - name: avatar
-          in: formData
-          type: file
-          required: true
       responses:
         '200':
           description: Success
@@ -175,17 +168,11 @@ paths:
       operationId: uploadOrganisationLogo
       security:
         - BearerAuth: []
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
           required: true
           type: string
-        - name: logo
-          in: formData
-          type: file
-          required: true
       responses:
         '200':
           description: Success
@@ -516,63 +503,11 @@ paths:
       operationId: createCourier
       security:
         - BearerAuth: []
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
           required: true
           type: string
-        - name: type
-          in: formData
-          type: string
-          enum: [incoming, outgoing]
-          required: true
-        - name: urgency
-          in: formData
-          type: string
-          enum: [normal, urgent, very_urgent]
-          required: true
-        - name: subject
-          in: formData
-          type: string
-          required: true
-        - name: senderName
-          in: formData
-          type: string
-          required: true
-        - name: senderNumber
-          in: formData
-          type: string
-          required: true
-        - name: senderStructureType
-          in: formData
-          type: string
-          enum: [physique, privee, publique, ong, autre]
-        - name: senderStructureName
-          in: formData
-          type: string
-        - name: senderIdNumber
-          in: formData
-          type: string
-        - name: senderPhone
-          in: formData
-          type: string
-        - name: senderEmail
-          in: formData
-          type: string
-        - name: assignedTo
-          in: formData
-          type: string
-          required: true
-        - name: targetType
-          in: formData
-          type: string
-          enum: [user, department]
-          required: true
-        - name: file
-          in: formData
-          type: file
       responses:
         '201':
           description: Created
@@ -722,8 +657,6 @@ paths:
       operationId: createCourierMessage
       security:
         - BearerAuth: []
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
@@ -733,14 +666,6 @@ paths:
           in: path
           required: true
           type: string
-        - name: content
-          in: formData
-          type: string
-          required: true
-        - name: file
-          in: formData
-          type: file
-          required: false
         - name: x-org-id
           in: header
           required: true
@@ -794,8 +719,6 @@ paths:
       operationId: createCourierReply
       security:
         - BearerAuth: []
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
@@ -805,14 +728,6 @@ paths:
           in: path
           required: true
           type: string
-        - name: content
-          in: formData
-          type: string
-          required: true
-        - name: file
-          in: formData
-          type: file
-          required: false
         - name: x-org-id
           in: header
           required: true

@@ -81,13 +81,6 @@ paths:
     post:
       summary: Uploader un Avatar
       operationId: uploadAvatar
-      consumes:
-        - multipart/form-data
-      parameters:
-        - name: avatar
-          in: formData
-          type: string
-          required: true
       responses:
         '200':
           description: Success
@@ -164,17 +157,11 @@ paths:
     post:
       summary: Uploader le Logo
       operationId: uploadOrganisationLogo
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
           required: true
           type: string
-        - name: logo
-          in: formData
-          type: string
-          required: true
       responses:
         '200':
           description: Success
@@ -465,39 +452,10 @@ paths:
     post:
       summary: Créer un courrier
       operationId: createCourier
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
           required: true
-          type: string
-        - name: type
-          in: formData
-          type: string
-          enum: [incoming, outgoing]
-          required: true
-        - name: subject
-          in: formData
-          type: string
-          required: true
-        - name: sender
-          in: formData
-          type: string
-        - name: recipient
-          in: formData
-          type: string
-        - name: assignedTo
-          in: formData
-          type: string
-          required: true
-        - name: targetType
-          in: formData
-          type: string
-          enum: [user, department]
-          required: true
-        - name: file
-          in: formData
           type: string
       responses:
         '201':
@@ -634,8 +592,6 @@ paths:
     post:
       summary: Envoyer un message de chat pour un courrier (Send courier chat message)
       operationId: createCourierMessage
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
@@ -645,14 +601,6 @@ paths:
           in: path
           required: true
           type: string
-        - name: content
-          in: formData
-          type: string
-          required: true
-        - name: file
-          in: formData
-          type: file
-          required: false
         - name: x-org-id
           in: header
           required: true
@@ -702,8 +650,6 @@ paths:
     post:
       summary: Créer une réponse pour un courrier (Create courier reply)
       operationId: createCourierReply
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
@@ -713,14 +659,6 @@ paths:
           in: path
           required: true
           type: string
-        - name: content
-          in: formData
-          type: string
-          required: true
-        - name: file
-          in: formData
-          type: file
-          required: false
         - name: x-org-id
           in: header
           required: true
