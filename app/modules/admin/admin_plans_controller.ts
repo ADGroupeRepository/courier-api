@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import appwrite from '#services/appwrite_service'
 import PlanService from '#modules/plans/plan_service'
+import CacheService from '#services/cache_service'
 import { Collections } from '#modules/_registry/collection_ids'
 import { ID, Query } from 'node-appwrite'
 import {
@@ -239,11 +240,15 @@ export default class AdminPlansController {
           activatedAt: new Date().toISOString(),
           expiresAt: payload.expiresAt || null,
           isActive: true,
+          status: 'active',
           totalSeatsPurchased: payload.totalSeatsPurchased,
           issuedBy: user.$id,
           notes: payload.notes || '',
         },
       })
+
+      // Clear subscription info cache
+      await CacheService.delete(`subscription:info:${payload.orgId}`)
 
       return response.created({
         data: cleanAppwriteDoc(subscription),
@@ -289,11 +294,26 @@ export default class AdminPlansController {
     const payload = await request.validateUsing(updateSubscriptionValidator)
 
     try {
+      // Fetch existing subscription details
+      const existing = await appwrite.databases.getDocument(
+        this.databaseId,
+        Collections.SUBSCRIPTIONS,
+        subscriptionId
+      )
+
       const data: Record<string, any> = {}
       for (const [key, value] of Object.entries(payload)) {
         if (value !== undefined) {
           data[key] = value
         }
+      }
+
+      // If transitioning to active
+      if (payload.status === 'active') {
+        data.isActive = true
+        data.activatedAt = new Date().toISOString()
+      } else if (payload.status === 'rejected') {
+        data.isActive = false
       }
 
       const subscription = await appwrite.databases.updateDocument({
@@ -302,6 +322,24 @@ export default class AdminPlansController {
         documentId: subscriptionId,
         data,
       })
+
+      // Clear cache
+      await CacheService.delete(`subscription:info:${existing.orgId}`)
+
+      // If status changed to active, assign license
+      if (payload.status === 'active' && existing.status !== 'active') {
+        if (existing.issuedBy) {
+          try {
+            await PlanService.assignLicenseToUser(
+              existing.orgId,
+              existing.issuedBy,
+              existing.issuedBy
+            )
+          } catch (licenseError: any) {
+            // Ignore if license already exists
+          }
+        }
+      }
 
       return response.ok({
         data: cleanAppwriteDoc(subscription),

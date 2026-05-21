@@ -8,12 +8,6 @@ export type ScannedRoutes = {
     'auth.profile': { paramsTuple?: []; params?: {} }
     'auth.upload_avatar': { paramsTuple?: []; params?: {} }
     'auth.delete_avatar': { paramsTuple?: []; params?: {} }
-    'organisations.index': { paramsTuple?: []; params?: {} }
-    'organisations.store': { paramsTuple?: []; params?: {} }
-    'organisations.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'organisations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'organisations.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.members.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
     'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
@@ -22,10 +16,16 @@ export type ScannedRoutes = {
     'org_licenses.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.revoke': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisation_modules.index_available': { paramsTuple?: []; params?: {} }
     'organisation_modules.index_active': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.activate': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.deactivate': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'module': ParamValue} }
+    'organisations.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'organisations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'organisations.index': { paramsTuple?: []; params?: {} }
+    'organisations.store': { paramsTuple?: []; params?: {} }
+    'organisations.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'organisation_modules.index_available': { paramsTuple?: []; params?: {} }
     'admin_marketplace.publish': { paramsTuple?: []; params?: {} }
     'admin_marketplace.unpublish': { paramsTuple: [ParamValue]; params: {'moduleName': ParamValue} }
     'admin_plans.index_plans': { paramsTuple?: []; params?: {} }
@@ -69,12 +69,12 @@ export type ScannedRoutes = {
   POST: {
     'auth.signup': { paramsTuple?: []; params?: {} }
     'auth.upload_avatar': { paramsTuple?: []; params?: {} }
-    'organisations.store': { paramsTuple?: []; params?: {} }
-    'organisations.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.revoke': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.activate': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'organisations.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'organisations.store': { paramsTuple?: []; params?: {} }
     'admin_marketplace.publish': { paramsTuple?: []; params?: {} }
     'admin_plans.store_plan': { paramsTuple?: []; params?: {} }
     'admin_plans.issue_subscription': { paramsTuple?: []; params?: {} }
@@ -89,13 +89,13 @@ export type ScannedRoutes = {
   }
   GET: {
     'auth.profile': { paramsTuple?: []; params?: {} }
-    'organisations.index': { paramsTuple?: []; params?: {} }
-    'organisations.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.members.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
     'org_licenses.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisation_modules.index_available': { paramsTuple?: []; params?: {} }
     'organisation_modules.index_active': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'organisations.index': { paramsTuple?: []; params?: {} }
+    'organisations.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'organisation_modules.index_available': { paramsTuple?: []; params?: {} }
     'admin_plans.index_plans': { paramsTuple?: []; params?: {} }
     'admin_plans.plan_usage': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'admin_plans.index_subscriptions': { paramsTuple?: []; params?: {} }
@@ -114,13 +114,13 @@ export type ScannedRoutes = {
   }
   HEAD: {
     'auth.profile': { paramsTuple?: []; params?: {} }
-    'organisations.index': { paramsTuple?: []; params?: {} }
-    'organisations.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.members.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
     'org_licenses.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisation_modules.index_available': { paramsTuple?: []; params?: {} }
     'organisation_modules.index_active': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'organisations.index': { paramsTuple?: []; params?: {} }
+    'organisations.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'organisation_modules.index_available': { paramsTuple?: []; params?: {} }
     'admin_plans.index_plans': { paramsTuple?: []; params?: {} }
     'admin_plans.plan_usage': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'admin_plans.index_subscriptions': { paramsTuple?: []; params?: {} }
@@ -139,9 +139,9 @@ export type ScannedRoutes = {
   }
   DELETE: {
     'auth.delete_avatar': { paramsTuple?: []; params?: {} }
-    'organisations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
     'organisation_modules.deactivate': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'module': ParamValue} }
+    'organisations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin_marketplace.unpublish': { paramsTuple: [ParamValue]; params: {'moduleName': ParamValue} }
     'admin_plans.destroy_plan': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'departments.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
@@ -151,13 +151,13 @@ export type ScannedRoutes = {
     'external_contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   PUT: {
-    'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'departments.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   PATCH: {
-    'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin_plans.update_plan': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'admin_plans.update_subscription': { paramsTuple: [ParamValue]; params: {'subscriptionId': ParamValue} }
     'departments.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }

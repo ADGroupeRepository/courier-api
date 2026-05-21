@@ -71,10 +71,6 @@ export default class AuthService {
       name: user.name,
       email: user.email,
       phone: user.phone || null,
-      emailVerification: user.emailVerification,
-      phoneVerification: user.phoneVerification,
-      labels: user.labels,
-      prefs: user.prefs,
       createdAt: user.$createdAt,
       updatedAt: user.$updatedAt,
     }

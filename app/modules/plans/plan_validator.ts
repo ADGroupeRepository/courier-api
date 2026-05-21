@@ -72,6 +72,7 @@ export const issueSubscriptionValidator = vine.create(
 export const updateSubscriptionValidator = vine.create(
   vine.object({
     isActive: vine.boolean().optional(),
+    status: vine.enum(['pending', 'active', 'rejected']).optional(),
     totalSeatsPurchased: vine.number().min(1).optional(),
     expiresAt: vine.string().optional(), // ISO 8601 datetime string
     notes: vine.string().maxLength(500).trim().optional(),

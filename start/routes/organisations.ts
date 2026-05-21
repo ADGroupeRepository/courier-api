@@ -9,38 +9,50 @@ const OrgLicensesController = () => import('#modules/organisations/org_licenses_
 
 router
   .group(() => {
-    // Organisation CRUD — auto-generates index, store, show, update, destroy
-    router.resource('organisations', OrganisationsController).apiOnly()
-
-    // Organisation Logo
-    router.post('organisations/:id/logo', [OrganisationsController, 'uploadLogo'])
-
-    // Members nested under a specific organisation
+    // ── Routes requiring a valid subscription ───────────────────────────
     router
-      .resource('organisations.members', MembersController)
-      .apiOnly()
-      .except(['store'])
-      .params({ organisations: 'orgId', members: 'memberId' })
+      .group(() => {
+        // Members nested under a specific organisation
+        router
+          .resource('organisations.members', MembersController)
+          .apiOnly()
+          .except(['store'])
+          .params({ organisations: 'orgId', members: 'memberId' })
 
-    router
-      .post('organisations/:orgId/members', [MembersController, 'store'])
-      .use(middleware.planGuard('limit:maxMembers'))
+        router
+          .post('organisations/:orgId/members', [MembersController, 'store'])
+          .use(middleware.planGuard('limit:maxMembers'))
 
-    // Seat Licenses
-    router.get('organisations/:orgId/licenses', [OrgLicensesController, 'index'])
-    router.post('organisations/:orgId/licenses/assign', [OrgLicensesController, 'assign'])
-    router.post('organisations/:orgId/licenses/revoke', [OrgLicensesController, 'revoke'])
+        // Seat Licenses
+        router.get('organisations/:orgId/licenses', [OrgLicensesController, 'index'])
+        router.post('organisations/:orgId/licenses/assign', [OrgLicensesController, 'assign'])
+        router.post('organisations/:orgId/licenses/revoke', [OrgLicensesController, 'revoke'])
 
-    // Module Management
+        // Module Management (Active modules listing and deactivation)
+        router.get('organisations/:orgId/modules', [OrganisationModulesController, 'indexActive'])
+        router
+          .post('organisations/:orgId/modules', [OrganisationModulesController, 'activate'])
+          .use(middleware.planGuard('limit:maxModules'))
+        router.delete('organisations/:orgId/modules/:module', [
+          OrganisationModulesController,
+          'deactivate',
+        ])
+
+        // Organisation logo, update, and deactivation
+        router.post('organisations/:id/logo', [OrganisationsController, 'uploadLogo'])
+        router.route('organisations/:id', ['PUT', 'PATCH'], [OrganisationsController, 'update']).as('organisations.update')
+        router.delete('organisations/:id', [OrganisationsController, 'destroy'])
+      })
+      .use(middleware.planGuard('limit:subscription'))
+
+    // ── Global / public / subscription-independent routes ────────────────
+    // We only expose index, store, and show outside of subscription checks,
+    // so users can list/create orgs and view their dashboard details
+    // (which includes displaying banners if subscription is pending/expired).
+    router.resource('organisations', OrganisationsController).apiOnly().only(['index', 'store', 'show'])
+
+    // Module Management (Available modules list)
     router.get('modules', [OrganisationModulesController, 'indexAvailable'])
-    router.get('organisations/:orgId/modules', [OrganisationModulesController, 'indexActive'])
-    router
-      .post('organisations/:orgId/modules', [OrganisationModulesController, 'activate'])
-      .use(middleware.planGuard('limit:maxModules'))
-    router.delete('organisations/:orgId/modules/:module', [
-      OrganisationModulesController,
-      'deactivate',
-    ])
   })
   .prefix('/api/v1')
   .use(middleware.auth())

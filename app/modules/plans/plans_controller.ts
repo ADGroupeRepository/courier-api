@@ -171,23 +171,32 @@ export default class PlansController {
         return response.badRequest({ message: 'The selected plan is not active.' })
       }
 
-      // 3. Process payment
+      // 3. Check for existing subscription conflicts
+      const existingSub = await PlanService.getOrgSubscription(orgId)
+      if (existingSub) {
+        const existingStatus = existingSub.status || (existingSub.isActive ? 'active' : 'none')
+
+        if (existingStatus === 'pending') {
+          return response.conflict({
+            message:
+              'A subscription request is already pending approval. Please wait for the administrator to review it before submitting a new one.',
+          })
+        }
+
+        if (existingSub.isActive) {
+          return response.conflict({
+            message:
+              'This organisation already has an active subscription. Please contact an administrator to change your plan.',
+          })
+        }
+      }
+
+      // 4. Process payment
       // TODO: Integrate Stripe/payment gateway here to charge for `plan.price`
 
       const totalSeatsPurchased = plan.maxMembers === -1 ? 999999 : plan.maxMembers
 
-      // 4. Deactivate any existing active subscription for this org
-      const existingSub = await PlanService.getOrgSubscription(orgId)
-      if (existingSub) {
-        await appwrite.databases.updateDocument({
-          databaseId: 'bara-platform',
-          collectionId: Collections.SUBSCRIPTIONS,
-          documentId: existingSub.$id,
-          data: { isActive: false },
-        })
-      }
-
-      // 5. Create new subscription
+      // 5. Create new subscription (starts as pending approval)
       const subscription = await appwrite.databases.createDocument({
         databaseId: 'bara-platform',
         collectionId: Collections.SUBSCRIPTIONS,
@@ -196,22 +205,19 @@ export default class PlansController {
           planId: payload.planId,
           orgId: orgId,
           activatedAt: new Date().toISOString(),
-          isActive: true,
+          isActive: false, // Starts inactive until approved
+          status: 'pending', // Set pending status
           totalSeatsPurchased: totalSeatsPurchased,
           issuedBy: user.$id,
         },
       })
 
-      // 6. Assign the first seat to the requesting owner
-      try {
-        await PlanService.assignLicenseToUser(orgId, user.$id, user.$id)
-      } catch (err: any) {
-        // If seat assignment fails, we shouldn't fail the whole subscription,
-        // but we should log it. E.g. they already have an active license somehow.
-        console.warn(`[PlansController] Failed to auto-assign seat to owner: ${err.message}`)
-      }
+      // 6. Seat license is not assigned yet (will be assigned automatically upon admin approval)
 
-      return response.created({ data: subscription, message: 'Subscribed successfully.' })
+      return response.created({
+        data: subscription,
+        message: 'Subscription request submitted successfully. Awaiting administrator approval.',
+      })
     } catch (error: any) {
       if (error.code === 404) {
         return response.notFound({ message: 'Plan or organisation not found' })

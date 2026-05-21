@@ -79,6 +79,8 @@ paths:
       responses:
         '200':
           description: Success
+          schema:
+            $ref: '#/definitions/ProfileResponse'
   /auth/profile/avatar:
     post:
       summary: Uploader un Avatar
@@ -629,6 +631,376 @@ paths:
           schema:
             $ref: '#/definitions/Courier'
 
+  /organisations/{orgId}/couriers/{id}/force:
+    delete:
+      summary: Supprimer définitivement un courrier (Force delete courier)
+      operationId: forceDeleteCourier
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+
+  /organisations/{orgId}/couriers/{id}/restore:
+    post:
+      summary: Restaurer un courrier du panier (Restore courier from bin)
+      operationId: restoreCourier
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Courier'
+              message: { type: string }
+
+  /organisations/{orgId}/couriers/{id}/messages:
+    get:
+      summary: Lister les messages de chat d'un courrier (List courier chat messages)
+      operationId: listCourierMessages
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: limit
+          in: query
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          required: false
+          type: integer
+        - name: x-org-id
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              total: { type: integer }
+              documents:
+                type: array
+                items:
+                  $ref: '#/definitions/CourierMessage'
+    post:
+      summary: Envoyer un message de chat pour un courrier (Send courier chat message)
+      operationId: createCourierMessage
+      security:
+        - BearerAuth: []
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: content
+          in: formData
+          type: string
+          required: true
+        - name: file
+          in: formData
+          type: file
+          required: false
+        - name: x-org-id
+          in: header
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/CourierMessage'
+
+  /organisations/{orgId}/couriers/{id}/replies:
+    get:
+      summary: Lister les réponses d'un courrier (List courier replies)
+      operationId: listCourierReplies
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: limit
+          in: query
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          required: false
+          type: integer
+        - name: x-org-id
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              total: { type: integer }
+              documents:
+                type: array
+                items:
+                  $ref: '#/definitions/CourierReply'
+    post:
+      summary: Créer une réponse pour un courrier (Create courier reply)
+      operationId: createCourierReply
+      security:
+        - BearerAuth: []
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: content
+          in: formData
+          type: string
+          required: true
+        - name: file
+          in: formData
+          type: file
+          required: false
+        - name: x-org-id
+          in: header
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/CourierReply'
+
+  /organisations/{orgId}/couriers/{id}/replies/{replyId}:
+    patch:
+      summary: Modifier une réponse de courrier (Update courier reply)
+      operationId: updateCourierReply
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: replyId
+          in: path
+          required: true
+          type: string
+        - name: x-org-id
+          in: header
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              documentStatus:
+                type: string
+                enum: [draft, finalized]
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/CourierReply'
+
+  /organisations/{orgId}/contacts:
+    get:
+      summary: Lister les contacts externes (List external contacts)
+      operationId: listExternalContacts
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ExternalContact'
+    post:
+      summary: Créer un contact externe (Create external contact)
+      operationId: createExternalContact
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - name
+              - structureType
+            properties:
+              name: { type: string }
+              email: { type: string }
+              phone: { type: string }
+              structureType:
+                type: string
+                enum: [physique, privee, publique, ong, autre]
+              structureName: { type: string }
+              idNumber: { type: string }
+              address: { type: string }
+      responses:
+        '201':
+          description: Created
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/ExternalContact'
+
+  /organisations/{orgId}/contacts/{id}:
+    get:
+      summary: Voir un contact externe (Show external contact)
+      operationId: getExternalContact
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/ExternalContact'
+    patch:
+      summary: Modifier un contact externe (Update external contact)
+      operationId: updateExternalContact
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name: { type: string }
+              email: { type: string }
+              phone: { type: string }
+              structureType:
+                type: string
+                enum: [physique, privee, publique, ong, autre]
+              structureName: { type: string }
+              idNumber: { type: string }
+              address: { type: string }
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/ExternalContact'
+    delete:
+      summary: Supprimer un contact externe (Delete external contact)
+      operationId: deleteExternalContact
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+
   /plans:
     get:
       summary: Lister les plans actifs (List active plans)
@@ -853,6 +1225,30 @@ paths:
         '200':
           description: Success
 
+  /admin/plans/{planId}/usage:
+    get:
+      summary: Voir l'utilisation d'un plan (Admin - Get plan usage)
+      operationId: adminGetPlanUsage
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  planId: { type: string }
+                  planName: { type: string }
+                  issuedSubscriptions: { type: integer }
+
   /admin/subscriptions:
     get:
       summary: Lister les abonnements (Admin)
@@ -979,3 +1375,83 @@ definitions:
       assignedBy: { type: string }
       assignedAt: { type: string }
       isActive: { type: boolean }
+
+  UserProfile:
+    type: object
+    properties:
+      id: { type: string }
+      name: { type: string }
+      email: { type: string }
+      phone: { type: string }
+      avatarUrl: { type: string }
+
+  OrganisationProfileItem:
+    type: object
+    properties:
+      id: { type: string }
+      name: { type: string }
+      logoUrl: { type: string }
+      roles:
+        type: array
+        items: { type: string }
+      subscriptionStatus: { type: string }
+      hasActiveSubscription: { type: boolean }
+      hasValidLicense: { type: boolean }
+      planName: { type: string }
+      planSlug: { type: string }
+      expiresAt: { type: string }
+      daysRemaining: { type: integer }
+
+  ProfileResponse:
+    type: object
+    properties:
+      data:
+        type: object
+        properties:
+          user:
+            $ref: '#/definitions/UserProfile'
+          organisations:
+            type: array
+            items:
+              $ref: '#/definitions/OrganisationProfileItem'
+
+  ExternalContact:
+    type: object
+    properties:
+      $id: { type: string }
+      $createdAt: { type: string }
+      name: { type: string }
+      email: { type: string }
+      phone: { type: string }
+      structureType:
+        type: string
+        enum: [physique, privee, publique, ong, autre]
+      structureName: { type: string }
+      idNumber: { type: string }
+      address: { type: string }
+      createdBy: { type: string }
+
+  CourierMessage:
+    type: object
+    properties:
+      id: { type: string }
+      courierId: { type: string }
+      content: { type: string }
+      fileUrl: { type: string }
+      fileId: { type: string }
+      createdBy: { type: string }
+      createdAt: { type: string }
+
+  CourierReply:
+    type: object
+    properties:
+      id: { type: string }
+      courierId: { type: string }
+      content: { type: string }
+      fileUrl: { type: string }
+      fileId: { type: string }
+      createdBy: { type: string }
+      createdAt: { type: string }
+      documentStatus:
+        type: string
+        enum: [draft, finalized]

@@ -22,6 +22,7 @@ export class PlanProvisioner {
     await this.createPlansCollection()
     await this.createSubscriptionsCollection()
     await this.createLicensesCollection()
+    await this.ensureSubscriptionStatusAttribute()
 
     console.log('[PlanProvisioner] Provisioning complete.')
   }
@@ -240,6 +241,15 @@ export class PlanProvisioner {
       required: false,
     })
 
+    await appwrite.databases.createStringAttribute({
+      databaseId: this.DATABASE_ID,
+      collectionId,
+      key: 'status',
+      size: 20,
+      required: false,
+      xdefault: 'active',
+    })
+
     // ── DateTime attributes ─────────────────────────────────────────────
     await appwrite.databases.createDatetimeAttribute({
       databaseId: this.DATABASE_ID,
@@ -412,6 +422,34 @@ export class PlanProvisioner {
     })
 
     console.log(`[PlanProvisioner] Collection "${collectionId}" created successfully.`)
+  }
+
+  /**
+   * Ensure that the 'status' attribute exists on the subscriptions collection.
+   * Safe to call on existing or newly created databases.
+   */
+  private static async ensureSubscriptionStatusAttribute() {
+    const collectionId = Collections.SUBSCRIPTIONS
+    try {
+      await appwrite.databases.getAttribute({
+        databaseId: this.DATABASE_ID,
+        collectionId,
+        key: 'status',
+      })
+      console.log('[PlanProvisioner] Attribute "status" already exists on subscriptions.')
+    } catch {
+      console.log('[PlanProvisioner] Creating "status" attribute on subscriptions...')
+      await appwrite.databases.createStringAttribute({
+        databaseId: this.DATABASE_ID,
+        collectionId,
+        key: 'status',
+        size: 20,
+        required: false, // optional for backward compatibility
+        xdefault: 'active', // default value for existing subscriptions is 'active'
+      })
+      await this.waitForAttributes(collectionId)
+      console.log('[PlanProvisioner] Attribute "status" created successfully.')
+    }
   }
 
   /**
