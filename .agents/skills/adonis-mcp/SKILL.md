@@ -21,6 +21,7 @@ directories: {
 ```
 
 ### CLI Generator Commands
+
 Use Ace to scaffold new MCP components:
 
 ```bash
@@ -35,6 +36,7 @@ node ace make:mcp-prompt my_prompt
 ```
 
 ### Inspector Tool
+
 The MCP Inspector provides an interactive interface for debugging tools, resources, and prompts during development.
 
 ```bash
@@ -79,9 +81,7 @@ export default class ListUserLogsTool extends Tool<Schema> {
     }
 
     // Logic: Fetch logs from a service or database
-    const logs = [
-      { id: '1', action: 'login', timestamp: new Date().toISOString() }
-    ]
+    const logs = [{ id: '1', action: 'login', timestamp: new Date().toISOString() }]
 
     return response.structured({
       userId: args.userId,
@@ -112,11 +112,13 @@ export default class ListUserLogsTool extends Tool<Schema> {
 ### Defining JSON Schemas
 
 You can define your tool schemas using:
+
 1. **JSON Schema Object**: The standard JSON Schema specification (as shown above).
 2. **Zod Validation**: Use `zod-to-json-schema` to export to a compatible JSON schema.
 3. **VineJS (Recommended)**: AdonisJS's native validation engine.
 
 #### VineJS Schema Example
+
 ```typescript
 import vine from '@vinejs/vine'
 
@@ -141,6 +143,7 @@ schema() {
 Resources expose raw application data (text or binary content) to the AI model. They are identified by URI templates.
 
 ### Dynamic Resource with URI Templates
+
 You can use dynamic paths (RFC 6570 syntax) to parameterize resource fetches.
 
 ```typescript
@@ -164,10 +167,10 @@ export default class ProjectDetailsResource extends Resource<Args> {
 
   async handle({ args, response }: ResourceContext<Args>) {
     const projectId = args.projectId
-    
+
     // Logic: Fetch project details from service/DB
     const projectSummary = `Summary for project ID: ${projectId}\nStatus: Active\nTeam: Core`
-    
+
     this.size = projectSummary.length
     return response.text(projectSummary)
   }
@@ -238,6 +241,7 @@ export default class CodeReviewPrompt extends Prompt<Schema> {
 ## 5. Security & Authentication
 
 ### CSRF Exceptions
+
 MCP requests usually do not carry standard CSRF cookies. If your AdonisJS application uses `@adonisjs/shield`, you **must** exempt the MCP route from CSRF checking in `config/shield.ts`:
 
 ```typescript
@@ -253,6 +257,7 @@ export const shieldConfig = defineConfig({
 ```
 
 ### Routing & Middleware
+
 Register your MCP routes in `start/routes.ts` and apply relevant authentication middleware to protect the endpoint:
 
 ```typescript
@@ -265,6 +270,7 @@ router.mcp().use(middleware.auth())
 ```
 
 ### Authorization (Bouncer & Auth)
+
 Add types to your custom `app/middleware/mcp_middleware.ts` to expose `auth` and `bouncer` inside the `ToolContext` or `ResourceContext`:
 
 ```typescript
@@ -294,7 +300,7 @@ This lets you enforce access controls in your handlers seamlessly:
 async handle({ bouncer, response }: ToolContext<Schema>) {
   // Authorize using standard AdonisJS Bouncer policies/abilities
   await bouncer.authorize('viewSecretData')
-  
+
   return response.text('Sensitive backend metrics...')
 }
 ```

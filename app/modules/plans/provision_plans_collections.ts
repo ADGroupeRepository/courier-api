@@ -23,6 +23,7 @@ export class PlanProvisioner {
     await this.createSubscriptionsCollection()
     await this.createLicensesCollection()
     await this.ensureSubscriptionStatusAttribute()
+    await this.seedPlans()
 
     console.log('[PlanProvisioner] Provisioning complete.')
   }
@@ -154,7 +155,6 @@ export class PlanProvisioner {
       collectionId,
       key: 'isActive',
       required: true,
-      xdefault: true,
     })
 
     // Wait for attributes to be ready before creating indexes
@@ -271,7 +271,6 @@ export class PlanProvisioner {
       collectionId,
       key: 'isActive',
       required: true,
-      xdefault: true,
     })
 
     // ── Integer attributes ──────────────────────────────────────────────
@@ -389,7 +388,6 @@ export class PlanProvisioner {
       collectionId,
       key: 'isActive',
       required: true,
-      xdefault: true,
     })
 
     // Wait for attributes to be ready before creating indexes
@@ -468,5 +466,122 @@ export class PlanProvisioner {
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
     throw new Error(`Attributes for "${collectionId}" did not become available in time.`)
+  }
+
+  /**
+   * Seeds the default subscription plans: Essentiel, Professionnel, and Sur mesure.
+   */
+  private static async seedPlans() {
+    const plansToSeed = [
+      {
+        id: 'essentiel',
+        name: 'Essentiel',
+        slug: 'essentiel',
+        description: 'Pour les petites équipes qui démarrent',
+        price: 49000,
+        maxMembers: 20,
+        maxStorageMB: 102400, // 20 users * 5 GB = 100 GB in MB (100 * 1024)
+        maxCouriersPerMonth: -1,
+        maxModules: -1,
+        allowedModules: ['directory', 'courier'],
+        features: [
+          '20 utilisateurs maximum',
+          '5 Go de stockage par utilisateur',
+          'Boîtes mail avec domaine personnalisé',
+          'Filtres anti-spam et sécurité de base',
+          'Archivage des messages sur 1 an',
+          'Support par e-mail',
+        ],
+        isActive: true,
+        sortOrder: 1,
+      },
+      {
+        id: 'professionnel',
+        name: 'Professionnel',
+        slug: 'professionnel',
+        description: 'Pour les entreprises en croissance',
+        price: 99000,
+        maxMembers: -1, // Unlimited
+        maxStorageMB: -1, // Unlimited
+        maxCouriersPerMonth: -1,
+        maxModules: -1,
+        allowedModules: ['directory', 'courier'],
+        features: [
+          'Utilisateurs illimités',
+          '50 Go de stockage par utilisateur',
+          'Multi-domaines et alias illimités',
+          'Chiffrement et sécurité avancée',
+          'Administration et politiques de groupe',
+          'Archivage des messages sur 5 ans',
+          'Intégrations et API REST',
+          'Support prioritaire 24h / 5j',
+          'Recommandé',
+        ],
+        isActive: true,
+        sortOrder: 2,
+      },
+      {
+        id: 'sur-mesure',
+        name: 'Sur mesure',
+        slug: 'sur-mesure',
+        description: "Pour l'État, institutions et grandes structures",
+        price: 0,
+        maxMembers: -1,
+        maxStorageMB: -1,
+        maxCouriersPerMonth: -1,
+        maxModules: -1,
+        allowedModules: ['directory', 'courier'],
+        features: [
+          'Déploiement on-premise ou cloud dédié',
+          'Stockage illimité et configurable',
+          'Souveraineté et conformité des données',
+          'Intégration aux SI existants (LDAP / Active Directory)',
+          "Journaux d'audit et rapports avancés",
+          'SLA garanti et support dédié 24h / 7j',
+        ],
+        isActive: true,
+        sortOrder: 3,
+      },
+    ]
+
+    console.log('[PlanProvisioner] Seeding default subscription plans...')
+
+    for (const plan of plansToSeed) {
+      try {
+        // Check if plan already exists by ID
+        await appwrite.databases.getDocument({
+          databaseId: this.DATABASE_ID,
+          collectionId: Collections.PLANS,
+          documentId: plan.id,
+        })
+        console.log(`[PlanProvisioner] Plan "${plan.name}" (${plan.id}) already exists. Skipping.`)
+      } catch (err: any) {
+        if (err.code === 404) {
+          console.log(`[PlanProvisioner] Creating plan "${plan.name}"...`)
+          await appwrite.databases.createDocument({
+            databaseId: this.DATABASE_ID,
+            collectionId: Collections.PLANS,
+            documentId: plan.id,
+            data: {
+              name: plan.name,
+              slug: plan.slug,
+              description: plan.description,
+              price: plan.price,
+              maxMembers: plan.maxMembers,
+              maxStorageMB: plan.maxStorageMB,
+              maxCouriersPerMonth: plan.maxCouriersPerMonth,
+              maxModules: plan.maxModules,
+              allowedModules: plan.allowedModules,
+              features: plan.features,
+              isActive: plan.isActive,
+              sortOrder: plan.sortOrder,
+            },
+          })
+          console.log(`[PlanProvisioner] Plan "${plan.name}" created successfully.`)
+        } else {
+          throw err
+        }
+      }
+    }
   }
 }

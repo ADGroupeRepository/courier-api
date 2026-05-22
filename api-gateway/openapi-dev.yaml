@@ -37,18 +37,6 @@ x-google-management:
           STANDARD: 20
 
 paths:
-  /:
-    get:
-      summary: Health Check
-      operationId: healthCheck
-      # We override the backend here because the health check is at the root (/), not /api/v1/
-      x-google-backend:
-        address: 'https://backend-dev-n4xxd6pd2q-ew.a.run.app/'
-        path_translation: CONSTANT_ADDRESS
-      responses:
-        '200':
-          description: Success
-
   /auth/signup:
     post:
       summary: Inscription (Signup)
@@ -61,6 +49,73 @@ paths:
           description: Success
         '201':
           description: Created
+
+  /auth/forgot-password:
+    post:
+      summary: Demander la réinitialisation du mot de passe (Request password reset)
+      operationId: requestPasswordReset
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - email
+            properties:
+              email:
+                type: string
+      responses:
+        '200':
+          description: Success
+    patch:
+      summary: Confirmer la réinitialisation du mot de passe (Confirm password reset)
+      operationId: confirmPasswordReset
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - email
+              - code
+              - password
+            properties:
+              email:
+                type: string
+              code:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: Success
+
+  /auth/verify-email:
+    post:
+      summary: Demander la vérification de l'email (Request email verification)
+      operationId: requestEmailVerification
+      responses:
+        '200':
+          description: Success
+    patch:
+      summary: Confirmer la vérification de l'email (Confirm email verification)
+      operationId: confirmEmailVerification
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - code
+            properties:
+              code:
+                type: string
+      responses:
+        '200':
+          description: Success
 
   /auth/profile:
     get:
@@ -129,6 +184,17 @@ paths:
     put:
       summary: Mettre à jour une organisation
       operationId: updateOrganisation
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+    patch:
+      summary: Mettre à jour une organisation (Patch)
+      operationId: patchOrganisation
       parameters:
         - name: orgId
           in: path
@@ -209,6 +275,21 @@ paths:
     put:
       summary: Modifier les rôles d'un membre
       operationId: updateMemberRoles
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: memberId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+    patch:
+      summary: Modifier les rôles d'un membre (Patch)
+      operationId: patchMemberRoles
       parameters:
         - name: orgId
           in: path
@@ -363,6 +444,21 @@ paths:
       responses:
         '200':
           description: Success
+    patch:
+      summary: Modifier un département (Patch)
+      operationId: patchDepartment
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
     delete:
       summary: Supprimer un département
       operationId: deleteDepartment
@@ -427,6 +523,82 @@ paths:
           required: true
           type: string
       responses:
+        '200':
+          description: Success
+
+  /organisations/{orgId}/notifications/read-all:
+    patch:
+      summary: Marquer toutes les notifications comme lues (Mark all notifications as read)
+      operationId: markAllNotificationsAsRead
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+
+  /organisations/{orgId}/notifications/{id}/read:
+    patch:
+      summary: Marquer une notification comme lue (Mark notification as read)
+      operationId: markNotificationAsRead
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+
+  /organisations/{orgId}/notifications:
+    delete:
+      summary: Supprimer des notifications en bloc (Delete notifications in bulk)
+      operationId: deleteNotifications
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - ids
+            properties:
+              ids:
+                type: array
+                items:
+                  type: string
+      responses:
+        '204':
+          description: No Content
+        '200':
+          description: Success
+
+  /organisations/{orgId}/notifications/{id}:
+    delete:
+      summary: Supprimer une notification (Delete single notification)
+      operationId: deleteNotification
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '204':
+          description: No Content
         '200':
           description: Success
 

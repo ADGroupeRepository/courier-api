@@ -3,6 +3,7 @@ import { middleware } from '#start/kernel'
 
 const DepartmentsController = () => import('#modules/directory/departments_controller')
 const DepartmentMembersController = () => import('#modules/directory/department_members_controller')
+const NotificationsController = () => import('#modules/directory/notifications_controller')
 
 router
   .group(() => {
@@ -13,6 +14,12 @@ router
     router.post('members/:membershipId/department', [DepartmentMembersController, 'assign'])
     router.get('departments/:id/members', [DepartmentMembersController, 'indexByDepartment'])
     router.delete('profiles/:id', [DepartmentMembersController, 'destroy'])
+
+    // In-App Notifications (listing is handled client-side via Appwrite Realtime)
+    router.patch('notifications/read-all', [NotificationsController, 'markAllAsRead'])
+    router.patch('notifications/:id/read', [NotificationsController, 'markAsRead'])
+    router.delete('notifications', [NotificationsController, 'destroyMany'])
+    router.delete('notifications/:id', [NotificationsController, 'destroy'])
   })
   .prefix('/api/v1/organisations/:orgId')
   .use(middleware.auth())

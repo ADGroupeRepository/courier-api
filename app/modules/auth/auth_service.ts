@@ -1,4 +1,4 @@
-import { ID, AppwriteException } from 'node-appwrite'
+import { ID, AppwriteException, type Models } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
 import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
@@ -162,5 +162,85 @@ export default class AuthService {
       userId: user.$id,
       prefs: newPrefs,
     })
+  }
+
+  /**
+   * Request email verification link for the logged in user.
+   * @param jwt - The user's session JWT.
+   * @param url - The redirect landing URL.
+   * @returns The generated token.
+   */
+  async requestEmailVerification(jwt: string, url: string): Promise<Models.Token> {
+    const { account } = appwrite.createSessionClient(jwt)
+    const token = await account.createEmailVerification({ url })
+
+    const verificationLink = `${url}?userId=${token.userId}&secret=${token.secret}`
+    logger.info(
+      {
+        userId: token.userId,
+        tokenId: token.$id,
+        secret: token.secret,
+        expire: token.expire,
+        verificationLink,
+      },
+      'Email verification link generated (TODO: Integrate custom SMTP/Mail Provider in the future to customize/log full mail templates)'
+    )
+
+    return token
+  }
+
+  /**
+   * Confirm email verification using the userId and secret.
+   * @param jwt - The user's session JWT.
+   * @param userId - The user ID to verify.
+   * @param secret - The verification secret.
+   * @returns The updated token status.
+   */
+  async confirmEmailVerification(
+    jwt: string,
+    userId: string,
+    secret: string
+  ): Promise<Models.Token> {
+    const { account } = appwrite.createSessionClient(jwt)
+    return await account.updateEmailVerification({ userId, secret })
+  }
+
+  /**
+   * Request a password reset recovery link for the specified email.
+   * @param email - The email to send recovery to.
+   * @param url - The redirect landing URL.
+   * @returns The generated recovery token.
+   */
+  async requestPasswordReset(email: string, url: string): Promise<Models.Token> {
+    const token = await appwrite.account.createRecovery({ email, url })
+
+    const recoveryLink = `${url}?userId=${token.userId}&secret=${token.secret}`
+    logger.info(
+      {
+        userId: token.userId,
+        tokenId: token.$id,
+        secret: token.secret,
+        expire: token.expire,
+        recoveryLink,
+      },
+      'Password recovery link generated (TODO: Integrate custom SMTP/Mail Provider in the future to customize/log full mail templates)'
+    )
+
+    return token
+  }
+
+  /**
+   * Confirm password reset using the userId, secret, and new password.
+   * @param userId - The user ID.
+   * @param secret - The recovery secret.
+   * @param password - The new password.
+   * @returns The updated recovery token status.
+   */
+  async confirmPasswordReset(
+    userId: string,
+    secret: string,
+    password: string
+  ): Promise<Models.Token> {
+    return await appwrite.account.updateRecovery({ userId, secret, password })
   }
 }

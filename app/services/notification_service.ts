@@ -1,6 +1,6 @@
 import logger from '@adonisjs/core/services/logger'
 import appwrite from '#services/appwrite_service'
-import { Query } from 'node-appwrite'
+import { Query, ID, Permission, Role } from 'node-appwrite'
 import MembersService from '#modules/directory/members_service'
 import { Collections } from '#modules/_registry/collection_ids'
 
@@ -53,8 +53,35 @@ export default class NotificationService {
    * Send an in-app notification.
    */
   static async sendInAppNotification(orgId: string, payload: NotificationPayload): Promise<void> {
-    // TODO: Implement in-app notification logic (e.g., saving to a notifications collection)
-    logger.info({ orgId, payload }, 'Mock In-App Notification: Notification created successfully')
+    try {
+      const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
+      if (!prefs.databaseId) {
+        throw new Error(`Organisation ${orgId} does not have a provisioned database.`)
+      }
+      const databaseId = prefs.databaseId
+
+      await appwrite.databases.createDocument({
+        databaseId,
+        collectionId: Collections.NOTIFICATIONS,
+        documentId: ID.unique(),
+        data: {
+          userId: payload.userId,
+          title: payload.title,
+          body: payload.body,
+          link: payload.link || null,
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        },
+        permissions: [
+          Permission.read(Role.user(payload.userId)),
+          Permission.update(Role.user(payload.userId)),
+          Permission.delete(Role.user(payload.userId)),
+        ],
+      })
+      logger.info({ orgId, payload }, 'In-App Notification created successfully')
+    } catch (err: any) {
+      logger.error({ err, orgId, payload }, 'Failed to send in-app notification')
+    }
   }
 
   /**

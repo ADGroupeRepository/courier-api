@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import PlanService from '#modules/plans/plan_service'
 import { subscribeToPlanValidator } from '#modules/plans/plan_validator'
 import appwrite from '#services/appwrite_service'
+import CacheService from '#services/cache_service'
 import { Collections } from '#modules/_registry/collection_ids'
 import { ID } from 'node-appwrite'
 
@@ -211,6 +212,9 @@ export default class PlansController {
           issuedBy: user.$id,
         },
       })
+
+      // Clear subscription info cache so the user's profile shows the pending state immediately
+      await CacheService.delete(`subscription:info:${orgId}`)
 
       // 6. Seat license is not assigned yet (will be assigned automatically upon admin approval)
 

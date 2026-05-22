@@ -25,9 +25,7 @@ export default class OrganisationsController {
    * Create a new organisation. Automatically provisions a database + storage bucket.
    */
   async store({ request, response, user }: HttpContext) {
-    console.log('[OrgsController] store called')
     const payload = await request.validateUsing(createOrganisationValidator)
-    console.log('[OrgsController] payload validated:', payload)
     const service = new OrganisationService()
     const organisation = await service.create(payload, user!.$id)
 
