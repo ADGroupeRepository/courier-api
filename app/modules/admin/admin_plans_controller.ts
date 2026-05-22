@@ -289,7 +289,7 @@ export default class AdminPlansController {
    * PATCH /api/v1/admin/subscriptions/:subscriptionId
    * Update or revoke a subscription.
    */
-  async updateSubscription({ request, response }: HttpContext) {
+  async updateSubscription({ request, response, logger }: HttpContext) {
     const subscriptionId = request.param('subscriptionId')
     const payload = await request.validateUsing(updateSubscriptionValidator)
 
@@ -336,7 +336,17 @@ export default class AdminPlansController {
               existing.issuedBy
             )
           } catch (licenseError: any) {
-            // Ignore if license already exists
+            if (licenseError.message === 'User already has an active license.') {
+              logger.info(
+                { orgId: existing.orgId, userId: existing.issuedBy },
+                'User already has an active license, skipping auto-assign.'
+              )
+            } else {
+              logger.error(
+                { err: licenseError, orgId: existing.orgId, userId: existing.issuedBy },
+                'Failed to automatically assign license to user'
+              )
+            }
           }
         }
       }

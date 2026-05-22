@@ -51,6 +51,25 @@ paths:
       x-google-quota:
         metricCosts:
           'auth-requests': 1
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - name
+              - email
+              - password
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+              phone:
+                type: string
+              password:
+                type: string
       responses:
         '200':
           description: Success
@@ -72,6 +91,8 @@ paths:
             properties:
               email:
                 type: string
+              redirectUrl:
+                type: string
       responses:
         '200':
           description: Success
@@ -85,13 +106,13 @@ paths:
           schema:
             type: object
             required:
-              - email
-              - code
+              - userId
+              - secret
               - password
             properties:
-              email:
+              userId:
                 type: string
-              code:
+              secret:
                 type: string
               password:
                 type: string
@@ -105,6 +126,15 @@ paths:
       operationId: requestEmailVerification
       security:
         - BearerAuth: []
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              redirectUrl:
+                type: string
       responses:
         '200':
           description: Success
@@ -120,9 +150,12 @@ paths:
           schema:
             type: object
             required:
-              - code
+              - userId
+              - secret
             properties:
-              code:
+              userId:
+                type: string
+              secret:
                 type: string
       responses:
         '200':
