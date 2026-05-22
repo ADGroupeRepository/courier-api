@@ -96,11 +96,7 @@ export default class NotificationsController {
       const unreadList = await appwrite.databases.listDocuments({
         databaseId,
         collectionId: Collections.NOTIFICATIONS,
-        queries: [
-          Query.equal('userId', userId),
-          Query.equal('isRead', false),
-          Query.limit(100),
-        ],
+        queries: [Query.equal('userId', userId), Query.equal('isRead', false), Query.limit(100)],
       })
 
       // Chunk the updates into batches of 10 to avoid HTTP connection limits and rate-limiting
@@ -134,7 +130,6 @@ export default class NotificationsController {
         message: 'All notifications marked as read successfully',
         count,
       })
-
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }
@@ -222,21 +217,25 @@ export default class NotificationsController {
       for (const chunk of idChunks) {
         const docs = await Promise.all(
           chunk.map((id) =>
-            appwrite.databases.getDocument({
-              databaseId,
-              collectionId: Collections.NOTIFICATIONS,
-              documentId: id,
-            }).catch((err) => {
-              if (err.code === 404) return null
-              throw err
-            })
+            appwrite.databases
+              .getDocument({
+                databaseId,
+                collectionId: Collections.NOTIFICATIONS,
+                documentId: id,
+              })
+              .catch((err) => {
+                if (err.code === 404) return null
+                throw err
+              })
           )
         )
 
         for (const doc of docs) {
           if (!doc) continue
           if (doc.userId !== userId) {
-            return response.forbidden({ message: `Forbidden: You do not own notification ${doc.$id}` })
+            return response.forbidden({
+              message: `Forbidden: You do not own notification ${doc.$id}`,
+            })
           }
         }
       }
@@ -245,15 +244,17 @@ export default class NotificationsController {
       for (const chunk of idChunks) {
         await Promise.all(
           chunk.map((id) =>
-            appwrite.databases.deleteDocument({
-              databaseId,
-              collectionId: Collections.NOTIFICATIONS,
-              documentId: id,
-            }).catch((err) => {
-              // Ignore not found during deletion
-              if (err.code === 404) return
-              throw err
-            })
+            appwrite.databases
+              .deleteDocument({
+                databaseId,
+                collectionId: Collections.NOTIFICATIONS,
+                documentId: id,
+              })
+              .catch((err) => {
+                // Ignore not found during deletion
+                if (err.code === 404) return
+                throw err
+              })
           )
         )
       }
@@ -264,4 +265,3 @@ export default class NotificationsController {
     }
   }
 }
-

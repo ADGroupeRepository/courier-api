@@ -536,7 +536,7 @@ export class PlanProvisioner {
           'Stockage illimité et configurable',
           'Souveraineté et conformité des données',
           'Intégration aux SI existants (LDAP / Active Directory)',
-          'Journaux d\'audit et rapports avancés',
+          "Journaux d'audit et rapports avancés",
           'SLA garanti et support dédié 24h / 7j',
         ],
         isActive: true,

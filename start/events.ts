@@ -11,4 +11,3 @@ emitter.on(CourierAssigned, [NotificationListener, 'onCourierAssigned'])
 emitter.on(CourierMessageSent, [NotificationListener, 'onCourierMessageSent'])
 emitter.on(CourierReplySent, [NotificationListener, 'onCourierReplySent'])
 emitter.on(OrganisationCreated, [OrganisationListener, 'onOrganisationCreated'])
-

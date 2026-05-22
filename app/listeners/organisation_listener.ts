@@ -15,13 +15,22 @@ export default class OrganisationListener {
       const provisioningService = new ModuleProvisioningService()
       for (const [moduleName, moduleDef] of MODULE_REGISTRY) {
         if (moduleDef.core) {
-          logger.info({ orgId, moduleName }, `[OrganisationListener] Activating core module: ${moduleName}`)
+          logger.info(
+            { orgId, moduleName },
+            `[OrganisationListener] Activating core module: ${moduleName}`
+          )
           await provisioningService.activate(orgId, moduleName)
         }
       }
-      logger.info({ orgId }, '[OrganisationListener] Core modules activated successfully in the background.')
+      logger.info(
+        { orgId },
+        '[OrganisationListener] Core modules activated successfully in the background.'
+      )
     } catch (err: any) {
-      logger.error({ err, orgId }, '[OrganisationListener] Failed to activate core modules in background')
+      logger.error(
+        { err, orgId },
+        '[OrganisationListener] Failed to activate core modules in background'
+      )
     }
   }
 }

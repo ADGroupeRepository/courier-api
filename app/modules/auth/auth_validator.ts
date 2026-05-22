@@ -41,4 +41,3 @@ export const confirmPasswordResetValidator = vine.create(
     password: vine.string().minLength(8).maxLength(256),
   })
 )
-

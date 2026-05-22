@@ -1,4 +1,4 @@
-import { ID, AppwriteException, Models } from 'node-appwrite'
+import { ID, AppwriteException, type Models } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
 import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
@@ -196,7 +196,11 @@ export default class AuthService {
    * @param secret - The verification secret.
    * @returns The updated token status.
    */
-  async confirmEmailVerification(jwt: string, userId: string, secret: string): Promise<Models.Token> {
+  async confirmEmailVerification(
+    jwt: string,
+    userId: string,
+    secret: string
+  ): Promise<Models.Token> {
     const { account } = appwrite.createSessionClient(jwt)
     return await account.updateEmailVerification({ userId, secret })
   }
@@ -232,7 +236,11 @@ export default class AuthService {
    * @param password - The new password.
    * @returns The updated recovery token status.
    */
-  async confirmPasswordReset(userId: string, secret: string, password: string): Promise<Models.Token> {
+  async confirmPasswordReset(
+    userId: string,
+    secret: string,
+    password: string
+  ): Promise<Models.Token> {
     return await appwrite.account.updateRecovery({ userId, secret, password })
   }
 }

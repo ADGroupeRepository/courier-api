@@ -5,7 +5,8 @@ import ModuleProvisioningService from '#modules/_registry/provisioning_service'
 
 export default class ProvisionNotifications extends BaseCommand {
   static readonly commandName = 'provision:notifications'
-  static readonly description = 'Activates/updates the directory module (including the new notifications collection) for all existing organisations'
+  static readonly description =
+    'Activates/updates the directory module (including the new notifications collection) for all existing organisations'
 
   static readonly options: CommandOptions = {
     startApp: true,
@@ -20,12 +21,16 @@ export default class ProvisionNotifications extends BaseCommand {
       const provisioningService = new ModuleProvisioningService()
 
       for (const team of result.teams) {
-        this.logger.info(`Activating 'directory' module for organisation: ${team.name} (${team.$id})...`)
+        this.logger.info(
+          `Activating 'directory' module for organisation: ${team.name} (${team.$id})...`
+        )
         try {
           await provisioningService.activate(team.$id, 'directory')
           this.logger.success(`Successfully activated/updated directory module for: ${team.name}`)
         } catch (orgError: any) {
-          this.logger.error(`Failed for organisation ${team.name} (${team.$id}): ${orgError.message}`)
+          this.logger.error(
+            `Failed for organisation ${team.name} (${team.$id}): ${orgError.message}`
+          )
         }
       }
 
