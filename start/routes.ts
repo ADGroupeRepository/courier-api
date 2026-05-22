@@ -14,7 +14,7 @@
 import router from '@adonisjs/core/services/router'
 
 // Health check
-router.get('/', async () => ({ status: 'ok', service: 'bara-api' }))
+router.get('/api/v1', async () => ({ status: 'ok', service: 'bara-api' }))
 
 // ── Module Routes ───────────────────────────────────────────────────────────
 import './routes/auth.js'

@@ -48,5 +48,29 @@ export const directoryModule: ModuleDefinition = {
         { key: 'manager_idx', type: 'key', attributes: ['departmentId', 'departmentRole'] },
       ],
     },
+    {
+      id: Collections.NOTIFICATIONS,
+      name: 'Notifications',
+      documentSecurity: true,
+      permissions: (orgId: string) => [
+        Permission.read(Role.team(orgId)),
+        Permission.create(Role.team(orgId)),
+        Permission.update(Role.team(orgId)),
+        Permission.delete(Role.team(orgId)),
+      ],
+      attributes: [
+        { key: 'userId', type: 'string', size: 36, required: true },
+        { key: 'title', type: 'string', size: 255, required: true },
+        { key: 'body', type: 'string', size: 1000, required: true },
+        { key: 'link', type: 'string', size: 255, required: false },
+        { key: 'isRead', type: 'boolean', required: true, default: false },
+        { key: 'createdAt', type: 'datetime', required: true },
+      ],
+      indexes: [
+        { key: 'user_idx', type: 'key', attributes: ['userId'] },
+        { key: 'read_idx', type: 'key', attributes: ['isRead'] },
+        { key: 'user_read_idx', type: 'key', attributes: ['userId', 'isRead'] },
+      ],
+    },
   ],
 }

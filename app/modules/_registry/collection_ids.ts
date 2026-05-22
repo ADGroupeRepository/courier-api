@@ -9,6 +9,7 @@ export const Collections = {
   // Directory module (core)
   DEPARTMENTS: 'departments',
   ORG_PROFILES: 'org_profiles',
+  NOTIFICATIONS: 'notifications',
 
   // Courier module
   COURIERS: 'couriers',

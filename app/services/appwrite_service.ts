@@ -23,6 +23,11 @@ class AppwriteService {
       .setSelfSigned(true)
   }
 
+  /** Admin-scoped Account service (for server-initiated auth flows like password recovery). */
+  get account() {
+    return new Account(this.adminClient)
+  }
+
   /** Admin-scoped Users service (requires API key). */
   get users() {
     return new Users(this.adminClient)

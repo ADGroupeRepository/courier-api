@@ -45,9 +45,14 @@
               "raw": "{\n  \"email\": \"{{owner_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Owner User\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/signup",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "signup"]
+              "raw": "{{base_url}}/auth/signup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
             }
           }
         },
@@ -84,8 +89,14 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "email"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "email"
+              ]
             }
           }
         },
@@ -122,8 +133,13 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/jwts",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "jwts"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "jwts"
+              ]
             }
           }
         },
@@ -158,9 +174,13 @@
               "raw": "{\n  \"name\": \"Test Corp {{owner_email}}\",\n  \"description\": \"Test description\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations"]
+              "raw": "{{base_url}}/organisations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations"
+              ]
             }
           }
         },
@@ -191,9 +211,14 @@
               "raw": "{\n  \"email\": \"{{member_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Member User\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/signup",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "signup"]
+              "raw": "{{base_url}}/auth/signup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
             }
           }
         },
@@ -229,9 +254,15 @@
               "raw": "{\n  \"email\": \"{{member_email}}\",\n  \"roles\": [\"member\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "members"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members"
+              ]
             }
           }
         },
@@ -266,9 +297,15 @@
               "raw": "{\n  \"name\": \"Support Client\",\n  \"description\": \"Support for customers\",\n  \"organisationId\": \"{{orgId}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "departments"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "departments"
+              ]
             }
           }
         },
@@ -291,11 +328,11 @@
               "raw": "{\n  \"userId\": \"{{memberUserId}}\",\n  \"departmentId\": \"{{deptId}}\",\n  \"departmentRole\": \"member\",\n  \"jobTitle\": \"Support Agent\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{membershipId}}/department",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{membershipId}}/department",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "members",
@@ -335,9 +372,15 @@
               "raw": "{\n  \"module\": \"courier\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "modules"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "modules"
+              ]
             }
           }
         },
@@ -372,12 +415,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Alice Dubois\",\n  \"email\": \"alice.dubois@company.com\",\n  \"phone\": \"+1234567890\",\n  \"structureType\": \"physique\",\n  \"address\": \"456 Enterprise Ave\"\n}"
+              "raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"phone\": \"{{$randomPhoneNumber}}\",\n  \"structureType\": \"physique\",\n  \"address\": \"{{$randomStreetAddress}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/contacts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts"
+              ]
             }
           }
         },
@@ -421,17 +470,17 @@
                 },
                 {
                   "key": "subject",
-                  "value": "Courrier Assigné à l'Utilisateur",
+                  "value": "User Courier - {{$randomCatchPhrase}}",
                   "type": "text"
                 },
                 {
                   "key": "contactName",
-                  "value": "Expéditeur Externe",
+                  "value": "External {{$randomCompanyName}}",
                   "type": "text"
                 },
                 {
                   "key": "contactNumber",
-                  "value": "REF-123",
+                  "value": "REF-{{$randomInt}}",
                   "type": "text"
                 },
                 {
@@ -452,9 +501,15 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             }
           }
         },
@@ -498,17 +553,17 @@
                 },
                 {
                   "key": "subject",
-                  "value": "Courrier Assigné au Département",
+                  "value": "Dept Courier - {{$randomCatchPhrase}}",
                   "type": "text"
                 },
                 {
                   "key": "contactName",
-                  "value": "Expéditeur Externe",
+                  "value": "External {{$randomCompanyName}}",
                   "type": "text"
                 },
                 {
                   "key": "contactNumber",
-                  "value": "REF-456",
+                  "value": "REF-{{$randomInt}}",
                   "type": "text"
                 },
                 {
@@ -524,9 +579,15 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             }
           }
         },
@@ -566,17 +627,17 @@
                 },
                 {
                   "key": "subject",
-                  "value": "Réponse Sortante",
+                  "value": "Outgoing - {{$randomCatchPhrase}}",
                   "type": "text"
                 },
                 {
                   "key": "contactName",
-                  "value": "Bara Corp",
+                  "value": "Bara Corp {{$randomCompanyName}}",
                   "type": "text"
                 },
                 {
                   "key": "contactNumber",
-                  "value": "OUT-789",
+                  "value": "OUT-{{$randomInt}}",
                   "type": "text"
                 },
                 {
@@ -592,9 +653,15 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             }
           }
         },
@@ -629,8 +696,14 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "email"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "email"
+              ]
             }
           }
         },
@@ -667,8 +740,13 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/jwts",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "jwts"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "jwts"
+              ]
             }
           }
         },
@@ -694,9 +772,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             }
           }
         },
@@ -719,9 +803,16 @@
               "raw": "{\n  \"status\": \"completed\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}"
+              ]
             }
           }
         },
@@ -747,9 +838,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}"
+              ]
             }
           }
         },
@@ -780,9 +878,14 @@
               "raw": "{\n  \"email\": \"{{unassigned_email}}\",\n  \"password\": \"password123\",\n  \"name\": \"Unassigned User\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/signup",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "signup"]
+              "raw": "{{base_url}}/auth/signup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
             }
           }
         },
@@ -817,8 +920,14 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "email"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "email"
+              ]
             }
           }
         },
@@ -855,8 +964,13 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/jwts",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "jwts"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "jwts"
+              ]
             }
           }
         },
@@ -890,9 +1004,15 @@
               "raw": "{\n  \"email\": \"{{unassigned_email}}\",\n  \"roles\": [\"member\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "members"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members"
+              ]
             }
           }
         },
@@ -922,9 +1042,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             }
           }
         },
@@ -958,9 +1084,16 @@
               "raw": "{\n  \"status\": \"completed\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}"
+              ]
             }
           }
         },
@@ -988,9 +1121,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId_user}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}"
+              ]
             }
           }
         },
@@ -1018,11 +1158,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{scenarioContactId}}",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{scenarioContactId}}",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "contacts",
@@ -1055,9 +1195,14 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}"
+              ]
             }
           }
         }
@@ -1070,8 +1215,12 @@
         "header": [],
         "url": {
           "raw": "{{base_url}}/",
-          "host": ["{{base_url}}"],
-          "path": [""]
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            ""
+          ]
         },
         "description": "Vérifie l'état de santé du serveur."
       },
@@ -1105,9 +1254,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/plans",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "plans"]
+              "raw": "{{base_url}}/plans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "plans"
+              ]
             },
             "description": "Affiche la liste des plans actifs disponibles pour inscription."
           },
@@ -1124,9 +1277,14 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/plans/{{planId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "plans", "{{planId}}"]
+              "raw": "{{base_url}}/plans/{{planId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "plans",
+                "{{planId}}"
+              ]
             },
             "description": "Affiche les détails complets d'un plan spécifique."
           },
@@ -1150,12 +1308,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Utilisateur Test\",\n  \"email\": \"test@example.com\",\n  \"password\": \"SuperSecret123!\",\n  \"phone\": \"+33600000000\"\n}"
+              "raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"test-{{$randomInt}}@example.com\",\n  \"password\": \"SuperSecret123!\",\n  \"phone\": \"{{$randomPhoneNumber}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/signup",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "signup"]
+              "raw": "{{base_url}}/auth/signup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
             },
             "description": "Permet de créer un nouvel utilisateur."
           },
@@ -1190,12 +1353,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+              "raw": "{\n  \"email\": \"test-{{$randomInt}}@example.com\",\n  \"password\": \"SuperSecret123!\"\n}"
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "email"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "email"
+              ]
             },
             "description": "Authentifie l'utilisateur directement auprès d'Appwrite et crée une session active."
           },
@@ -1234,8 +1403,13 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/jwts",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "jwts"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "jwts"
+              ]
             },
             "description": "Génère un token JWT client-side temporaire pour signer les requêtes vers l'API Bara."
           },
@@ -1271,9 +1445,14 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/profile",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "profile"]
+              "raw": "{{base_url}}/auth/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
             },
             "description": "Récupère les informations de l'utilisateur actuellement connecté (id, name, email, phone, avatarUrl), y compris la liste de ses organisations avec une structure à plat simplifiée contenant : les rôles du membre ('roles'), le statut de l'abonnement ('subscriptionStatus': 'none'|'pending'|'active'|'grace_period'|'expired'), si l'abonnement est actif ('hasActiveSubscription'), si le membre possède une licence active ('hasValidLicense'), le nom du plan ('planName'), le slug du plan ('planSlug'), la date d'expiration de l'abonnement ('expiresAt') et les jours restants ('daysRemaining')."
           },
@@ -1304,8 +1483,14 @@
             ],
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/current",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "current"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "current"
+              ]
             },
             "description": "Déconnecte l'utilisateur en supprimant sa session active sur Appwrite."
           },
@@ -1345,9 +1530,15 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/profile/avatar",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "profile", "avatar"]
+              "raw": "{{base_url}}/auth/profile/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "profile",
+                "avatar"
+              ]
             },
             "description": "Met à jour la photo de profil de l'utilisateur."
           },
@@ -1364,9 +1555,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/profile/avatar",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "profile", "avatar"]
+              "raw": "{{base_url}}/auth/profile/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "profile",
+                "avatar"
+              ]
             },
             "description": "Supprime la photo de profil de l'utilisateur."
           },
@@ -1389,9 +1586,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations"]
+              "raw": "{{base_url}}/organisations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations"
+              ]
             },
             "description": "Affiche la liste des organisations auxquelles l'utilisateur appartient avec leurs informations de base (id, name, membersCount, logoUrl, createdAt, updatedAt)."
           },
@@ -1426,12 +1627,16 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Acme Corporation\",\n  \"description\": \"Fabricant d'enclumes\",\n  \"address\": \"123 Rue de l'Industrie\"\n}"
+              "raw": "{\n  \"name\": \"Acme Corp {{$randomInt}}\",\n  \"description\": \"{{$randomCatchPhrase}}\",\n  \"address\": \"{{$randomStreetAddress}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations"]
+              "raw": "{{base_url}}/organisations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations"
+              ]
             },
             "description": "Crée une nouvelle organisation et définit l'utilisateur comme propriétaire."
           },
@@ -1471,9 +1676,14 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}"
+              ]
             },
             "description": "Affiche les détails d'une organisation spécifique."
           },
@@ -1495,7 +1705,7 @@
         {
           "name": "Mettre à jour une organisation",
           "request": {
-            "method": "PUT",
+            "method": "PATCH",
             "header": [
               {
                 "key": "Content-Type",
@@ -1511,9 +1721,14 @@
               "raw": "{\n  \"name\": \"Acme Corporation (Modifiée)\",\n  \"description\": \"Nouvelle description de l'entreprise\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}"
+              ]
             },
             "description": "Met à jour les informations de l'organisation."
           },
@@ -1543,9 +1758,14 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}"
+              ]
             },
             "description": "Supprime une organisation (nécessite des droits d'administration)."
           },
@@ -1585,9 +1805,15 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/logo",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "logo"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/logo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "logo"
+              ]
             },
             "description": "Met à jour le logo de l'organisation."
           },
@@ -1604,9 +1830,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/subscription",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "subscription"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/subscription",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "subscription"
+              ]
             },
             "description": "Affiche les détails de la souscription de l'organisation (statut calculé: 'active', 'grace_period', 'expired', 'pending', 'rejected' ou 'none') ainsi que la consommation des ressources et sièges de licence."
           },
@@ -1631,9 +1863,15 @@
               "raw": "{\n  \"planId\": \"plan_id_here\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/subscription",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "subscription"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/subscription",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "subscription"
+              ]
             },
             "description": "Permet à l'owner de l'organisation de s'abonner à un plan. La souscription est créée à l'état en attente ('status': 'pending', 'isActive': false) et doit être approuvée par un administrateur pour être active."
           },
@@ -1669,9 +1907,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/licenses",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "licenses"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/licenses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "licenses"
+              ]
             },
             "description": "Lister tous les sièges (licences) assignés aux membres."
           },
@@ -1696,9 +1940,16 @@
               "raw": "{\n  \"userId\": \"{{memberId}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/licenses/assign",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "licenses", "assign"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/licenses/assign",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "licenses",
+                "assign"
+              ]
             },
             "description": "Assigne une licence de siège à un membre spécifique."
           },
@@ -1723,9 +1974,16 @@
               "raw": "{\n  \"userId\": \"{{memberId}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/licenses/revoke",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "licenses", "revoke"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/licenses/revoke",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "licenses",
+                "revoke"
+              ]
             },
             "description": "Révoque une licence de siège d'un membre spécifique."
           },
@@ -1748,9 +2006,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "members"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members"
+              ]
             },
             "description": "Affiche tous les membres d'une organisation donnée."
           },
@@ -1788,9 +2052,15 @@
               "raw": "{\n  \"email\": \"nouveau.membre@example.com\",\n  \"roles\": [\"admin\", \"user\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "members"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members"
+              ]
             },
             "description": "Ajoute un nouvel utilisateur ou invite un utilisateur existant à rejoindre l'organisation."
           },
@@ -1830,9 +2100,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "members", "{{memberId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{memberId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members",
+                "{{memberId}}"
+              ]
             },
             "description": "Récupère les détails d'un membre spécifique au sein de l'organisation."
           },
@@ -1854,7 +2131,7 @@
         {
           "name": "Modifier les rôles d'un membre",
           "request": {
-            "method": "PUT",
+            "method": "PATCH",
             "header": [
               {
                 "key": "Content-Type",
@@ -1870,9 +2147,16 @@
               "raw": "{\n  \"roles\": [\"user\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "members", "{{memberId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{memberId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members",
+                "{{memberId}}"
+              ]
             },
             "description": "Met à jour les rôles attribués à un membre spécifique."
           },
@@ -1902,9 +2186,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "members", "{{memberId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{memberId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members",
+                "{{memberId}}"
+              ]
             },
             "description": "Supprime un utilisateur de l'organisation."
           },
@@ -1940,9 +2231,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "modules"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "modules"
+              ]
             },
             "description": "Récupère la liste des modules actuellement activés pour l'organisation."
           },
@@ -1967,9 +2264,15 @@
               "raw": "{\n  \"module\": \"directory\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "modules"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "modules"
+              ]
             },
             "description": "Active un nouveau module pour l'organisation et provisionne les ressources nécessaires."
           },
@@ -1986,9 +2289,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/modules/directory",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "modules", "directory"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/modules/directory",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "modules",
+                "directory"
+              ]
             },
             "description": "Désactive un module pour l'organisation (les données sont conservées)."
           },
@@ -2011,9 +2321,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/modules",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "modules"]
+              "raw": "{{base_url}}/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "modules"
+              ]
             },
             "description": "Affiche tous les modules publiés et disponibles à l'activation."
           },
@@ -2044,9 +2358,14 @@
               "raw": "{\n  \"moduleName\": \"directory\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/marketplace",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "marketplace"]
+              "raw": "{{base_url}}/admin/marketplace",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "marketplace"
+              ]
             },
             "description": "Publie un module du code vers le marketplace."
           },
@@ -2063,9 +2382,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/marketplace/directory",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "marketplace", "directory"]
+              "raw": "{{base_url}}/admin/marketplace/directory",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "marketplace",
+                "directory"
+              ]
             },
             "description": "Retire un module du marketplace."
           },
@@ -2082,9 +2407,14 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/plans",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "plans"]
+              "raw": "{{base_url}}/admin/plans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans"
+              ]
             },
             "description": "Affiche tous les plans."
           },
@@ -2106,12 +2436,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Enterprise Plan\",\n  \"slug\": \"enterprise\",\n  \"description\": \"Custom enterprise plan\",\n  \"price\": 15000,\n  \"maxMembers\": -1,\n  \"maxStorageMB\": 100000,\n  \"maxCouriersPerMonth\": -1,\n  \"maxModules\": -1,\n  \"allowedModules\": [\"directory\", \"courier\"],\n  \"features\": [\"Priority Support\", \"Dedicated SLA\"]\n}"
+              "raw": "{\n  \"name\": \"Enterprise Plan {{$randomWord}}\",\n  \"slug\": \"enterprise-{{$randomWord}}\",\n  \"description\": \"{{$randomCatchPhrase}}\",\n  \"price\": 15000,\n  \"maxMembers\": -1,\n  \"maxStorageMB\": 100000,\n  \"maxCouriersPerMonth\": -1,\n  \"maxModules\": -1,\n  \"allowedModules\": [\"directory\", \"courier\"],\n  \"features\": [\"Priority Support\", \"Dedicated SLA\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/plans",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "plans"]
+              "raw": "{{base_url}}/admin/plans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans"
+              ]
             },
             "description": "Crée un nouveau plan de tarification."
           },
@@ -2136,9 +2471,15 @@
               "raw": "{\n  \"name\": \"Enterprise Plan Updated\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/plans/{{planId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "plans", "{{planId}}"]
+              "raw": "{{base_url}}/admin/plans/{{planId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans",
+                "{{planId}}"
+              ]
             },
             "description": "Met à jour un plan existant."
           },
@@ -2155,9 +2496,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/plans/{{planId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "plans", "{{planId}}"]
+              "raw": "{{base_url}}/admin/plans/{{planId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans",
+                "{{planId}}"
+              ]
             },
             "description": "Supprime un plan existant."
           },
@@ -2174,9 +2521,14 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/subscriptions",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "subscriptions"]
+              "raw": "{{base_url}}/admin/subscriptions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions"
+              ]
             },
             "description": "Affiche tous les abonnements émis."
           },
@@ -2201,9 +2553,14 @@
               "raw": "{\n  \"planId\": \"plan_id_here\",\n  \"orgId\": \"org_id_here\",\n  \"totalSeatsPurchased\": 10\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/subscriptions",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "subscriptions"]
+              "raw": "{{base_url}}/admin/subscriptions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions"
+              ]
             },
             "description": "Émet un abonnement manuel pour une organisation."
           },
@@ -2228,9 +2585,15 @@
               "raw": "{\n  \"totalSeatsPurchased\": 15,\n  \"status\": \"active\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/subscriptions/{{subscriptionId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "subscriptions", "{{subscriptionId}}"]
+              "raw": "{{base_url}}/admin/subscriptions/{{subscriptionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions",
+                "{{subscriptionId}}"
+              ]
             },
             "description": "Modifie les détails ou le statut ('pending', 'active', 'rejected') d'un abonnement."
           },
@@ -2255,9 +2618,15 @@
               "raw": "{\n  \"status\": \"active\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/subscriptions/{{subscriptionId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "subscriptions", "{{subscriptionId}}"]
+              "raw": "{{base_url}}/admin/subscriptions/{{subscriptionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions",
+                "{{subscriptionId}}"
+              ]
             },
             "description": "Approuve un abonnement en attente en le passant à l'état actif, ce qui provisionne automatiquement le premier siège de licence pour l'organisation."
           },
@@ -2282,9 +2651,15 @@
               "raw": "{\n  \"status\": \"rejected\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/subscriptions/{{subscriptionId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "subscriptions", "{{subscriptionId}}"]
+              "raw": "{{base_url}}/admin/subscriptions/{{subscriptionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions",
+                "{{subscriptionId}}"
+              ]
             },
             "description": "Rejette un abonnement, interdisant toute opération ultérieure pour l'organisation."
           },
@@ -2301,9 +2676,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/plans/{{planId}}/usage",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "plans", "{{planId}}", "usage"]
+              "raw": "{{base_url}}/admin/plans/{{planId}}/usage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans",
+                "{{planId}}",
+                "usage"
+              ]
             },
             "description": "Permet de voir le nombre de souscriptions actives/émises pour un plan donné."
           },
@@ -2343,9 +2725,15 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments"]
+                  "raw": "{{base_url}}/organisations/{{orgId}}/departments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments"
+                  ]
                 },
                 "description": "Affiche tous les départements d'une organisation donnée."
               },
@@ -2367,12 +2755,18 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Ressources Humaines\",\n  \"description\": \"Gestion du personnel et recrutement\",\n  \"organisationId\": \"{{orgId}}\"\n}"
+                  "raw": "{\n  \"name\": \"HR Dept {{$randomWord}}\",\n  \"description\": \"{{$randomCatchPhrase}}\",\n  \"organisationId\": \"{{orgId}}\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments"]
+                  "raw": "{{base_url}}/organisations/{{orgId}}/departments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments"
+                  ]
                 },
                 "description": "Crée un nouveau département dans l'organisation."
               },
@@ -2410,9 +2804,16 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments", "{{deptId}}"]
+                  "raw": "{{base_url}}/organisations/{{orgId}}/departments/{{deptId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
                 },
                 "description": "Récupère les détails d'un département spécifique."
               },
@@ -2421,7 +2822,7 @@
             {
               "name": "Modifier un département",
               "request": {
-                "method": "PUT",
+                "method": "PATCH",
                 "header": [
                   {
                     "key": "Content-Type",
@@ -2434,12 +2835,19 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"RH & Recrutement\",\n  \"organisationId\": \"{{orgId}}\"\n}"
+                  "raw": "{\n  \"name\": \"HR Dept {{$randomWord}} Updated\",\n  \"organisationId\": \"{{orgId}}\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments", "{{deptId}}"]
+                  "raw": "{{base_url}}/organisations/{{orgId}}/departments/{{deptId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
                 },
                 "description": "Met à jour les informations d'un département."
               },
@@ -2456,9 +2864,16 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "organisations", "{{orgId}}", "departments", "{{deptId}}"]
+                  "raw": "{{base_url}}/organisations/{{orgId}}/departments/{{deptId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
                 },
                 "description": "Supprime un département de l'organisation."
               },
@@ -2489,11 +2904,11 @@
                   "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"departmentId\": \"{{deptId}}\",\n  \"departmentRole\": \"member\",\n  \"jobTitle\": \"Développeur Fullstack\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/members/{{memberId}}/department",
-                  "host": ["{{base_url}}"],
+                  "raw": "{{base_url}}/organisations/{{orgId}}/members/{{memberId}}/department",
+                  "host": [
+                    "{{base_url}}"
+                  ],
                   "path": [
-                    "api",
-                    "v1",
                     "organisations",
                     "{{orgId}}",
                     "members",
@@ -2516,11 +2931,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/departments/{{deptId}}/members",
-                  "host": ["{{base_url}}"],
+                  "raw": "{{base_url}}/organisations/{{orgId}}/departments/{{deptId}}/members",
+                  "host": [
+                    "{{base_url}}"
+                  ],
                   "path": [
-                    "api",
-                    "v1",
                     "organisations",
                     "{{orgId}}",
                     "departments",
@@ -2543,9 +2958,16 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/profiles/{{profileId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "organisations", "{{orgId}}", "profiles", "{{profileId}}"]
+                  "raw": "{{base_url}}/organisations/{{orgId}}/profiles/{{profileId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "profiles",
+                    "{{profileId}}"
+                  ]
                 },
                 "description": "Supprime le profil d'un membre (le retire de son département)."
               },
@@ -2570,9 +2992,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             },
             "description": "Affiche tous les courriers d'une organisation."
           },
@@ -2616,17 +3044,17 @@
                 },
                 {
                   "key": "subject",
-                  "value": "Facture Mars 2026",
+                  "value": "Facture {{$randomWord}} - {{$randomCatchPhrase}}",
                   "type": "text"
                 },
                 {
                   "key": "contactName",
-                  "value": "EDF",
+                  "value": "EDF {{$randomCompanyName}}",
                   "type": "text"
                 },
                 {
                   "key": "contactNumber",
-                  "value": "REF-001",
+                  "value": "REF-{{$randomInt}}",
                   "type": "text"
                 },
                 {
@@ -2647,9 +3075,15 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             },
             "description": "Enregistre un nouveau courrier dans le système."
           },
@@ -2737,9 +3171,15 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             },
             "description": "Enregistre un nouveau courrier sortant."
           },
@@ -2769,9 +3209,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}"
+              ]
             },
             "description": "Affiche les informations complètes d'un courrier spécifique par son identifiant."
           },
@@ -2809,9 +3256,16 @@
               "raw": "{\n  \"subject\": \"Sujet de courrier modifié\",\n  \"urgency\": \"urgent\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}"
+              ]
             },
             "description": "Permet de modifier les métadonnées d'un courrier (sujet, urgence, assignation, etc.)."
           },
@@ -2841,9 +3295,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}"
+              ]
             },
             "description": "Déplace le courrier dans la corbeille (panier)."
           },
@@ -2873,11 +3334,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/force",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/force",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "couriers",
@@ -2913,11 +3374,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/restore",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/restore",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "couriers",
@@ -2957,11 +3418,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/messages",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/messages",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "couriers",
@@ -3005,7 +3466,7 @@
               "formdata": [
                 {
                   "key": "content",
-                  "value": "Message de chat pour le courrier",
+                  "value": "Chat: {{$randomLoremSentence}}",
                   "type": "text"
                 },
                 {
@@ -3016,11 +3477,11 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/messages",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/messages",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "couriers",
@@ -3060,11 +3521,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/replies",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/replies",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "couriers",
@@ -3108,7 +3569,7 @@
               "formdata": [
                 {
                   "key": "content",
-                  "value": "Contenu de la réponse officielle",
+                  "value": "Official Reply: {{$randomLoremParagraph}}",
                   "type": "text"
                 },
                 {
@@ -3119,11 +3580,11 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/replies",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/replies",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "couriers",
@@ -3171,11 +3632,11 @@
               "raw": "{\n  \"documentStatus\": \"finalized\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/couriers/{{courierId}}/replies/{{replyId}}",
-              "host": ["{{base_url}}"],
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/replies/{{replyId}}",
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
-                "api",
-                "v1",
                 "organisations",
                 "{{orgId}}",
                 "couriers",
@@ -3218,9 +3679,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/contacts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts"
+              ]
             }
           },
           "response": [],
@@ -3275,12 +3742,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+123456789\",\n  \"structureType\": \"physique\",\n  \"address\": \"123 Main St\"\n}"
+              "raw": "{\n  \"name\": \"{{$randomFullName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"phone\": \"{{$randomPhoneNumber}}\",\n  \"structureType\": \"physique\",\n  \"address\": \"{{$randomStreetAddress}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/contacts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts"
+              ]
             }
           },
           "response": []
@@ -3304,9 +3777,16 @@
               "raw": "{\n  \"name\": \"John Updated\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{contactId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{contactId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts",
+                "{{contactId}}"
+              ]
             }
           },
           "response": [],
@@ -3335,9 +3815,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{contactId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{contactId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts",
+                "{{contactId}}"
+              ]
             }
           },
           "response": [],
@@ -3366,9 +3853,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/organisations/{{orgId}}/contacts/{{contactId}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+              "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{contactId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts",
+                "{{contactId}}"
+              ]
             },
             "description": "Récupère les détails d'un contact externe par son identifiant unique."
           },
@@ -3393,7 +3887,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:3333",
+      "value": "http://localhost:3333/api/v1",
       "type": "string"
     },
     {
@@ -3424,6 +3918,11 @@
     {
       "key": "deptId",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "prod_gateway_url",
+      "value": "https://bara-api-gateway-dev-4vv0klb3.ew.gateway.dev",
       "type": "string"
     }
   ]

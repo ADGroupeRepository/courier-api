@@ -1,8 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { Query } from 'node-appwrite'
 import logger from '@adonisjs/core/services/logger'
+import env from '#start/env'
 import AuthService from '#modules/auth/auth_service'
-import { signupValidator } from '#modules/auth/auth_validator'
+import {
+  signupValidator,
+  confirmEmailVerificationValidator,
+  requestPasswordResetValidator,
+  confirmPasswordResetValidator,
+} from '#modules/auth/auth_validator'
 import OrganisationService from '#modules/organisations/organisation_service'
 import PlanService from '#modules/plans/plan_service'
 import appwrite from '#services/appwrite_service'
@@ -149,5 +155,50 @@ export default class AuthController {
     await authService.deleteAvatar(token)
 
     return response.ok({ message: 'Avatar deleted successfully' })
+  }
+
+  /**
+   * POST /api/v1/auth/verify-email
+   * Send email verification link to user.
+   */
+  async requestEmailVerification({ request, token, response }: HttpContext) {
+    const redirectUrl = request.input('redirectUrl') || `${env.get('APP_URL')}/verify-email`
+    const authService = new AuthService()
+    const result = await authService.requestEmailVerification(token!, redirectUrl)
+    return response.ok({ message: 'Verification email sent successfully', data: result })
+  }
+
+  /**
+   * PATCH /api/v1/auth/verify-email
+   * Confirm email verification.
+   */
+  async confirmEmailVerification({ request, token, response }: HttpContext) {
+    const { userId, secret } = await request.validateUsing(confirmEmailVerificationValidator)
+    const authService = new AuthService()
+    const result = await authService.confirmEmailVerification(token!, userId, secret)
+    return response.ok({ message: 'Email verified successfully', data: result })
+  }
+
+  /**
+   * POST /api/v1/auth/forgot-password
+   * Request password reset link.
+   */
+  async requestPasswordReset({ request, response }: HttpContext) {
+    const { email } = await request.validateUsing(requestPasswordResetValidator)
+    const redirectUrl = request.input('redirectUrl') || `${env.get('APP_URL')}/reset-password`
+    const authService = new AuthService()
+    const result = await authService.requestPasswordReset(email, redirectUrl)
+    return response.ok({ message: 'Password recovery email sent successfully', data: result })
+  }
+
+  /**
+   * PATCH /api/v1/auth/forgot-password
+   * Confirm password reset.
+   */
+  async confirmPasswordReset({ request, response }: HttpContext) {
+    const { userId, secret, password } = await request.validateUsing(confirmPasswordResetValidator)
+    const authService = new AuthService()
+    const result = await authService.confirmPasswordReset(userId, secret, password)
+    return response.ok({ message: 'Password reset successfully', data: result })
   }
 }

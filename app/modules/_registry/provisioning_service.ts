@@ -106,6 +106,33 @@ export default class ModuleProvisioningService {
               array: attr.array,
             })
             break
+          case 'datetime':
+            await appwrite.databases.createDatetimeAttribute({
+              databaseId,
+              collectionId: collDef.id,
+              key: attr.key,
+              required: attr.required,
+              array: attr.array,
+            })
+            break
+          case 'double':
+            await appwrite.databases.createFloatAttribute({
+              databaseId,
+              collectionId: collDef.id,
+              key: attr.key,
+              required: attr.required,
+              array: attr.array,
+            })
+            break
+          case 'email':
+            await appwrite.databases.createEmailAttribute({
+              databaseId,
+              collectionId: collDef.id,
+              key: attr.key,
+              required: attr.required,
+              array: attr.array,
+            })
+            break
           // Add other types as needed
         }
       }

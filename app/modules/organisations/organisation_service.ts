@@ -3,9 +3,9 @@ import appwrite from '#services/appwrite_service'
 import logger from '@adonisjs/core/services/logger'
 import { Compression, ID, Permission, Query, Role } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
-import ModuleProvisioningService from '#modules/_registry/provisioning_service'
-import { MODULE_REGISTRY } from '#modules/_registry/module_registry'
 import PlanService from '#modules/plans/plan_service'
+import emitter from '@adonisjs/core/services/emitter'
+import OrganisationCreated from '#events/organisation_created'
 
 interface CreateOrganisationPayload {
   name: string
@@ -98,20 +98,9 @@ export default class OrganisationService {
     })
     console.log('[OrgService] Team prefs updated.')
 
-    // Step 5: Auto-provision core modules (like 'directory')
-    console.log('[OrgService] Provisioning core modules...')
-    const provisioningService = new ModuleProvisioningService()
-    for (const [moduleName, moduleDef] of MODULE_REGISTRY) {
-      if (moduleDef.core) {
-        console.log(
-          `[OrgService] Activating core module: ${moduleName}. Memory: ${JSON.stringify(process.memoryUsage())}`
-        )
-        await provisioningService.activate(team.$id, moduleName)
-      }
-    }
-    console.log(
-      `[OrgService] Core modules provisioned. Memory: ${JSON.stringify(process.memoryUsage())}`
-    )
+    // Step 5: Dispatch core modules provisioning to background event listener
+    console.log('[OrgService] Dispatching core modules provisioning event...')
+    emitter.emit(OrganisationCreated, new OrganisationCreated(team.$id))
 
     return {
       id: team.$id,
