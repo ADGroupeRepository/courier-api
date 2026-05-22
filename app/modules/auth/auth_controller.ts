@@ -1,17 +1,17 @@
-import type { HttpContext } from '@adonisjs/core/http'
-import { Query } from 'node-appwrite'
-import logger from '@adonisjs/core/services/logger'
-import env from '#start/env'
 import AuthService from '#modules/auth/auth_service'
 import {
-  signupValidator,
   confirmEmailVerificationValidator,
-  requestPasswordResetValidator,
   confirmPasswordResetValidator,
+  requestPasswordResetValidator,
+  signupValidator,
 } from '#modules/auth/auth_validator'
 import OrganisationService from '#modules/organisations/organisation_service'
 import PlanService from '#modules/plans/plan_service'
 import appwrite from '#services/appwrite_service'
+import env from '#start/env'
+import type { HttpContext } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
+import { Query } from 'node-appwrite'
 
 export default class AuthController {
   /**
