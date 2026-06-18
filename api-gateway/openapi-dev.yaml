@@ -214,17 +214,6 @@ paths:
       responses:
         '200':
           description: Success
-    put:
-      summary: Mettre à jour une organisation
-      operationId: updateOrganisation
-      parameters:
-        - name: orgId
-          in: path
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Success
     patch:
       summary: Mettre à jour une organisation (Patch)
       operationId: patchOrganisation
@@ -293,21 +282,6 @@ paths:
     get:
       summary: Voir un membre
       operationId: getMember
-      parameters:
-        - name: orgId
-          in: path
-          required: true
-          type: string
-        - name: memberId
-          in: path
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Success
-    put:
-      summary: Modifier les rôles d'un membre
-      operationId: updateMemberRoles
       parameters:
         - name: orgId
           in: path
@@ -450,21 +424,6 @@ paths:
     get:
       summary: Voir un département
       operationId: getDepartment
-      parameters:
-        - name: orgId
-          in: path
-          required: true
-          type: string
-        - name: id
-          in: path
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Success
-    put:
-      summary: Modifier un département
-      operationId: updateDepartment
       parameters:
         - name: orgId
           in: path

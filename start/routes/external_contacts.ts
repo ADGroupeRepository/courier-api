@@ -14,4 +14,5 @@ router
   })
   .prefix('/api/v1/organisations/:orgId/contacts')
   .use(middleware.auth())
+  .use(middleware.verified())
   .use(middleware.moduleGuard('courier'))

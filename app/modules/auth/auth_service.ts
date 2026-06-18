@@ -1,8 +1,12 @@
-import { ID, AppwriteException, type Models } from 'node-appwrite'
+import { ID, AppwriteException, Query } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
+import { randomBytes } from 'node:crypto'
 import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
+import CacheService from '#services/cache_service'
+import EmailService from '#services/email_service'
 import logger from '@adonisjs/core/services/logger'
+import env from '#start/env'
 
 interface SignupPayload {
   name: string
@@ -165,82 +169,211 @@ export default class AuthService {
   }
 
   /**
-   * Request email verification link for the logged in user.
+   * Request email verification — generates a secure token, stores it in Redis,
+   * and sends the verification email via Resend (bypassing Appwrite SMTP).
    * @param jwt - The user's session JWT.
-   * @param url - The redirect landing URL.
-   * @returns The generated token.
+   * @param redirectUrl - The base URL the front-end will redirect to with the token.
    */
-  async requestEmailVerification(jwt: string, url: string): Promise<Models.Token> {
+  async requestEmailVerification(jwt: string, redirectUrl: string): Promise<{ userId: string }> {
     const { account } = appwrite.createSessionClient(jwt)
-    const token = await account.createEmailVerification({ url })
+    const user = await account.get()
 
-    const verificationLink = `${url}?userId=${token.userId}&secret=${token.secret}`
-    logger.info(
-      {
-        userId: token.userId,
-        tokenId: token.$id,
-        secret: token.secret,
-        expire: token.expire,
-        verificationLink,
-      },
-      'Email verification link generated (TODO: Integrate custom SMTP/Mail Provider in the future to customize/log full mail templates)'
-    )
+    if (user.emailVerification) {
+      return { userId: user.$id }
+    }
 
-    return token
+    // Generate a cryptographically secure token
+    const secret = randomBytes(32).toString('hex')
+    const cacheKey = `email_verify:${user.$id}`
+    const verificationLink = `${redirectUrl}?userId=${user.$id}&secret=${secret}`
+
+    // Store token in Redis with 24h TTL
+    await CacheService.set(cacheKey, { secret, email: user.email }, 60 * 60 * 24)
+
+    logger.info({ userId: user.$id, email: user.email }, 'Email verification token generated')
+
+    // Send email via Resend
+    await EmailService.send({
+      to: user.email,
+      subject: 'Vérifiez votre adresse e-mail',
+      html: buildVerificationEmailHtml(user.name, verificationLink),
+      text: `Bonjour ${user.name},\n\nVeuillez vérifier votre adresse e-mail en cliquant sur le lien ci-dessous :\n\n${verificationLink}\n\nCe lien expire dans 24 heures.`,
+    })
+
+    return { userId: user.$id }
   }
 
   /**
-   * Confirm email verification using the userId and secret.
-   * @param jwt - The user's session JWT.
-   * @param userId - The user ID to verify.
-   * @param secret - The verification secret.
-   * @returns The updated token status.
+   * Confirm email verification using a custom Redis-backed token.
+   * Marks the user as verified via the Appwrite Admin SDK.
+   * @param userId - The user ID from the verification link.
+   * @param secret - The verification secret from the verification link.
    */
-  async confirmEmailVerification(
-    jwt: string,
-    userId: string,
-    secret: string
-  ): Promise<Models.Token> {
-    const { account } = appwrite.createSessionClient(jwt)
-    return await account.updateEmailVerification({ userId, secret })
+  async confirmEmailVerification(userId: string, secret: string): Promise<{ verified: boolean }> {
+    const cacheKey = `email_verify:${userId}`
+    const cached = await CacheService.get<{ secret: string; email: string }>(cacheKey)
+
+    if (!cached || cached.secret !== secret) {
+      const error = new Error('Invalid or expired verification link.')
+      ;(error as any).status = 400
+      throw error
+    }
+
+    // Mark verified in Appwrite via Admin SDK
+    await appwrite.users.updateEmailVerification({ userId, emailVerification: true })
+
+    // Single-use: delete the token immediately
+    await CacheService.delete(cacheKey)
+
+    logger.info({ userId }, 'Email verified successfully')
+
+    return { verified: true }
   }
 
   /**
-   * Request a password reset recovery link for the specified email.
-   * @param email - The email to send recovery to.
-   * @param url - The redirect landing URL.
-   * @returns The generated recovery token.
+   * Request a password reset — looks up the user, generates a secure Redis-backed
+   * token, and sends a recovery email via Resend (bypassing Appwrite SMTP).
+   * Silently succeeds if the email is not found (prevents email enumeration).
+   * @param email - The email address to send recovery to.
+   * @param redirectUrl - The base URL the front-end will use with the token.
    */
-  async requestPasswordReset(email: string, url: string): Promise<Models.Token> {
-    const token = await appwrite.account.createRecovery({ email, url })
+  async requestPasswordReset(email: string, redirectUrl: string): Promise<{ sent: boolean }> {
+    try {
+      // Find user by email via Admin SDK
+      const usersResult = await appwrite.users.list({
+        queries: [Query.equal('email', email)],
+      })
 
-    const recoveryLink = `${url}?userId=${token.userId}&secret=${token.secret}`
-    logger.info(
-      {
-        userId: token.userId,
-        tokenId: token.$id,
-        secret: token.secret,
-        expire: token.expire,
-        recoveryLink,
-      },
-      'Password recovery link generated (TODO: Integrate custom SMTP/Mail Provider in the future to customize/log full mail templates)'
-    )
+      if (usersResult.total === 0) {
+        // Silent success — prevent email enumeration
+        logger.info({ email }, 'Password reset requested for unknown email — silently ignored')
+        return { sent: false }
+      }
 
-    return token
+      const user = usersResult.users[0]
+
+      // Generate a cryptographically secure token
+      const secret = randomBytes(32).toString('hex')
+      const cacheKey = `pwd_reset:${secret}`
+      const recoveryLink = `${redirectUrl}?userId=${user.$id}&secret=${secret}`
+
+      // Store userId in Redis with 1h TTL
+      await CacheService.set(cacheKey, { userId: user.$id }, 60 * 60)
+
+      logger.info({ userId: user.$id, email }, 'Password reset token generated')
+
+      // Send email via Resend
+      await EmailService.send({
+        to: user.email,
+        subject: 'Réinitialisez votre mot de passe',
+        html: buildPasswordResetEmailHtml(user.name, recoveryLink),
+        text: `Bonjour ${user.name},\n\nRéinitialisez votre mot de passe en cliquant sur le lien ci-dessous :\n\n${recoveryLink}\n\nCe lien expire dans 1 heure. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.`,
+      })
+    } catch (err: any) {
+      // Log but do not expose internal errors to prevent information leakage
+      logger.error({ err, email }, 'Error during password reset request')
+    }
+
+    return { sent: true }
   }
 
   /**
-   * Confirm password reset using the userId, secret, and new password.
-   * @param userId - The user ID.
-   * @param secret - The recovery secret.
+   * Confirm password reset using a custom Redis-backed token.
+   * Updates the user's password via the Appwrite Admin SDK.
+   * @param userId - The user ID from the recovery link.
+   * @param secret - The recovery secret from the recovery link.
    * @param password - The new password.
-   * @returns The updated recovery token status.
    */
   async confirmPasswordReset(
     userId: string,
     secret: string,
     password: string
-  ): Promise<Models.Token> {
-    return await appwrite.account.updateRecovery({ userId, secret, password })
+  ): Promise<{ reset: boolean }> {
+    const cacheKey = `pwd_reset:${secret}`
+    const cached = await CacheService.get<{ userId: string }>(cacheKey)
+
+    if (!cached || cached.userId !== userId) {
+      const error = new Error('Invalid or expired password reset link.')
+      ;(error as any).status = 400
+      throw error
+    }
+
+    // Update password via Admin SDK
+    await appwrite.users.updatePassword({ userId, password })
+
+    // Single-use: delete the token immediately
+    await CacheService.delete(cacheKey)
+
+    logger.info({ userId }, 'Password reset successfully')
+
+    return { reset: true }
   }
+}
+
+// ── Email HTML Templates ──────────────────────────────────────────────────────
+
+function buildVerificationEmailHtml(name: string, link: string): string {
+  const appUrl = env.get('APP_URL')
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vérifiez votre adresse e-mail</title>
+</head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 0">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+        <tr><td style="background:#111827;padding:24px 32px">
+          <span style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px">Bara</span>
+        </td></tr>
+        <tr><td style="padding:32px">
+          <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;color:#111827">Vérifiez votre adresse e-mail</h1>
+          <p style="margin:0 0 16px;color:#374151">Bonjour ${name},</p>
+          <p style="margin:0 0 24px;color:#374151">Cliquez sur le bouton ci-dessous pour vérifier votre adresse e-mail. Ce lien expire dans <strong>24 heures</strong>.</p>
+          <a href="${link}" style="display:inline-block;padding:12px 24px;background:#111827;color:#ffffff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">Vérifier l'e-mail &rarr;</a>
+          <p style="margin:24px 0 0;font-size:12px;color:#6b7280">Ou copiez et collez ce lien dans votre navigateur :<br/><a href="${link}" style="color:#111827">${link}</a></p>
+        </td></tr>
+        <tr><td style="padding:20px 32px;border-top:1px solid #f3f4f6">
+          <p style="margin:0;font-size:12px;color:#6b7280">Si vous n'avez pas créé de compte Bara, vous pouvez ignorer cet e-mail en toute sécurité. Visitez <a href="${appUrl}" style="color:#111827">${appUrl}</a> si vous avez des questions.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+function buildPasswordResetEmailHtml(name: string, link: string): string {
+  const appUrl = env.get('APP_URL')
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Réinitialisez votre mot de passe</title>
+</head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 0">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+        <tr><td style="background:#111827;padding:24px 32px">
+          <span style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px">Bara</span>
+        </td></tr>
+        <tr><td style="padding:32px">
+          <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;color:#111827">Réinitialisez votre mot de passe</h1>
+          <p style="margin:0 0 16px;color:#374151">Bonjour ${name},</p>
+          <p style="margin:0 0 24px;color:#374151">Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour continuer. Ce lien expire dans <strong>1 heure</strong>.</p>
+          <a href="${link}" style="display:inline-block;padding:12px 24px;background:#111827;color:#ffffff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">Réinitialiser le mot de passe &rarr;</a>
+          <p style="margin:24px 0 0;font-size:12px;color:#6b7280">Ou copiez et collez ce lien dans votre navigateur :<br/><a href="${link}" style="color:#111827">${link}</a></p>
+        </td></tr>
+        <tr><td style="padding:20px 32px;border-top:1px solid #f3f4f6">
+          <p style="margin:0;font-size:12px;color:#6b7280">Si vous n'avez pas demandé de réinitialisation de mot de passe, vous pouvez ignorer cet e-mail en toute sécurité. Votre mot de passe restera inchangé. Visitez <a href="${appUrl}" style="color:#111827">${appUrl}</a> si vous avez des questions.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
 }
