@@ -20,6 +20,19 @@ export default class MembersController {
   }
 
   /**
+   * GET /api/v1/organisations/:orgId/members/:memberId
+   * Retrieve a single member of an organisation by membership ID.
+   */
+  async show({ request, response }: HttpContext) {
+    const orgId = request.param('orgId')
+    const membershipId = request.param('memberId')
+    const service = new OrganisationService()
+    const member = await service.getMember(orgId, membershipId)
+
+    return response.ok({ data: member })
+  }
+
+  /**
    * POST /api/v1/organisations/:orgId/members
    * Add a new member to the organisation by email address.
    * Using the admin API key means the membership is confirmed instantly.

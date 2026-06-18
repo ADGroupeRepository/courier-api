@@ -1356,6 +1356,106 @@
             "description": "Supprime la photo de profil de l'utilisateur."
           },
           "response": []
+        },
+        {
+          "name": "Demander la réinitialisation du mot de passe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"redirectUrl\": \"{{base_url}}/reset-password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "description": "Demande l'envoi d'un e-mail de réinitialisation du mot de passe pour l'adresse e-mail fournie."
+          },
+          "response": []
+        },
+        {
+          "name": "Confirmer la réinitialisation du mot de passe",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-id\",\n  \"secret\": \"secret-code\",\n  \"password\": \"nouveauMotDePasse123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "description": "Confirme la réinitialisation du mot de passe avec l'identifiant utilisateur, le code secret reçu par e-mail et le nouveau mot de passe."
+          },
+          "response": []
+        },
+        {
+          "name": "Demander la vérification de l'email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redirectUrl\": \"{{base_url}}/verify-email\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify-email",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-email"]
+            },
+            "description": "Demande l'envoi d'un e-mail contenant un lien de vérification de l'adresse e-mail pour l'utilisateur connecté."
+          },
+          "response": []
+        },
+        {
+          "name": "Confirmer la vérification de l'email",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-id\",\n  \"secret\": \"secret-code\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify-email",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-email"]
+            },
+            "description": "Confirme la vérification de l'adresse e-mail avec l'identifiant de l'utilisateur et le code secret reçu."
+          },
+          "response": []
         }
       ]
     },
@@ -2517,6 +2617,102 @@
                   "path": ["organisations", "{{orgId}}", "profiles", "{{profileId}}"]
                 },
                 "description": "Supprime le profil d'un membre (le retire de son département)."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Notifications",
+          "description": "Gestion des notifications in-app.",
+          "item": [
+            {
+              "name": "Marquer toutes les notifications comme lues",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/organisations/{{orgId}}/notifications/read-all",
+                  "host": ["{{base_url}}"],
+                  "path": ["organisations", "{{orgId}}", "notifications", "read-all"]
+                },
+                "description": "Marque toutes les notifications non lues de l'utilisateur comme lues."
+              },
+              "response": []
+            },
+            {
+              "name": "Marquer une notification comme lue",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/organisations/{{orgId}}/notifications/{{notificationId}}/read",
+                  "host": ["{{base_url}}"],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "notifications",
+                    "{{notificationId}}",
+                    "read"
+                  ]
+                },
+                "description": "Marque une notification spécifique comme lue."
+              },
+              "response": []
+            },
+            {
+              "name": "Supprimer des notifications en bloc",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ids\": [\n    \"{{notificationId}}\"\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/organisations/{{orgId}}/notifications",
+                  "host": ["{{base_url}}"],
+                  "path": ["organisations", "{{orgId}}", "notifications"]
+                },
+                "description": "Supprime plusieurs notifications spécifiées par leurs IDs."
+              },
+              "response": []
+            },
+            {
+              "name": "Supprimer une notification",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/organisations/{{orgId}}/notifications/{{notificationId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["organisations", "{{orgId}}", "notifications", "{{notificationId}}"]
+                },
+                "description": "Supprime une notification spécifique."
               },
               "response": []
             }

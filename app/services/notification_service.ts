@@ -3,6 +3,7 @@ import appwrite from '#services/appwrite_service'
 import { Query, ID, Permission, Role } from 'node-appwrite'
 import MembersService from '#modules/directory/members_service'
 import { Collections } from '#modules/_registry/collection_ids'
+import EmailService from '#services/email_service'
 
 export interface EmailPayload {
   to: string
@@ -20,7 +21,8 @@ export interface NotificationPayload {
 
 /**
  * Service for dispatching emails and in-app notifications.
- * Currently a stub for a future integration like SendGrid, AWS SES, or Appwrite Messaging.
+ * Uses Resend for transactional email delivery and Appwrite Databases
+ * for in-app notification documents.
  */
 export default class NotificationService {
   /**
@@ -42,11 +44,10 @@ export default class NotificationService {
   }
 
   /**
-   * Send an email notification.
+   * Send an email notification via Resend.
    */
   static async sendEmail(payload: EmailPayload): Promise<void> {
-    // TODO: Implement actual email sending logic (e.g., via SMTP or a third-party service)
-    logger.info({ payload }, 'Mock Email Dispatch: Email sent successfully')
+    await EmailService.send(payload)
   }
 
   /**
@@ -93,22 +94,30 @@ export default class NotificationService {
     assigneeEmail: string,
     assigneeId: string
   ): Promise<void> {
-    const subject = `You have been assigned a new Courier`
-    const body = `You have been assigned to courier ID: ${courierId}. Please review it in your dashboard.`
+    const subject = `New Courier Assignment`
+    const bodyText = `You have been assigned to courier ${courierId}. Please review it in your dashboard.`
 
     // Send Email
     await this.sendEmail({
       to: assigneeEmail,
       subject,
-      html: `<p>${body}</p>`,
-      text: body,
+      html: buildEmailHtml(
+        subject,
+        `<p style="margin:0 0 16px">You have been assigned a new courier.</p>
+        <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+          <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+        </table>
+        <p style="margin:0 0 24px">Log in to your dashboard to review and action it.</p>`,
+        'View Courier'
+      ),
+      text: bodyText,
     })
 
     // Send In-App Notification
     await this.sendInAppNotification(orgId, {
       userId: assigneeId,
       title: 'New Courier Assignment',
-      body,
+      body: bodyText,
       link: `/couriers/${courierId}`,
     })
   }
@@ -196,20 +205,29 @@ export default class NotificationService {
       for (const recipientId of recipients) {
         const email = await this.getEmailByUserId(orgId, recipientId)
         if (email) {
-          const subject = `New ${itemType} on Courier`
-          const body = `A new ${itemType} was posted on courier ID: ${courierId}.`
+          const label = itemType === 'message' ? 'Message' : 'Reply'
+          const subject = `New Courier ${label}`
+          const bodyText = `A new ${itemType} was posted on courier ${courierId}.`
 
           await this.sendEmail({
             to: email,
             subject,
-            html: `<p>${body}</p>`,
-            text: body,
+            html: buildEmailHtml(
+              subject,
+              `<p style="margin:0 0 16px">A new <strong>${itemType}</strong> has been posted on a courier you are involved in.</p>
+              <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+                <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+              </table>
+              <p style="margin:0 0 24px">Log in to your dashboard to view and respond.</p>`,
+              `View ${label}`
+            ),
+            text: bodyText,
           })
 
           await this.sendInAppNotification(orgId, {
             userId: recipientId,
-            title: `New Courier ${itemType === 'message' ? 'Message' : 'Reply'}`,
-            body,
+            title: `New Courier ${label}`,
+            body: bodyText,
             link: `/couriers/${courierId}`,
           })
         }
@@ -231,23 +249,75 @@ export default class NotificationService {
     recipientEmail: string,
     recipientId: string
   ): Promise<void> {
-    const subject = `New message on Courier`
-    const body = `A new message was posted on courier ID: ${courierId}.`
+    const subject = `New Courier Message`
+    const bodyText = `A new message was posted on courier ${courierId}.`
 
     // Send Email
     await this.sendEmail({
       to: recipientEmail,
       subject,
-      html: `<p>${body}</p>`,
-      text: body,
+      html: buildEmailHtml(
+        subject,
+        `<p style="margin:0 0 16px">A new <strong>message</strong> has been posted on a courier you are involved in.</p>
+        <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+          <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+        </table>
+        <p style="margin:0 0 24px">Log in to your dashboard to view and respond.</p>`,
+        'View Message'
+      ),
+      text: bodyText,
     })
 
     // Send In-App Notification
     await this.sendInAppNotification(orgId, {
       userId: recipientId,
       title: 'New Courier Message',
-      body,
+      body: bodyText,
       link: `/couriers/${courierId}`,
     })
   }
+}
+
+/**
+ * Builds a minimal but clean branded HTML email body.
+ */
+function buildEmailHtml(title: string, content: string, ctaLabel?: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 0">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+          <!-- Header -->
+          <tr>
+            <td style="background:#111827;padding:24px 32px">
+              <span style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px">Bara</span>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:32px">
+              <h1 style="margin:0 0 20px;font-size:20px;font-weight:600;color:#111827">${title}</h1>
+              ${content}
+              ${ctaLabel ? `<a href="#" style="display:inline-block;padding:12px 24px;background:#111827;color:#ffffff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">${ctaLabel} &rarr;</a>` : ''}
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 32px;border-top:1px solid #f3f4f6">
+              <p style="margin:0;font-size:12px;color:#6b7280">You received this email because you are a member of a Bara organisation. If you have questions, contact your organisation administrator.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
 }
