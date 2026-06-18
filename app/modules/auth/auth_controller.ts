@@ -172,10 +172,10 @@ export default class AuthController {
    * PATCH /api/v1/auth/verify-email
    * Confirm email verification.
    */
-  async confirmEmailVerification({ request, token, response }: HttpContext) {
+  async confirmEmailVerification({ request, response }: HttpContext) {
     const { userId, secret } = await request.validateUsing(confirmEmailVerificationValidator)
     const authService = new AuthService()
-    const result = await authService.confirmEmailVerification(token!, userId, secret)
+    const result = await authService.confirmEmailVerification(userId, secret)
     return response.ok({ message: 'Email verified successfully', data: result })
   }
 

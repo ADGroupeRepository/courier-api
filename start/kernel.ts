@@ -45,4 +45,5 @@ export const middleware = router.named({
   moduleGuard: () => import('#middleware/module_guard_middleware'),
   admin: () => import('#middleware/admin_middleware'),
   planGuard: () => import('#middleware/plan_guard_middleware'),
+  verified: () => import('#middleware/verified_middleware'),
 })

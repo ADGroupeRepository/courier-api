@@ -408,6 +408,26 @@ export default class OrganisationService {
   }
 
   /**
+   * Get details of a single member in the organisation.
+   * @param teamId - The ID of the organisation (team).
+   * @param membershipId - The ID of the membership record.
+   */
+  async getMember(teamId: string, membershipId: string) {
+    const m = await appwrite.teams.getMembership({ teamId, membershipId })
+
+    return {
+      id: m.$id,
+      userId: m.userId,
+      userName: m.userName,
+      userEmail: m.userEmail,
+      roles: m.roles,
+      invited: m.invited,
+      joined: m.joined,
+      confirm: m.confirm,
+    }
+  }
+
+  /**
    * Update a member's roles within the organisation.
    * @param teamId - The ID of the organisation (team).
    * @param membershipId - The ID of the membership record.
