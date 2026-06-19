@@ -139,7 +139,7 @@ export default class NotificationService {
         }
       } else if (targetType === 'department') {
         const membersService = await MembersService.forOrg(orgId)
-        const members = await membersService.listByDepartment(targetId)
+        const { documents: members } = await membersService.listByDepartment(targetId)
         for (const member of members) {
           const email = await this.getEmailByUserId(orgId, member.userId)
           if (email) {
@@ -192,7 +192,7 @@ export default class NotificationService {
           recipients.add(assigneeId)
         } else if (targetType === 'department') {
           const membersService = await MembersService.forOrg(orgId)
-          const members = await membersService.listByDepartment(assigneeId)
+          const { documents: members } = await membersService.listByDepartment(assigneeId)
           for (const member of members) {
             if (member.userId !== senderId) {
               recipients.add(member.userId)

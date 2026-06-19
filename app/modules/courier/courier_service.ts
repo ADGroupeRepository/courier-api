@@ -94,10 +94,11 @@ export default class CourierService {
     favorite?: boolean
     deleted?: boolean
     limit?: number
-    offset?: number
+    page?: number
   }) {
     const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
-    const offset = Math.max(options.offset ?? 0, 0)
+    const page = Math.max(options.page ?? 1, 1)
+    const offset = (page - 1) * limit
 
     const baseQueries = [Query.orderDesc('$createdAt'), Query.limit(limit), Query.offset(offset)]
 

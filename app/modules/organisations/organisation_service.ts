@@ -1,11 +1,11 @@
 import appwriteConfig from '#config/appwrite'
+import OrganisationCreated from '#events/organisation_created'
+import PlanService from '#modules/plans/plan_service'
 import appwrite from '#services/appwrite_service'
+import emitter from '@adonisjs/core/services/emitter'
 import logger from '@adonisjs/core/services/logger'
 import { Compression, ID, Permission, Query, Role } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
-import PlanService from '#modules/plans/plan_service'
-import emitter from '@adonisjs/core/services/emitter'
-import OrganisationCreated from '#events/organisation_created'
 
 interface CreateOrganisationPayload {
   name: string
@@ -388,16 +388,23 @@ export default class OrganisationService {
   }
 
   /**
-   * List all members of an organisation.
+   * List all members of an organisation with pagination.
    * @param teamId - The ID of the organisation (team).
-   * @returns A list of members with their roles and status.
+   * @param options - Pagination options.
+   * @returns A paginated list of members with their roles and status.
    */
-  async listMembers(teamId: string) {
-    const result = await appwrite.teams.listMemberships({ teamId })
+  async listMembers(teamId: string, options: { limit?: number; page?: number } = {}) {
+    const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
+    const page = Math.max(options.page ?? 1, 1)
+    const offset = (page - 1) * limit
 
-    return result.memberships.map((m) => ({
-      id: m.$id,
-      userId: m.userId,
+    const result = await appwrite.teams.listMemberships({
+      teamId,
+      queries: [Query.limit(limit), Query.offset(offset)],
+    })
+
+    const documents = result.memberships.map((m) => ({
+      id: m.userId,
       userName: m.userName,
       userEmail: m.userEmail,
       roles: m.roles,
@@ -405,6 +412,11 @@ export default class OrganisationService {
       joined: m.joined,
       confirm: m.confirm,
     }))
+
+    return {
+      total: result.total,
+      documents,
+    }
   }
 
   /**

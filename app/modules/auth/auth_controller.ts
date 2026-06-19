@@ -4,6 +4,7 @@ import {
   confirmPasswordResetValidator,
   requestPasswordResetValidator,
   signupValidator,
+  updateProfileValidator,
 } from '#modules/auth/auth_validator'
 import OrganisationService from '#modules/organisations/organisation_service'
 import PlanService from '#modules/plans/plan_service'
@@ -114,58 +115,43 @@ export default class AuthController {
           email: profile.email,
           phone: profile.phone,
           avatarUrl,
+          signatureUrl: profile.signatureUrl,
         },
         organisations: enrichedOrganisations,
       },
     })
   }
 
-  /**
-   * POST /api/v1/auth/profile/avatar
-   * Upload or replace the user's avatar.
-   */
-  async uploadAvatar({ request, response }: HttpContext) {
-    const avatar = request.file('avatar', {
-      size: '5mb',
-      extnames: ['jpg', 'png', 'jpeg', 'webp'],
-    })
+  async updateProfile({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(updateProfileValidator)
 
-    if (!avatar || !avatar.isValid) {
-      return response.badRequest({ errors: avatar?.errors || 'Invalid file' })
-    }
+    const avatar = request.file('avatar')
+    const signature = request.file('signature')
 
     const authHeader = request.header('Authorization')!
     const token = authHeader.slice(7).trim()
 
     const authService = new AuthService()
-    const avatarUrl = await authService.uploadAvatar(token, avatar.tmpPath!, avatar.clientName)
+    const updatedUser = await authService.updateProfile(
+      token,
+      { name: payload.name, phone: payload.phone },
+      {
+        avatar: avatar && avatar.tmpPath && avatar.clientName ? { tmpPath: avatar.tmpPath, fileName: avatar.clientName } : undefined,
+        signature: signature && signature.tmpPath && signature.clientName ? { tmpPath: signature.tmpPath, fileName: signature.clientName } : undefined,
+      }
+    )
 
-    return response.ok({ message: 'Avatar uploaded successfully', data: { avatarUrl } })
-  }
-
-  /**
-   * DELETE /api/v1/auth/profile/avatar
-   * Delete the user's avatar.
-   */
-  async deleteAvatar({ request, response }: HttpContext) {
-    const authHeader = request.header('Authorization')!
-    const token = authHeader.slice(7).trim()
-
-    const authService = new AuthService()
-    await authService.deleteAvatar(token)
-
-    return response.ok({ message: 'Avatar deleted successfully' })
+    return response.ok({ message: 'Profile updated successfully', data: updatedUser })
   }
 
   /**
    * POST /api/v1/auth/verify-email
-   * Send email verification link to user.
+   * Send a 6-digit OTP to the user's email for verification.
    */
-  async requestEmailVerification({ request, token, response }: HttpContext) {
-    const redirectUrl = request.input('redirectUrl') || `${env.get('APP_URL')}/verify-email`
+  async requestEmailVerification({ token, response }: HttpContext) {
     const authService = new AuthService()
-    const result = await authService.requestEmailVerification(token!, redirectUrl)
-    return response.ok({ message: 'Verification email sent successfully', data: result })
+    const result = await authService.requestEmailVerification(token!)
+    return response.ok({ message: 'Verification code sent successfully', data: result })
   }
 
   /**
@@ -173,9 +159,9 @@ export default class AuthController {
    * Confirm email verification.
    */
   async confirmEmailVerification({ request, response }: HttpContext) {
-    const { userId, secret } = await request.validateUsing(confirmEmailVerificationValidator)
+    const { userId, otp } = await request.validateUsing(confirmEmailVerificationValidator)
     const authService = new AuthService()
-    const result = await authService.confirmEmailVerification(userId, secret)
+    const result = await authService.confirmEmailVerification(userId, otp)
     return response.ok({ message: 'Email verified successfully', data: result })
   }
 

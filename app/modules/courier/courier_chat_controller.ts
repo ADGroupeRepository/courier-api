@@ -19,13 +19,21 @@ export default class CourierChatController {
     const qs = request.qs()
 
     try {
+      const limit = qs.limit ? Number.parseInt(qs.limit, 10) : 50
+      const page = qs.page ? Number.parseInt(qs.page, 10) : 1
       const service = await CourierChatService.forOrg(orgId)
-      const messages = await service.list(courierId, {
-        limit: qs.limit ? Number.parseInt(qs.limit, 10) : undefined,
-        offset: qs.offset ? Number.parseInt(qs.offset, 10) : undefined,
+      const result = await service.list(courierId, {
+        limit,
+        page,
       })
 
-      return response.ok(messages)
+      return response.ok({
+        total: result.total,
+        limit,
+        page,
+        lastPage: Math.ceil(result.total / limit),
+        data: result.documents,
+      })
     } catch (error: any) {
       return response.internalServerError({
         message: 'Failed to fetch courier messages',

@@ -31,11 +31,20 @@ export default class ExternalContactsController {
   /**
    * GET /api/v1/organisations/:orgId/contacts
    */
-  async index({ params, response }: HttpContext) {
+  async index({ request, params, response }: HttpContext) {
+    const limit = request.input('limit') ? Number.parseInt(request.input('limit'), 10) : 25
+    const page = request.input('page') ? Number.parseInt(request.input('page'), 10) : 1
+
     try {
       const service = await ExternalContactService.forOrg(params.orgId)
-      const contacts = await service.list()
-      return response.ok({ data: contacts })
+      const { documents, total } = await service.list({ limit, page })
+      return response.ok({
+        total,
+        limit,
+        page,
+        lastPage: Math.ceil(total / limit),
+        data: documents,
+      })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }

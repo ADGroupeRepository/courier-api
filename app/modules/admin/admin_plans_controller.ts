@@ -4,6 +4,7 @@ import PlanService from '#modules/plans/plan_service'
 import CacheService from '#services/cache_service'
 import { Collections } from '#modules/_registry/collection_ids'
 import { ID, Query } from 'node-appwrite'
+import EmailService from '#services/email_service'
 import {
   createPlanValidator,
   updatePlanValidator,
@@ -326,7 +327,7 @@ export default class AdminPlansController {
       // Clear cache
       await CacheService.delete(`subscription:info:${existing.orgId}`)
 
-      // If status changed to active, assign license
+      // If status changed to active, assign license and send email notification
       if (payload.status === 'active' && existing.status !== 'active') {
         if (existing.issuedBy) {
           try {
@@ -347,6 +348,36 @@ export default class AdminPlansController {
                 'Failed to automatically assign license to user'
               )
             }
+          }
+
+          // Send approval notification email to the user who requested/issued it
+          try {
+            const userDoc = await appwrite.users.get({ userId: existing.issuedBy })
+            const planDoc = await PlanService.getPlan(existing.planId)
+            const orgDoc = await appwrite.teams.get({ teamId: existing.orgId })
+
+            await EmailService.send({
+              to: userDoc.email,
+              subject: 'Votre abonnement a été approuvé !',
+              text: `Bonjour ${userDoc.name},\n\nNous avons le plaisir de vous informer que votre demande d'abonnement au forfait "${planDoc.name}" pour l'organisation "${orgDoc.name}" a été approuvée.\n\nVous pouvez dès à présent vous connecter et profiter de l'ensemble de vos fonctionnalités.\n\nL'équipe Bara.`,
+              html: `
+                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e5e5; border-radius: 8px;">
+                  <h2 style="color: #4f46e5; margin-bottom: 20px;">Félicitations !</h2>
+                  <p>Bonjour <strong>${userDoc.name}</strong>,</p>
+                  <p>Nous avons le plaisir de vous informer que votre demande d'abonnement au forfait <strong>${planDoc.name}</strong> pour l'organisation <strong>${orgDoc.name}</strong> a été approuvée.</p>
+                  <p>Toutes les fonctionnalités de votre formule sont désormais entièrement actives pour votre équipe.</p>
+                  <div style="margin: 30px 0; text-align: center;">
+                    <a href="https://bara.run" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Accéder à mon espace</a>
+                  </div>
+                  <p style="font-size: 14px; color: #666; border-top: 1px solid #e5e5e5; padding-top: 20px; margin-top: 30px;">
+                    L'équipe Bara.<br/>
+                    <em>Ceci est un message automatique, merci de ne pas y répondre directement.</em>
+                  </p>
+                </div>
+              `
+            })
+          } catch (emailErr) {
+            logger.error({ err: emailErr, userId: existing.issuedBy }, 'Failed to send subscription approval notification email')
           }
         }
       }

@@ -53,34 +53,32 @@ export default class CourierController {
     const favorite = request.input('favorite') as string | undefined
     const deleted = request.input('deleted') as string | undefined
     const limit = Number(request.input('limit')) || 25
-    const offset = Number(request.input('offset')) || 0
+    const page = Number(request.input('page')) || 1
 
     try {
-      const { canManage, departmentId } = await this.getUserContext(user, orgId)
+       const { canManage, departmentId } = await this.getUserContext(user, orgId)
 
-      // List couriers with visibility rules
-      const service = await CourierService.forOrg(orgId)
-      const result = await service.list({
-        userId: user?.$id || '',
-        departmentId,
-        canManage,
-        type,
-        archived: archived === 'true',
-        favorite: favorite === 'true' ? true : undefined,
-        deleted: deleted === 'true',
-        limit,
-        offset,
-      })
+       // List couriers with visibility rules
+       const service = await CourierService.forOrg(orgId)
+       const result = await service.list({
+         userId: user?.$id || '',
+         departmentId,
+         canManage,
+         type,
+         archived: archived === 'true',
+         favorite: favorite === 'true' ? true : undefined,
+         deleted: deleted === 'true',
+         limit,
+         page,
+       })
 
-      return response.ok({
-        data: result.documents,
-        pagination: {
-          total: result.total,
-          limit,
-          offset,
-          hasMore: offset + result.documents.length < result.total,
-        },
-      })
+       return response.ok({
+         total: result.total,
+         limit,
+         page,
+         lastPage: Math.ceil(result.total / limit),
+         data: result.documents,
+       })
     } catch (error: any) {
       if (error.message === 'User is not a member of this organisation') {
         return response.forbidden({ message: error.message })

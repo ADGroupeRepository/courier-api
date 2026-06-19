@@ -70,14 +70,116 @@ export default class AuthService {
     const { account } = appwrite.createSessionClient(jwt)
     const user = await account.get()
 
+    const avatarFileId = user.prefs?.avatarFileId
+    const avatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : null
+
+    const signatureFileId = user.prefs?.signatureFileId
+    const signatureUrl = signatureFileId ? AuthService.buildPreviewUrl(signatureFileId) : null
+
     return {
       id: user.$id,
       name: user.name,
       email: user.email,
       phone: user.phone || null,
+      avatarUrl,
+      signatureUrl,
       createdAt: user.$createdAt,
       updatedAt: user.$updatedAt,
     }
+  }
+
+  /**
+   * Update the authenticated user's profile details, including optional avatar & signature.
+   * @param jwt - The user's session JWT.
+   * @param data - The fields to update (name, phone).
+   * @param files - Optional avatar and signature files.
+   * @returns The updated user profile.
+   */
+  async updateProfile(
+    jwt: string,
+    data: { name?: string; phone?: string },
+    files?: {
+      avatar?: { tmpPath: string; fileName: string }
+      signature?: { tmpPath: string; fileName: string }
+    }
+  ) {
+    const { account } = appwrite.createSessionClient(jwt)
+    const user = await account.get()
+    const updatedPrefs = { ...user.prefs }
+    let prefsChanged = false
+
+    // 1. Update text fields
+    if (data.name !== undefined) {
+      await appwrite.users.updateName({ userId: user.$id, name: data.name })
+    }
+
+    if (data.phone !== undefined) {
+      try {
+        await appwrite.users.updatePhone({ userId: user.$id, number: data.phone })
+      } catch (err: any) {
+        throw new Error(`Failed to update phone number: ${err.message}`)
+      }
+    }
+
+    // 2. Handle optional avatar upload
+    if (files?.avatar) {
+      const fileId = `avatar-${user.$id}`
+      if (updatedPrefs.avatarFileId) {
+        try {
+          await appwrite.storage.deleteFile({
+            bucketId: 'public-media',
+            fileId: updatedPrefs.avatarFileId,
+          })
+        } catch (error: any) {
+          if (error.code !== 404) throw error
+        }
+      }
+
+      const file = InputFile.fromPath(files.avatar.tmpPath, files.avatar.fileName)
+      await appwrite.storage.createFile({
+        bucketId: 'public-media',
+        fileId,
+        file,
+      })
+
+      updatedPrefs.avatarFileId = fileId
+      prefsChanged = true
+    }
+
+    // 3. Handle optional signature upload
+    if (files?.signature) {
+      const fileId = `signature-${user.$id}`
+      if (updatedPrefs.signatureFileId) {
+        try {
+          await appwrite.storage.deleteFile({
+            bucketId: 'public-media',
+            fileId: updatedPrefs.signatureFileId,
+          })
+        } catch (error: any) {
+          if (error.code !== 404) throw error
+        }
+      }
+
+      const file = InputFile.fromPath(files.signature.tmpPath, files.signature.fileName)
+      await appwrite.storage.createFile({
+        bucketId: 'public-media',
+        fileId,
+        file,
+      })
+
+      updatedPrefs.signatureFileId = fileId
+      prefsChanged = true
+    }
+
+    // 4. Save changed preferences if any new files were uploaded
+    if (prefsChanged) {
+      await appwrite.users.updatePrefs({
+        userId: user.$id,
+        prefs: updatedPrefs,
+      })
+    }
+
+    return this.getUserProfile(jwt)
   }
 
   /**
@@ -91,90 +193,14 @@ export default class AuthService {
     return `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${fileId}/preview?width=${width}&height=${height}&project=${appwriteConfig.projectId}`
   }
 
-  /**
-   * Upload a new avatar, replacing the existing one if any.
-   * @param jwt - The user's session JWT.
-   * @param tmpPath - The temporary path of the avatar file.
-   * @param fileName - The original filename.
-   * @returns The preview URL of the new avatar.
-   */
-  async uploadAvatar(jwt: string, tmpPath: string, fileName: string) {
-    const { account } = appwrite.createSessionClient(jwt)
-    const user = await account.get()
-    const fileId = `avatar-${user.$id}`
 
-    // 1. Delete old avatar if it exists
-    const prefs = user.prefs as any
-    if (prefs?.avatarFileId) {
-      try {
-        await appwrite.storage.deleteFile({
-          bucketId: 'public-media',
-          fileId: prefs.avatarFileId,
-        })
-      } catch (error: any) {
-        // Ignore 404 if the file was already deleted
-        if (error.code !== 404) throw error
-      }
-    }
-
-    // 2. Upload the new avatar
-    const file = InputFile.fromPath(tmpPath, fileName)
-    await appwrite.storage.createFile({
-      bucketId: 'public-media',
-      fileId,
-      file,
-    })
-
-    // 3. Update the user preferences
-    await appwrite.users.updatePrefs({
-      userId: user.$id,
-      prefs: {
-        ...user.prefs,
-        avatarFileId: fileId,
-      },
-    })
-
-    return AuthService.buildPreviewUrl(fileId)
-  }
 
   /**
-   * Delete the user's avatar entirely.
+   * Request email verification — generates a 6-digit OTP, stores it in Redis
+   * for 30 minutes, and sends the code by email via Resend.
    * @param jwt - The user's session JWT.
    */
-  async deleteAvatar(jwt: string) {
-    const { account } = appwrite.createSessionClient(jwt)
-    const user = await account.get()
-    const prefs = user.prefs as any
-
-    if (!prefs?.avatarFileId) {
-      return
-    }
-
-    try {
-      await appwrite.storage.deleteFile({
-        bucketId: 'public-media',
-        fileId: prefs.avatarFileId,
-      })
-    } catch (error: any) {
-      if (error.code !== 404) throw error
-    }
-
-    const newPrefs = { ...user.prefs }
-    delete newPrefs.avatarFileId
-
-    await appwrite.users.updatePrefs({
-      userId: user.$id,
-      prefs: newPrefs,
-    })
-  }
-
-  /**
-   * Request email verification — generates a secure token, stores it in Redis,
-   * and sends the verification email via Resend (bypassing Appwrite SMTP).
-   * @param jwt - The user's session JWT.
-   * @param redirectUrl - The base URL the front-end will redirect to with the token.
-   */
-  async requestEmailVerification(jwt: string, redirectUrl: string): Promise<{ userId: string }> {
+  async requestEmailVerification(jwt: string): Promise<{ userId: string }> {
     const { account } = appwrite.createSessionClient(jwt)
     const user = await account.get()
 
@@ -182,39 +208,39 @@ export default class AuthService {
       return { userId: user.$id }
     }
 
-    // Generate a cryptographically secure token
-    const secret = randomBytes(32).toString('hex')
+    // Generate a 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString()
     const cacheKey = `email_verify:${user.$id}`
-    const verificationLink = `${redirectUrl}?userId=${user.$id}&secret=${secret}`
+    const OTP_TTL_SECONDS = 30 * 60 // 30 minutes
 
-    // Store token in Redis with 24h TTL
-    await CacheService.set(cacheKey, { secret, email: user.email }, 60 * 60 * 24)
+    // Store OTP in Redis with 30-minute TTL
+    await CacheService.set(cacheKey, { otp, email: user.email }, OTP_TTL_SECONDS)
 
-    logger.info({ userId: user.$id, email: user.email }, 'Email verification token generated')
+    logger.info({ userId: user.$id, email: user.email, otp }, 'Email verification OTP generated')
 
-    // Send email via Resend
+    // Send OTP email via Resend
     await EmailService.send({
       to: user.email,
-      subject: 'Vérifiez votre adresse e-mail',
-      html: buildVerificationEmailHtml(user.name, verificationLink),
-      text: `Bonjour ${user.name},\n\nVeuillez vérifier votre adresse e-mail en cliquant sur le lien ci-dessous :\n\n${verificationLink}\n\nCe lien expire dans 24 heures.`,
+      subject: 'Votre code de vérification e-mail',
+      html: buildOtpEmailHtml(user.name, otp),
+      text: `Bonjour ${user.name},\n\nVotre code de vérification est : ${otp}\n\nCe code expire dans 30 minutes. Ne le partagez avec personne.`,
     })
 
     return { userId: user.$id }
   }
 
   /**
-   * Confirm email verification using a custom Redis-backed token.
+   * Confirm email verification using the 6-digit OTP sent by email.
    * Marks the user as verified via the Appwrite Admin SDK.
-   * @param userId - The user ID from the verification link.
-   * @param secret - The verification secret from the verification link.
+   * @param userId - The user ID.
+   * @param otp - The 6-digit OTP from the email.
    */
-  async confirmEmailVerification(userId: string, secret: string): Promise<{ verified: boolean }> {
+  async confirmEmailVerification(userId: string, otp: string): Promise<{ verified: boolean }> {
     const cacheKey = `email_verify:${userId}`
-    const cached = await CacheService.get<{ secret: string; email: string }>(cacheKey)
+    const cached = await CacheService.get<{ otp: string; email: string }>(cacheKey)
 
-    if (!cached || cached.secret !== secret) {
-      const error = new Error('Invalid or expired verification link.')
+    if (!cached || cached.otp !== otp) {
+      const error = new Error('Invalid or expired verification code.')
       ;(error as any).status = 400
       throw error
     }
@@ -222,13 +248,14 @@ export default class AuthService {
     // Mark verified in Appwrite via Admin SDK
     await appwrite.users.updateEmailVerification({ userId, emailVerification: true })
 
-    // Single-use: delete the token immediately
+    // Single-use: delete the OTP immediately
     await CacheService.delete(cacheKey)
 
-    logger.info({ userId }, 'Email verified successfully')
+    logger.info({ userId }, 'Email verified successfully via OTP')
 
     return { verified: true }
   }
+
 
   /**
    * Request a password reset — looks up the user, generates a secure Redis-backed
@@ -312,39 +339,6 @@ export default class AuthService {
 
 // ── Email HTML Templates ──────────────────────────────────────────────────────
 
-function buildVerificationEmailHtml(name: string, link: string): string {
-  const appUrl = env.get('APP_URL')
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vérifiez votre adresse e-mail</title>
-</head>
-<body style="margin:0;padding:0;background:#f9fafb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 0">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-        <tr><td style="background:#111827;padding:24px 32px">
-          <span style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px">Bara</span>
-        </td></tr>
-        <tr><td style="padding:32px">
-          <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;color:#111827">Vérifiez votre adresse e-mail</h1>
-          <p style="margin:0 0 16px;color:#374151">Bonjour ${name},</p>
-          <p style="margin:0 0 24px;color:#374151">Cliquez sur le bouton ci-dessous pour vérifier votre adresse e-mail. Ce lien expire dans <strong>24 heures</strong>.</p>
-          <a href="${link}" style="display:inline-block;padding:12px 24px;background:#111827;color:#ffffff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">Vérifier l'e-mail &rarr;</a>
-          <p style="margin:24px 0 0;font-size:12px;color:#6b7280">Ou copiez et collez ce lien dans votre navigateur :<br/><a href="${link}" style="color:#111827">${link}</a></p>
-        </td></tr>
-        <tr><td style="padding:20px 32px;border-top:1px solid #f3f4f6">
-          <p style="margin:0;font-size:12px;color:#6b7280">Si vous n'avez pas créé de compte Bara, vous pouvez ignorer cet e-mail en toute sécurité. Visitez <a href="${appUrl}" style="color:#111827">${appUrl}</a> si vous avez des questions.</p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
-}
-
 function buildPasswordResetEmailHtml(name: string, link: string): string {
   const appUrl = env.get('APP_URL')
   return `<!DOCTYPE html>
@@ -370,6 +364,41 @@ function buildPasswordResetEmailHtml(name: string, link: string): string {
         </td></tr>
         <tr><td style="padding:20px 32px;border-top:1px solid #f3f4f6">
           <p style="margin:0;font-size:12px;color:#6b7280">Si vous n'avez pas demandé de réinitialisation de mot de passe, vous pouvez ignorer cet e-mail en toute sécurité. Votre mot de passe restera inchangé. Visitez <a href="${appUrl}" style="color:#111827">${appUrl}</a> si vous avez des questions.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+function buildOtpEmailHtml(name: string, otp: string): string {
+  const appUrl = env.get('APP_URL')
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Votre code de vérification</title>
+</head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 0">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+        <tr><td style="background:#111827;padding:24px 32px">
+          <span style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px">Bara</span>
+        </td></tr>
+        <tr><td style="padding:32px">
+          <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;color:#111827">Vérifiez votre adresse e-mail</h1>
+          <p style="margin:0 0 16px;color:#374151">Bonjour ${name},</p>
+          <p style="margin:0 0 24px;color:#374151">Voici votre code de vérification à 6 chiffres. Ce code expire dans <strong>30 minutes</strong>.</p>
+          <div style="display:inline-block;padding:16px 32px;background:#f3f4f6;color:#111827;border-radius:8px;font-size:24px;font-weight:700;letter-spacing:4px;margin-bottom:24px">
+            ${otp}
+          </div>
+          <p style="margin:0;font-size:12px;color:#6b7280">Ne partagez jamais ce code avec quiconque.</p>
+        </td></tr>
+        <tr><td style="padding:20px 32px;border-top:1px solid #f3f4f6">
+          <p style="margin:0;font-size:12px;color:#6b7280">Si vous n'avez pas demandé ce code, vous pouvez ignorer cet e-mail en toute sécurité. Visitez <a href="${appUrl}" style="color:#111827">${appUrl}</a> si vous avez des questions.</p>
         </td></tr>
       </table>
     </td></tr>

@@ -23,7 +23,7 @@ export default class DepartmentMembersController {
         membershipId: params.membershipId,
         departmentId: payload.departmentId,
         jobTitle: payload.jobTitle,
-        departmentRole: payload.departmentRole as 'manager' | 'member',
+        departmentRole: payload.departmentRole,
       })
 
       return response.ok({ data: profile })
@@ -36,14 +36,22 @@ export default class DepartmentMembersController {
    * GET /api/v1/organisations/:orgId/departments/:id/members
    * List all members in a specific department.
    */
-  async indexByDepartment({ params, response }: HttpContext) {
+  async indexByDepartment({ request, params, response }: HttpContext) {
     const orgId = params.orgId
     const departmentId = params.id
+    const limit = request.input('limit') ? Number.parseInt(request.input('limit'), 10) : 25
+    const page = request.input('page') ? Number.parseInt(request.input('page'), 10) : 1
 
     try {
       const service = await MembersService.forOrg(orgId)
-      const members = await service.listByDepartment(departmentId)
-      return response.ok({ data: members })
+      const { documents, total } = await service.listByDepartment(departmentId, { limit, page })
+      return response.ok({
+        total,
+        limit,
+        page,
+        lastPage: Math.ceil(total / limit),
+        data: documents,
+      })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }
