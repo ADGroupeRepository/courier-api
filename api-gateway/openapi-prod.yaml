@@ -174,23 +174,33 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/ProfileResponse'
-  /auth/profile/avatar:
-    post:
-      summary: Uploader un Avatar
-      operationId: uploadAvatar
+    patch:
+      summary: Mettre à jour le profil (Update Profile)
+      operationId: updateProfile
       security:
         - BearerAuth: []
+      parameters:
+        - name: name
+          in: formData
+          required: false
+          type: string
+        - name: phone
+          in: formData
+          required: false
+          type: string
+        - name: avatar
+          in: formData
+          required: false
+          type: file
+        - name: signature
+          in: formData
+          required: false
+          type: file
       responses:
         '200':
           description: Success
-    delete:
-      summary: Supprimer l'Avatar
-      operationId: deleteAvatar
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Success
+          schema:
+            $ref: '#/definitions/ProfileResponse'
   /organisations:
     get:
       summary: Lister les organisations
@@ -1524,6 +1534,7 @@ definitions:
       email: { type: string }
       phone: { type: string }
       avatarUrl: { type: string }
+      signatureUrl: { type: string }
 
   OrganisationProfileItem:
     type: object

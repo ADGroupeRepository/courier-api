@@ -46,9 +46,10 @@ export default class CourierReplyService {
   /**
    * List replies for a specific courier.
    */
-  async list(courierId: string, options?: { limit?: number; offset?: number }) {
+  async list(courierId: string, options?: { limit?: number; page?: number }) {
     const limit = Math.min(Math.max(options?.limit ?? 25, 1), 100)
-    const offset = Math.max(options?.offset ?? 0, 0)
+    const page = Math.max(options?.page ?? 1, 1)
+    const offset = (page - 1) * limit
 
     const result = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,

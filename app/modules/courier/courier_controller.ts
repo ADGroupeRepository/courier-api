@@ -53,7 +53,7 @@ export default class CourierController {
     const favorite = request.input('favorite') as string | undefined
     const deleted = request.input('deleted') as string | undefined
     const limit = Number(request.input('limit')) || 25
-    const offset = Number(request.input('offset')) || 0
+    const page = Number(request.input('page')) || 1
 
     try {
       const { canManage, departmentId } = await this.getUserContext(user, orgId)
@@ -69,17 +69,15 @@ export default class CourierController {
         favorite: favorite === 'true' ? true : undefined,
         deleted: deleted === 'true',
         limit,
-        offset,
+        page,
       })
 
       return response.ok({
+        total: result.total,
+        limit,
+        page,
+        lastPage: Math.ceil(result.total / limit),
         data: result.documents,
-        pagination: {
-          total: result.total,
-          limit,
-          offset,
-          hasMore: offset + result.documents.length < result.total,
-        },
       })
     } catch (error: any) {
       if (error.message === 'User is not a member of this organisation') {

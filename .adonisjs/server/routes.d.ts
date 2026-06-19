@@ -8,8 +8,7 @@ export type ScannedRoutes = {
     'auth.request_password_reset': { paramsTuple?: []; params?: {} }
     'auth.confirm_password_reset': { paramsTuple?: []; params?: {} }
     'auth.profile': { paramsTuple?: []; params?: {} }
-    'auth.upload_avatar': { paramsTuple?: []; params?: {} }
-    'auth.delete_avatar': { paramsTuple?: []; params?: {} }
+    'auth.update_profile': { paramsTuple?: []; params?: {} }
     'auth.request_email_verification': { paramsTuple?: []; params?: {} }
     'auth.confirm_email_verification': { paramsTuple?: []; params?: {} }
     'organisations.members.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -77,7 +76,6 @@ export type ScannedRoutes = {
   POST: {
     'auth.signup': { paramsTuple?: []; params?: {} }
     'auth.request_password_reset': { paramsTuple?: []; params?: {} }
-    'auth.upload_avatar': { paramsTuple?: []; params?: {} }
     'auth.request_email_verification': { paramsTuple?: []; params?: {} }
     'members.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -99,6 +97,7 @@ export type ScannedRoutes = {
   }
   PATCH: {
     'auth.confirm_password_reset': { paramsTuple?: []; params?: {} }
+    'auth.update_profile': { paramsTuple?: []; params?: {} }
     'auth.confirm_email_verification': { paramsTuple?: []; params?: {} }
     'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
     'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -161,8 +160,12 @@ export type ScannedRoutes = {
     'plans.show': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'plans.org_subscription': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
   }
+  PUT: {
+    'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'departments.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+  }
   DELETE: {
-    'auth.delete_avatar': { paramsTuple?: []; params?: {} }
     'organisations.members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
     'organisation_modules.deactivate': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'module': ParamValue} }
     'organisations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -175,11 +178,6 @@ export type ScannedRoutes = {
     'courier.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.force_destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'external_contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-  }
-  PUT: {
-    'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
-    'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'departments.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {

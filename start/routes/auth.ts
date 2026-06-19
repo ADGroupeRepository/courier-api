@@ -20,8 +20,7 @@ router
 
     // Protected
     router.get('/profile', [AuthController, 'profile']).use(middleware.auth())
-    router.post('/profile/avatar', [AuthController, 'uploadAvatar']).use(middleware.auth())
-    router.delete('/profile/avatar', [AuthController, 'deleteAvatar']).use(middleware.auth())
+    router.patch('/profile', [AuthController, 'updateProfile']).use(middleware.auth())
 
     // Protected email verification flows
     router

@@ -1310,9 +1310,9 @@
           ]
         },
         {
-          "name": "Uploader un Avatar",
+          "name": "Mettre à jour le profil (Update Profile)",
           "request": {
-            "method": "POST",
+            "method": "PATCH",
             "header": [
               {
                 "key": "Authorization",
@@ -1323,37 +1323,33 @@
               "mode": "formdata",
               "formdata": [
                 {
+                  "key": "name",
+                  "value": "Nouveau Nom",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "+33612345678",
+                  "type": "text"
+                },
+                {
                   "key": "avatar",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "signature",
                   "type": "file",
                   "src": []
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/auth/profile/avatar",
+              "raw": "{{base_url}}/auth/profile",
               "host": ["{{base_url}}"],
-              "path": ["auth", "profile", "avatar"]
+              "path": ["auth", "profile"]
             },
-            "description": "Met à jour la photo de profil de l'utilisateur."
-          },
-          "response": []
-        },
-        {
-          "name": "Supprimer l'Avatar",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/auth/profile/avatar",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "profile", "avatar"]
-            },
-            "description": "Supprime la photo de profil de l'utilisateur."
+            "description": "Met à jour les informations de profil de l'utilisateur (nom, téléphone, avatar, signature)."
           },
           "response": []
         },

@@ -22,13 +22,21 @@ export default class CourierRepliesController {
     const qs = request.qs()
 
     try {
+      const limit = qs.limit ? Number.parseInt(qs.limit, 10) : 25
+      const page = qs.page ? Number.parseInt(qs.page, 10) : 1
       const service = await CourierReplyService.forOrg(orgId)
-      const replies = await service.list(courierId, {
-        limit: qs.limit ? Number.parseInt(qs.limit, 10) : undefined,
-        offset: qs.offset ? Number.parseInt(qs.offset, 10) : undefined,
+      const result = await service.list(courierId, {
+        limit,
+        page,
       })
 
-      return response.ok(replies)
+      return response.ok({
+        total: result.total,
+        limit,
+        page,
+        lastPage: Math.ceil(result.total / limit),
+        data: result.documents,
+      })
     } catch (error: any) {
       return response.internalServerError({
         message: 'Failed to fetch courier replies',

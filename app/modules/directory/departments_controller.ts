@@ -16,11 +16,19 @@ export default class DepartmentsController {
    */
   async index({ request, response }: HttpContext) {
     const orgId = request.param('orgId')
+    const limit = request.input('limit') ? Number.parseInt(request.input('limit'), 10) : 25
+    const page = request.input('page') ? Number.parseInt(request.input('page'), 10) : 1
 
     try {
       const service = await DepartmentsService.forOrg(orgId)
-      const departments = await service.list()
-      return response.ok({ data: departments })
+      const { documents, total } = await service.list({ limit, page })
+      return response.ok({
+        total,
+        limit,
+        page,
+        lastPage: Math.ceil(total / limit),
+        data: documents,
+      })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }

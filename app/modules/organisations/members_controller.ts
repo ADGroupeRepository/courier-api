@@ -13,10 +13,19 @@ export default class MembersController {
    */
   async index({ request, response }: HttpContext) {
     const orgId = request.param('orgId')
-    const service = new OrganisationService()
-    const members = await service.listMembers(orgId)
+    const limit = request.input('limit') ? Number.parseInt(request.input('limit'), 10) : 25
+    const page = request.input('page') ? Number.parseInt(request.input('page'), 10) : 1
 
-    return response.ok({ data: members })
+    const service = new OrganisationService()
+    const { documents, total } = await service.listMembers(orgId, { limit, page })
+
+    return response.ok({
+      total,
+      limit,
+      page,
+      lastPage: Math.ceil(total / limit),
+      data: documents,
+    })
   }
 
   /**

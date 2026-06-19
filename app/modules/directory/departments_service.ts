@@ -29,43 +29,109 @@ export default class DepartmentsService {
   }
 
   /**
-   * List all departments for the organisation.
-   * @returns A list of departments.
+   * List departments for the organisation with pagination, including member and courier counts.
+   * Fires parallel queries to minimise latency.
+   * @param options - Pagination options.
+   * @returns A paginated result containing departments and the total count.
    */
-  async list() {
-    const result = await appwrite.databases.listDocuments({
-      databaseId: this.databaseId,
-      collectionId: this.collectionId,
-      queries: [Query.orderAsc('name'), Query.limit(100)],
-    })
+  async list(options: { limit?: number; page?: number } = {}) {
+    const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
+    const page = Math.max(options.page ?? 1, 1)
+    const offset = (page - 1) * limit
 
-    return result.documents.map((row) => ({
+    const [deptResult, profilesResult, couriersResult] = await Promise.all([
+      // 1. Departments paginated query
+      appwrite.databases.listDocuments({
+        databaseId: this.databaseId,
+        collectionId: this.collectionId,
+        queries: [Query.orderAsc('name'), Query.limit(limit), Query.offset(offset)],
+      }),
+      // 2. All org profiles — lightweight, only need departmentId
+      appwrite.databases.listDocuments({
+        databaseId: this.databaseId,
+        collectionId: Collections.ORG_PROFILES,
+        queries: [Query.select(['departmentId']), Query.limit(5000)],
+      }),
+      // 3. All non-deleted couriers assigned to a department
+      appwrite.databases.listDocuments({
+        databaseId: this.databaseId,
+        collectionId: Collections.COURIERS,
+        queries: [
+          Query.equal('targetType', 'department'),
+          Query.equal('isDeleted', false),
+          Query.select(['internalEntityId']),
+          Query.limit(5000),
+        ],
+      }),
+    ])
+
+    // Build count maps: departmentId → count
+    const membersCountMap = new Map<string, number>()
+    for (const doc of profilesResult.documents) {
+      const deptId = doc.departmentId as string
+      membersCountMap.set(deptId, (membersCountMap.get(deptId) ?? 0) + 1)
+    }
+
+    const couriersCountMap = new Map<string, number>()
+    for (const doc of couriersResult.documents) {
+      const deptId = doc.internalEntityId as string
+      couriersCountMap.set(deptId, (couriersCountMap.get(deptId) ?? 0) + 1)
+    }
+
+    const documents = deptResult.documents.map((row) => ({
       id: row.$id,
       name: row.name,
       description: row.description || null,
       managerUserId: row.managerUserId || null,
+      membersCount: membersCountMap.get(row.$id) ?? 0,
+      couriersCount: couriersCountMap.get(row.$id) ?? 0,
       createdAt: row.$createdAt,
       updatedAt: row.$updatedAt,
     }))
+
+    return {
+      total: deptResult.total,
+      documents,
+    }
   }
 
   /**
-   * Get a single department by ID.
+   * Get a single department by ID, including member and courier counts.
    * @param departmentId - The ID of the department.
-   * @returns The department details.
+   * @returns The department details with membersCount and couriersCount.
    */
   async get(departmentId: string) {
-    const row = await appwrite.databases.getDocument({
-      databaseId: this.databaseId,
-      collectionId: this.collectionId,
-      documentId: departmentId,
-    })
+    const [row, profilesResult, couriersResult] = await Promise.all([
+      appwrite.databases.getDocument({
+        databaseId: this.databaseId,
+        collectionId: this.collectionId,
+        documentId: departmentId,
+      }),
+      appwrite.databases.listDocuments({
+        databaseId: this.databaseId,
+        collectionId: Collections.ORG_PROFILES,
+        queries: [Query.equal('departmentId', departmentId), Query.select(['$id']), Query.limit(1)],
+      }),
+      appwrite.databases.listDocuments({
+        databaseId: this.databaseId,
+        collectionId: Collections.COURIERS,
+        queries: [
+          Query.equal('internalEntityId', departmentId),
+          Query.equal('targetType', 'department'),
+          Query.equal('isDeleted', false),
+          Query.select(['$id']),
+          Query.limit(1),
+        ],
+      }),
+    ])
 
     return {
       id: row.$id,
       name: row.name,
       description: row.description || null,
       managerUserId: row.managerUserId || null,
+      membersCount: profilesResult.total,
+      couriersCount: couriersResult.total,
       createdAt: row.$createdAt,
       updatedAt: row.$updatedAt,
     }

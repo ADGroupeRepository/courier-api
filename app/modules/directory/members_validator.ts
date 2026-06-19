@@ -10,7 +10,7 @@ export const assignMemberValidator = vine.create(
     userId: vine.string(), // Passed in body
     departmentId: vine.string(), // Passed in body
     jobTitle: vine.string().optional(),
-    departmentRole: vine.enum(['manager', 'member']),
+    departmentRole: vine.enum(['manager', 'member']).optional(),
   })
 )
 

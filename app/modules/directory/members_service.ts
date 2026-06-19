@@ -1,13 +1,13 @@
+import { Collections } from '#modules/_registry/collection_ids'
 import appwrite from '#services/appwrite_service'
 import { ID, Query } from 'node-appwrite'
-import { Collections } from '#modules/_registry/collection_ids'
 
 export interface AssignMemberPayload {
   userId: string
   membershipId: string
   departmentId: string
   jobTitle?: string
-  departmentRole: 'manager' | 'member'
+  departmentRole?: 'manager' | 'member'
 }
 
 /**
@@ -15,10 +15,12 @@ export interface AssignMemberPayload {
  */
 export default class MembersService {
   public readonly databaseId: string
+  private readonly teamId: string
   private readonly collectionId = Collections.ORG_PROFILES
 
-  constructor(databaseId: string) {
+  constructor(databaseId: string, teamId: string) {
     this.databaseId = databaseId
+    this.teamId = teamId
   }
 
   /**
@@ -31,7 +33,7 @@ export default class MembersService {
     if (!prefs.databaseId) {
       throw new Error(`Organisation ${orgId} does not have a provisioned database.`)
     }
-    return new MembersService(prefs.databaseId)
+    return new MembersService(prefs.databaseId, orgId)
   }
 
   /**
@@ -53,7 +55,7 @@ export default class MembersService {
       membershipId: payload.membershipId,
       departmentId: payload.departmentId,
       jobTitle: payload.jobTitle ?? '',
-      departmentRole: payload.departmentRole,
+      departmentRole: payload.departmentRole ?? 'member',
     }
 
     if (existing.total > 0) {
@@ -76,27 +78,40 @@ export default class MembersService {
   }
 
   /**
-   * List all members assigned to a specific department.
+   * List members assigned to a specific department with pagination.
    * @param departmentId - The ID of the department.
-   * @returns A list of member profiles in the department.
+   * @param options - Pagination options.
+   * @returns A paginated list of member profiles in the department.
    */
-  async listByDepartment(departmentId: string) {
+  async listByDepartment(departmentId: string, options: { limit?: number; page?: number } = {}) {
+    const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
+    const page = Math.max(options.page ?? 1, 1)
+    const offset = (page - 1) * limit
+
     const result = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
-      queries: [Query.equal('departmentId', departmentId)],
+      queries: [
+        Query.equal('departmentId', departmentId),
+        Query.limit(limit),
+        Query.offset(offset),
+      ],
     })
 
-    return result.documents.map((doc) => ({
-      id: doc.$id,
-      userId: doc.userId,
-      membershipId: doc.membershipId,
-      departmentId: doc.departmentId,
-      jobTitle: doc.jobTitle || null,
-      departmentRole: doc.departmentRole,
-      createdAt: doc.$createdAt,
-      updatedAt: doc.$updatedAt,
+    const memberships = await appwrite.teams.listMemberships({ teamId: this.teamId })
+    const membershipsById = new Map(memberships.memberships.map((member) => [member.$id, member]))
+    const membershipsByUserId = new Map(
+      memberships.memberships.map((member) => [member.userId, member])
+    )
+
+    const documents = result.documents.map((doc) => ({
+      ...this.serializeProfile(doc, membershipsById, membershipsByUserId),
     }))
+
+    return {
+      total: result.total,
+      documents,
+    }
   }
 
   /**
@@ -109,5 +124,24 @@ export default class MembersService {
       collectionId: this.collectionId,
       documentId: profileId,
     })
+  }
+
+  private serializeProfile(
+    doc: any,
+    membershipsById: Map<string, any>,
+    membershipsByUserId: Map<string, any>
+  ) {
+    const membership = membershipsById.get(doc.membershipId) || membershipsByUserId.get(doc.userId)
+
+    return {
+      userId: doc.userId,
+      userName: membership?.userName ?? null,
+      userEmail: membership?.userEmail ?? null,
+      roles: membership?.roles ?? [],
+      departmentId: doc.departmentId,
+      jobTitle: doc.jobTitle || null,
+      departmentRole: doc.departmentRole,
+      createdAt: doc.$createdAt,
+    }
   }
 }

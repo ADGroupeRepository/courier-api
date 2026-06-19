@@ -15,13 +15,14 @@ export enum CourierStatus {
 export enum CourierType {
   INCOMING = 'incoming',
   OUTGOING = 'outgoing',
+  INTERNAL = 'internal',
 }
 
 export enum CourierStructureType {
-  PHYSIQUE = 'physique',
-  PRIVEE = 'privee',
-  PUBLIQUE = 'publique',
-  ONG = 'ong',
+  PERSONNE = 'personne',
+  ENTREPRISE_PRIVEE = 'entreprise_privee',
+  ORGANISATION_PUBLIQUE = 'organisation_publique',
+  ONG = 'ONG',
   AUTRE = 'autre',
 }
 

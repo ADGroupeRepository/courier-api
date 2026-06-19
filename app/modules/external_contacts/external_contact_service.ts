@@ -32,22 +32,39 @@ export class ExternalContactService {
    * @returns A new instance of ExternalContactService.
    */
   static async forOrg(orgId: string) {
-    return new ExternalContactService(orgId)
+    const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
+    if (!prefs.databaseId) {
+      throw new Error(`Organisation ${orgId} does not have a provisioned database.`)
+    }
+    return new ExternalContactService(prefs.databaseId)
   }
 
   /**
-   * List all external contacts for the organisation.
+   * List external contacts for the organisation with pagination.
+   * @param options - Pagination options.
    * @param queries - Optional Appwrite queries for filtering/sorting.
-   * @returns A list of external contacts.
+   * @returns A paginated list of external contacts.
    */
-  async list(queries: string[] = []) {
+  async list(options: { limit?: number; page?: number } = {}, queries: string[] = []) {
+    const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
+    const page = Math.max(options.page ?? 1, 1)
+    const offset = (page - 1) * limit
+
     const response = await appwrite.databases.listDocuments({
       databaseId: this.orgId,
       collectionId: Collections.EXTERNAL_CONTACTS,
-      queries: [Query.limit(100), Query.orderDesc('$createdAt'), ...queries],
+      queries: [
+        Query.limit(limit),
+        Query.offset(offset),
+        Query.orderDesc('$createdAt'),
+        ...queries,
+      ],
     })
 
-    return response.documents.map((doc) => this.mapToContact(doc))
+    return {
+      total: response.total,
+      documents: response.documents.map((doc) => this.mapToContact(doc)),
+    }
   }
 
   /**
