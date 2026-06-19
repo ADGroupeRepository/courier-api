@@ -374,10 +374,13 @@ export default class AdminPlansController {
                     <em>Ceci est un message automatique, merci de ne pas y répondre directement.</em>
                   </p>
                 </div>
-              `
+              `,
             })
           } catch (emailErr) {
-            logger.error({ err: emailErr, userId: existing.issuedBy }, 'Failed to send subscription approval notification email')
+            logger.error(
+              { err: emailErr, userId: existing.issuedBy },
+              'Failed to send subscription approval notification email'
+            )
           }
         }
       }

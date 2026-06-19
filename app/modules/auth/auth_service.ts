@@ -193,8 +193,6 @@ export default class AuthService {
     return `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${fileId}/preview?width=${width}&height=${height}&project=${appwriteConfig.projectId}`
   }
 
-
-
   /**
    * Request email verification — generates a 6-digit OTP, stores it in Redis
    * for 30 minutes, and sends the code by email via Resend.
@@ -255,7 +253,6 @@ export default class AuthService {
 
     return { verified: true }
   }
-
 
   /**
    * Request a password reset — looks up the user, generates a secure Redis-backed

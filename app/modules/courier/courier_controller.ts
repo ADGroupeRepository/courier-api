@@ -56,29 +56,29 @@ export default class CourierController {
     const page = Number(request.input('page')) || 1
 
     try {
-       const { canManage, departmentId } = await this.getUserContext(user, orgId)
+      const { canManage, departmentId } = await this.getUserContext(user, orgId)
 
-       // List couriers with visibility rules
-       const service = await CourierService.forOrg(orgId)
-       const result = await service.list({
-         userId: user?.$id || '',
-         departmentId,
-         canManage,
-         type,
-         archived: archived === 'true',
-         favorite: favorite === 'true' ? true : undefined,
-         deleted: deleted === 'true',
-         limit,
-         page,
-       })
+      // List couriers with visibility rules
+      const service = await CourierService.forOrg(orgId)
+      const result = await service.list({
+        userId: user?.$id || '',
+        departmentId,
+        canManage,
+        type,
+        archived: archived === 'true',
+        favorite: favorite === 'true' ? true : undefined,
+        deleted: deleted === 'true',
+        limit,
+        page,
+      })
 
-       return response.ok({
-         total: result.total,
-         limit,
-         page,
-         lastPage: Math.ceil(result.total / limit),
-         data: result.documents,
-       })
+      return response.ok({
+        total: result.total,
+        limit,
+        page,
+        lastPage: Math.ceil(result.total / limit),
+        data: result.documents,
+      })
     } catch (error: any) {
       if (error.message === 'User is not a member of this organisation') {
         return response.forbidden({ message: error.message })

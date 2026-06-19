@@ -136,8 +136,14 @@ export default class AuthController {
       token,
       { name: payload.name, phone: payload.phone },
       {
-        avatar: avatar && avatar.tmpPath && avatar.clientName ? { tmpPath: avatar.tmpPath, fileName: avatar.clientName } : undefined,
-        signature: signature && signature.tmpPath && signature.clientName ? { tmpPath: signature.tmpPath, fileName: signature.clientName } : undefined,
+        avatar:
+          avatar && avatar.tmpPath && avatar.clientName
+            ? { tmpPath: avatar.tmpPath, fileName: avatar.clientName }
+            : undefined,
+        signature:
+          signature && signature.tmpPath && signature.clientName
+            ? { tmpPath: signature.tmpPath, fileName: signature.clientName }
+            : undefined,
       }
     )
 

@@ -110,11 +110,7 @@ export default class DepartmentsService {
       appwrite.databases.listDocuments({
         databaseId: this.databaseId,
         collectionId: Collections.ORG_PROFILES,
-        queries: [
-          Query.equal('departmentId', departmentId),
-          Query.select(['$id']),
-          Query.limit(1),
-        ],
+        queries: [Query.equal('departmentId', departmentId), Query.select(['$id']), Query.limit(1)],
       }),
       appwrite.databases.listDocuments({
         databaseId: this.databaseId,
