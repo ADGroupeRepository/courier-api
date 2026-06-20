@@ -10,7 +10,6 @@ export interface ExternalContact {
   email?: string
   phone?: string
   structureType: CourierStructureType
-  structureName?: string
   idNumber?: string
   address?: string
   createdBy: string
@@ -18,6 +17,7 @@ export interface ExternalContact {
 
 export type CreateExternalContactPayload = Omit<ExternalContact, '$id' | '$createdAt'>
 export type UpdateExternalContactPayload = Partial<CreateExternalContactPayload>
+
 
 export class ExternalContactService {
   private readonly orgId: string
@@ -134,10 +134,10 @@ export class ExternalContactService {
       email: doc.email,
       phone: doc.phone,
       structureType: doc.structureType,
-      structureName: doc.structureName,
       idNumber: doc.idNumber,
       address: doc.address,
       createdBy: doc.createdBy,
     }
   }
 }
+
