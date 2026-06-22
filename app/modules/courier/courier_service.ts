@@ -2,7 +2,6 @@ import appwrite from '#services/appwrite_service'
 import logger from '@adonisjs/core/services/logger'
 import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
-import { InputFile } from 'node-appwrite/file'
 import {
   type CourierUrgency,
   type CourierStructureType,
@@ -32,6 +31,7 @@ export interface CreateCourierPayload {
   targetType: 'user' | 'department'
   entityIds: string[]
   createdBy: string
+  fileIds?: string[]
 }
 
 export interface UpdateCourierPayload {
@@ -300,75 +300,47 @@ export default class CourierService {
   }
 
   /**
-   * Create a new courier record with an optional file attachment,
-   * then create assignment documents for each entity ID.
-   * @param payload - The courier details including entityIds.
-   * @param fileOptions - Optional temporary path and filename for the file attachment.
-   * @returns The created courier document with assignments.
+   * Create a new courier record, then create assignment documents for each entity ID.
    */
-  async create(payload: CreateCourierPayload, fileOptions?: { tmpPath: string; fileName: string }) {
-    let fileId: string | undefined
+  async create(payload: CreateCourierPayload) {
+    const fileIds = payload.fileIds?.filter(Boolean) ?? []
 
-    if (fileOptions) {
-      const file = InputFile.fromPath(fileOptions.tmpPath, fileOptions.fileName)
-      const uploadedFile = await appwrite.storage.createFile({
-        bucketId: this.bucketId,
-        fileId: ID.unique(),
-        file,
-      })
-      fileId = uploadedFile.$id
-    }
+    const doc = await appwrite.databases.createDocument({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      documentId: ID.unique(),
+      data: {
+        ...this.omitUndefined({
+          type: payload.type,
+          urgency: payload.urgency,
+          subject: payload.subject,
+          receivedAt: payload.receivedAt,
+          emittedAt: payload.emittedAt,
+          senderName: payload.senderName,
+          senderEmail: payload.senderEmail,
+          senderPhone: payload.senderPhone,
+          externalContactId: payload.externalContactId,
+          externalContactType: payload.externalContactType,
+          createdBy: payload.createdBy,
+          targetType: payload.targetType,
+          fileIds: fileIds.length > 0 ? fileIds : undefined,
+        }),
+        replyCount: 0,
+        status: payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
+        isFavorite: false,
+        isArchived: false,
+        isDeleted: false,
+      },
+    })
 
-    try {
-      // Create the courier document (without per-entity assignment data)
-      const doc = await appwrite.databases.createDocument({
-        databaseId: this.databaseId,
-        collectionId: this.collectionId,
-        documentId: ID.unique(),
-        data: {
-          ...this.omitUndefined({
-            type: payload.type,
-            urgency: payload.urgency,
-            subject: payload.subject,
-            receivedAt: payload.receivedAt,
-            emittedAt: payload.emittedAt,
-            senderName: payload.senderName,
-            senderEmail: payload.senderEmail,
-            senderPhone: payload.senderPhone,
-            externalContactId: payload.externalContactId,
-            externalContactType: payload.externalContactType,
-            createdBy: payload.createdBy,
-            targetType: payload.targetType,
-          }),
-          replyCount: 0,
-          fileId: fileId || null,
-          status:
-            payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
-          isFavorite: false,
-          isArchived: false,
-          isDeleted: false,
-        },
-      })
+    const assignments = await this.createAssignments(
+      doc.$id,
+      payload.entityIds,
+      payload.targetType,
+      payload.createdBy
+    )
 
-      // Create assignment documents
-      const assignments = await this.createAssignments(
-        doc.$id,
-        payload.entityIds,
-        payload.targetType,
-        payload.createdBy
-      )
-
-      return this.mapDocument(doc, assignments)
-    } catch (error) {
-      // Cleanup orphaned file if document creation fails
-      if (fileId) {
-        await appwrite.storage.deleteFile({
-          bucketId: this.bucketId,
-          fileId,
-        })
-      }
-      throw error
-    }
+    return this.mapDocument(doc, assignments)
   }
 
   /**
@@ -396,32 +368,33 @@ export default class CourierService {
   }
 
   /**
-   * Upload a file for a courier and link it to the document.
-   * @param courierId - The ID of the courier to link the file to.
-   * @param tmpPath - The temporary path of the file to upload.
-   * @param fileName - The name of the file.
-   * @returns The uploaded file metadata.
+   * Prepare direct Appwrite upload targets for courier documents.
    */
-  async uploadFile(courierId: string, tmpPath: string, fileName: string) {
-    // 1. Upload to isolated bucket
-    const file = InputFile.fromPath(tmpPath, fileName)
-    const uploadedFile = await appwrite.storage.createFile({
-      bucketId: this.bucketId,
-      fileId: ID.unique(),
-      file,
-    })
+  createUploadTargets(files: { fileName: string; contentType?: string; size: number }[]) {
+    return files.map((file) => {
+      const fileId = ID.unique()
+      const uploadUrl = `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files`
 
-    // 2. Link to courier document
-    await appwrite.databases.updateDocument({
-      databaseId: this.databaseId,
-      collectionId: this.collectionId,
-      documentId: courierId,
-      data: {
-        fileId: uploadedFile.$id,
-      },
+      return {
+        fileId,
+        fileName: file.fileName,
+        contentType: file.contentType || null,
+        size: file.size,
+        bucketId: this.bucketId,
+        projectId: appwriteConfig.projectId,
+        uploadUrl,
+        method: 'POST',
+        expiresInSeconds: 900,
+        formData: {
+          fileId,
+          file: '<binary>',
+        },
+        headers: {
+          'X-Appwrite-Project': appwriteConfig.projectId,
+          'X-Appwrite-JWT': '<current-user-jwt>',
+        },
+      }
     })
-
-    return uploadedFile
   }
 
   /**
@@ -455,7 +428,7 @@ export default class CourierService {
   }
 
   /**
-   * Permanently delete a courier, its assignments, and its associated file.
+   * Permanently delete a courier, its assignments, and associated files.
    * @param courierId - The ID of the courier to permanently delete.
    * @throws Error if the courier or file cannot be deleted.
    */
@@ -465,17 +438,11 @@ export default class CourierService {
     // Delete assignments first
     await this.deleteAssignments(courierId)
 
-    if (courier.fileId) {
+    for (const fileId of courier.fileIds) {
       try {
-        await appwrite.storage.deleteFile({
-          bucketId: this.bucketId,
-          fileId: courier.fileId,
-        })
+        await appwrite.storage.deleteFile({ bucketId: this.bucketId, fileId })
       } catch (error) {
-        logger.warn(
-          { courierId, fileId: courier.fileId, error },
-          'Failed to delete courier file, continuing with document deletion'
-        )
+        logger.warn({ courierId, fileId, error }, 'Failed to delete courier file')
       }
     }
 
@@ -498,15 +465,17 @@ export default class CourierService {
 
   /**
    * Helper to map an Appwrite document to our domain model.
-   * Calculates the public view URL for the file attachment if it exists.
+   * Calculates public view URLs for file attachments if they exist.
    * @param doc - The raw Appwrite document.
    * @param assignments - Pre-fetched assignment list.
    * @returns The formatted domain model object.
    */
   private mapDocument(doc: any, assignments: CourierAssignment[]) {
-    const fileUrl = doc.fileId
-      ? `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${doc.fileId}/view?project=${appwriteConfig.projectId}`
-      : null
+    const fileIds = Array.isArray(doc.fileIds) ? doc.fileIds.filter(Boolean) : []
+    const fileUrls = fileIds.map(
+      (id: string) =>
+        `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${id}/view?project=${appwriteConfig.projectId}`
+    )
 
     return {
       id: doc.$id,
@@ -522,8 +491,8 @@ export default class CourierService {
       externalContactType: doc.externalContactType || null,
       targetType: doc.targetType || null,
       assignments,
-      fileUrl,
-      fileId: doc.fileId || null,
+      fileUrls,
+      fileIds,
       createdBy: doc.createdBy,
       status: doc.status,
       isFavorite: doc.isFavorite ?? false,

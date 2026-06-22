@@ -77,6 +77,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
           )
           await this.createOptionalDatetimeAttributeIfMissing(prefs.databaseId, 'receivedAt')
           await this.createOptionalDatetimeAttributeIfMissing(prefs.databaseId, 'emittedAt')
+          await this.createOptionalStringArrayAttributeIfMissing(prefs.databaseId, 'fileIds')
 
           await this.deleteAttributeIfExists(prefs.databaseId, 'createdAt')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactNumber')
@@ -209,6 +210,29 @@ export default class ProvisionCourierInterface extends BaseCommand {
         size: 36,
         required: false,
         xdefault: '',
+      })
+    }
+  }
+
+  private async createOptionalStringArrayAttributeIfMissing(databaseId: string, key: string) {
+    try {
+      await appwrite.databases.getAttribute({
+        databaseId,
+        collectionId: Collections.COURIERS,
+        key,
+      })
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
+
+      await appwrite.databases.createStringAttribute({
+        databaseId,
+        collectionId: Collections.COURIERS,
+        key,
+        size: 36,
+        required: false,
+        array: true,
       })
     }
   }

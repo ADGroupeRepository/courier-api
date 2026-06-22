@@ -10,6 +10,7 @@ router
     // Courier CRUD
     router.get('couriers', [CourierController, 'index'])
     router.post('couriers', [CourierController, 'store'])
+    router.post('couriers/upload-url', [CourierController, 'createUploadUrl'])
     router.get('couriers/:id', [CourierController, 'show'])
     router.patch('couriers/:id', [CourierController, 'update'])
     router.delete('couriers/:id', [CourierController, 'destroy'])
