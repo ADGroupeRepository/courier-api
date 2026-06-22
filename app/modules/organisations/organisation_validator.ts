@@ -8,6 +8,7 @@ export const createOrganisationValidator = vine.create(
     name: vine.string().minLength(1).maxLength(128).trim(),
     description: vine.string().maxLength(500).trim().optional(),
     address: vine.string().maxLength(256).trim().optional(),
+    rccm: vine.string().maxLength(128).trim().optional(),
   })
 )
 
@@ -19,6 +20,7 @@ export const updateOrganisationValidator = vine.create(
     name: vine.string().minLength(1).maxLength(128).trim().optional(),
     description: vine.string().maxLength(500).trim().optional(),
     address: vine.string().maxLength(256).trim().optional(),
+    rccm: vine.string().maxLength(128).trim().optional(),
   })
 )
 

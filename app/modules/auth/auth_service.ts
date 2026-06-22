@@ -1,12 +1,11 @@
-import { ID, AppwriteException, Query } from 'node-appwrite'
-import { InputFile } from 'node-appwrite/file'
-import { randomBytes } from 'node:crypto'
-import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
+import appwrite from '#services/appwrite_service'
 import CacheService from '#services/cache_service'
 import EmailService from '#services/email_service'
 import logger from '@adonisjs/core/services/logger'
-import env from '#start/env'
+import { AppwriteException, ID, Query } from 'node-appwrite'
+import { InputFile } from 'node-appwrite/file'
+import { randomBytes } from 'node:crypto'
 
 interface SignupPayload {
   name: string
@@ -338,7 +337,7 @@ export default class AuthService {
 // ── Email HTML Templates ──────────────────────────────────────────────────────
 
 function buildPasswordResetEmailHtml(name: string, link: string): string {
-  const appUrl = env.get('APP_URL')
+  const appUrl = 'https://bara.akumba.io'
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -371,7 +370,7 @@ function buildPasswordResetEmailHtml(name: string, link: string): string {
 }
 
 function buildOtpEmailHtml(name: string, otp: string): string {
-  const appUrl = env.get('APP_URL')
+  const appUrl = 'https://bara.akumba.io'
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
