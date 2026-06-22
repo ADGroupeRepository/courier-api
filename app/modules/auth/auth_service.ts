@@ -80,6 +80,7 @@ export default class AuthService {
       id: user.$id,
       name: user.name,
       email: user.email,
+      emailVerification: user.emailVerification,
       phone: user.phone || null,
       avatarUrl,
       signatureUrl,
