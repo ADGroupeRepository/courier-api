@@ -291,9 +291,9 @@
               "raw": "{\n  \"userId\": \"{{memberUserId}}\",\n  \"departmentId\": \"{{deptId}}\",\n  \"departmentRole\": \"member\",\n  \"jobTitle\": \"Support Agent\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{membershipId}}/department",
+              "raw": "{{base_url}}/organisations/{{orgId}}/departments/assign",
               "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members", "{{membershipId}}", "department"]
+              "path": ["organisations", "{{orgId}}", "departments", "assign"]
             }
           }
         },
@@ -2595,9 +2595,9 @@
                   "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"departmentId\": \"{{deptId}}\",\n  \"departmentRole\": \"member\",\n  \"jobTitle\": \"Développeur Fullstack\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/organisations/{{orgId}}/members/{{memberId}}/department",
+                  "raw": "{{base_url}}/organisations/{{orgId}}/departments/assign",
                   "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "members", "{{memberId}}", "department"]
+                  "path": ["organisations", "{{orgId}}", "departments", "assign"]
                 },
                 "description": "Assigne un membre de l'organisation à un département spécifique."
               },
