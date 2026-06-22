@@ -29,6 +29,16 @@ export default class HttpExceptionHandler extends ExceptionHandler {
       })
     }
 
+    // Force JSON responses for all API endpoints
+    if (ctx.request.url().startsWith('/api/')) {
+      const status = (error as any).status || 500
+      const message = (error as any).message || 'An unexpected error occurred'
+      return ctx.response.status(status).json({
+        message,
+        code: (error as any).code,
+      })
+    }
+
     return super.handle(error, ctx)
   }
 
