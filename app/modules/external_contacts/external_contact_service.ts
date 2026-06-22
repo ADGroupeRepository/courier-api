@@ -18,7 +18,6 @@ export interface ExternalContact {
 export type CreateExternalContactPayload = Omit<ExternalContact, '$id' | '$createdAt'>
 export type UpdateExternalContactPayload = Partial<CreateExternalContactPayload>
 
-
 export class ExternalContactService {
   private readonly orgId: string
 
@@ -140,4 +139,3 @@ export class ExternalContactService {
     }
   }
 }
-

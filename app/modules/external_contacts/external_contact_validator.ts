@@ -32,6 +32,3 @@ export const updateExternalContactValidator = vine.create(
     address: vine.string().trim().maxLength(500).optional(),
   })
 )
-
-
-

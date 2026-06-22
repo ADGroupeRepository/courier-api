@@ -59,13 +59,7 @@ export default class MembersService {
     }
 
     if (existing.total > 0) {
-      // Update existing profile
-      return appwrite.databases.updateDocument({
-        databaseId: this.databaseId,
-        collectionId: this.collectionId,
-        documentId: existing.documents[0].$id,
-        data,
-      })
+      throw new Error('User is already assigned to a department in this organisation.')
     }
 
     // Create new profile

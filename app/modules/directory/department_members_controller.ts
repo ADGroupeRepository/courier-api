@@ -28,7 +28,7 @@ export default class DepartmentMembersController {
 
       return response.ok({ data: profile })
     } catch (error: any) {
-      return response.internalServerError({ message: error.message })
+      return response.badRequest({ message: error.message })
     }
   }
 
