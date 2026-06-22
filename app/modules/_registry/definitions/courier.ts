@@ -111,7 +111,6 @@ export const courierModule: ModuleDefinition = {
           elements: Object.values(CourierStructureType),
           required: true,
         },
-        { key: 'structureName', type: 'string', size: 255, required: false },
         { key: 'idNumber', type: 'string', size: 255, required: false },
         { key: 'address', type: 'string', size: 500, required: false },
         { key: 'createdBy', type: 'string', size: 36, required: true },
