@@ -113,6 +113,7 @@ export default class AuthController {
           id: profile.id,
           name: profile.name,
           email: profile.email,
+          emailVerification: profile.emailVerification,
           phone: profile.phone,
           avatarUrl,
           signatureUrl: profile.signatureUrl,
