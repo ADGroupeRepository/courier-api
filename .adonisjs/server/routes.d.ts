@@ -44,7 +44,7 @@ export type ScannedRoutes = {
     'departments.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'departments.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'departments.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'department_members.assign': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'membershipId': ParamValue} }
+    'department_members.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'department_members.index_by_department': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'department_members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'notifications.mark_all_as_read': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -87,7 +87,7 @@ export type ScannedRoutes = {
     'admin_plans.store_plan': { paramsTuple?: []; params?: {} }
     'admin_plans.issue_subscription': { paramsTuple?: []; params?: {} }
     'departments.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'department_members.assign': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'membershipId': ParamValue} }
+    'department_members.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.restore': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }

@@ -1,26 +1,36 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import MembersService from '#modules/directory/members_service'
 import { assignMemberValidator } from '#modules/directory/members_validator'
+import appwrite from '#services/appwrite_service'
+import { Query } from 'node-appwrite'
 
 export default class DepartmentMembersController {
   /**
-   * POST /api/v1/organisations/:orgId/members/:membershipId/department
+   * POST /api/v1/organisations/:orgId/departments/assign
    * Assign a member to a department.
    */
   async assign({ params, request, response }: HttpContext) {
-    const payload = await request.validateUsing(assignMemberValidator, {
-      data: {
-        ...request.all(),
-        organisationId: params.orgId,
-        membershipId: params.membershipId,
-      },
-    })
+    const payload = await request.validateUsing(assignMemberValidator)
 
     try {
+      // Resolve membershipId from the Teams API using the userId
+      const memberships = await appwrite.teams.listMemberships({
+        teamId: params.orgId,
+        queries: [Query.equal('userId', payload.userId)],
+      })
+
+      if (memberships.total === 0) {
+        return response.notFound({
+          message: 'User is not a member of this organisation.',
+        })
+      }
+
+      const membershipId = memberships.memberships[0].$id
+
       const service = await MembersService.forOrg(params.orgId)
       const profile = await service.assignToDepartment({
         userId: payload.userId,
-        membershipId: params.membershipId,
+        membershipId,
         departmentId: payload.departmentId,
         jobTitle: payload.jobTitle,
         departmentRole: payload.departmentRole,

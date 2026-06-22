@@ -478,7 +478,7 @@ paths:
         '200':
           description: Success
 
-  /organisations/{orgId}/members/{membershipId}/department:
+  /organisations/{orgId}/departments/assign:
     post:
       summary: Assigner à un département
       operationId: assignMemberToDepartment
@@ -487,13 +487,29 @@ paths:
           in: path
           required: true
           type: string
-        - name: membershipId
-          in: path
+        - name: body
+          in: body
           required: true
-          type: string
+          schema:
+            type: object
+            required:
+              - userId
+              - departmentId
+            properties:
+              userId:
+                type: string
+              departmentId:
+                type: string
+              jobTitle:
+                type: string
+              departmentRole:
+                type: string
+                enum: [manager, member]
       responses:
         '200':
           description: Success
+        '404':
+          description: User is not a member of this organisation
 
   /organisations/{orgId}/departments/{id}/members:
     get:
@@ -625,11 +641,73 @@ paths:
     post:
       summary: Créer un courrier
       operationId: createCourier
+      consumes:
+        - multipart/form-data
       parameters:
         - name: orgId
           in: path
           required: true
           type: string
+        - name: type
+          in: formData
+          required: true
+          type: string
+          enum: [incoming, outgoing, internal]
+        - name: urgency
+          in: formData
+          required: true
+          type: string
+          enum: [normal, urgent, very_urgent]
+        - name: subject
+          in: formData
+          required: true
+          type: string
+        - name: targetType
+          in: formData
+          required: true
+          type: string
+          enum: [user, department]
+        - name: entityIds[]
+          in: formData
+          required: true
+          type: array
+          items:
+            type: string
+        - name: receivedAt
+          in: formData
+          required: false
+          type: string
+        - name: emittedAt
+          in: formData
+          required: false
+          type: string
+        - name: senderName
+          in: formData
+          required: false
+          type: string
+        - name: senderEmail
+          in: formData
+          required: false
+          type: string
+        - name: senderPhone
+          in: formData
+          required: false
+          type: string
+        - name: externalContactId
+          in: formData
+          required: false
+          type: string
+          description: Required for incoming/outgoing couriers
+        - name: externalContactType
+          in: formData
+          required: false
+          type: string
+          enum: [personne, entreprise_privee, organisation_publique, ONG, autre]
+          description: Required for incoming/outgoing couriers
+        - name: file
+          in: formData
+          required: false
+          type: file
       responses:
         '201':
           description: Created
@@ -887,6 +965,12 @@ paths:
           in: path
           required: true
           type: string
+        - name: type
+          in: query
+          required: false
+          type: string
+          enum: [physique, privee, publique, ong, autre]
+          description: Filter contacts by structure type
       responses:
         '200':
           description: Success
@@ -1294,11 +1378,16 @@ definitions:
       urgency: { type: string, enum: [normal, urgent, very_urgent] }
       subject: { type: string }
       receivedAt: { type: string }
+      emittedAt: { type: string }
       senderName: { type: string }
       senderEmail: { type: string }
       senderPhone: { type: string }
-      internalEntityId: { type: string }
+      externalContactId: { type: string }
+      externalContactType: { type: string, enum: [personne, entreprise_privee, organisation_publique, ONG, autre] }
       targetType: { type: string, enum: [user, department] }
+      entityIds:
+        type: array
+        items: { type: string }
       fileUrl: { type: string }
       fileId: { type: string }
       status: { type: string }

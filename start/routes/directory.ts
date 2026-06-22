@@ -11,7 +11,7 @@ router
     router.resource('departments', DepartmentsController).apiOnly()
 
     // Members management
-    router.post('members/:membershipId/department', [DepartmentMembersController, 'assign'])
+    router.post('departments/assign', [DepartmentMembersController, 'assign'])
     router.get('departments/:id/members', [DepartmentMembersController, 'indexByDepartment'])
     router.delete('profiles/:id', [DepartmentMembersController, 'destroy'])
 
