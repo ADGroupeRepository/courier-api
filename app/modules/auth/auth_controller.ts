@@ -178,7 +178,7 @@ export default class AuthController {
    */
   async requestPasswordReset({ request, response }: HttpContext) {
     const { email } = await request.validateUsing(requestPasswordResetValidator)
-    const redirectUrl = request.input('redirectUrl') || `${env.get('APP_URL')}/reset-password`
+    const redirectUrl = request.input('redirectUrl') || `https://bara.akumba.io/reset-password`
     const authService = new AuthService()
     const result = await authService.requestPasswordReset(email, redirectUrl)
     return response.ok({ message: 'Password recovery email sent successfully', data: result })
