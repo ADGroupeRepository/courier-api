@@ -44,20 +44,29 @@ export class ExternalContactService {
    * @param queries - Optional Appwrite queries for filtering/sorting.
    * @returns A paginated list of external contacts.
    */
-  async list(options: { limit?: number; page?: number } = {}, queries: string[] = []) {
+  async list(
+    options: { limit?: number; page?: number; structureType?: string } = {},
+    queries: string[] = []
+  ) {
     const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
     const page = Math.max(options.page ?? 1, 1)
     const offset = (page - 1) * limit
 
+    const baseQueries = [
+      Query.limit(limit),
+      Query.offset(offset),
+      Query.orderDesc('$createdAt'),
+      ...queries,
+    ]
+
+    if (options.structureType) {
+      baseQueries.push(Query.equal('structureType', options.structureType))
+    }
+
     const response = await appwrite.databases.listDocuments({
       databaseId: this.orgId,
       collectionId: Collections.EXTERNAL_CONTACTS,
-      queries: [
-        Query.limit(limit),
-        Query.offset(offset),
-        Query.orderDesc('$createdAt'),
-        ...queries,
-      ],
+      queries: baseQueries,
     })
 
     return {

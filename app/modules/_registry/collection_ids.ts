@@ -13,6 +13,7 @@ export const Collections = {
 
   // Courier module
   COURIERS: 'couriers',
+  COURIER_ASSIGNMENTS: 'courier_assignments',
   COURIER_REPLIES: 'courier_replies',
   COURIER_MESSAGES: 'courier_messages',
 

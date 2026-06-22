@@ -33,11 +33,33 @@ export default class ProvisionCourierInterface extends BaseCommand {
             continue
           }
 
-          await appwrite.databases.getCollection({
-            databaseId: prefs.databaseId,
-            collectionId: Collections.COURIERS,
-          })
+          // 1. Ensure externalContactId and externalContactType exist on couriers
+          try {
+            await this.createOptionalStringAttributeIfMissing(prefs.databaseId, 'externalContactId')
+          } catch (e) {
+            this.logger.error(`Failed to create externalContactId: ${e.message}`)
+            throw e
+          }
+          try {
+            await this.createOptionalEnumAttributeIfMissing(
+              prefs.databaseId,
+              'externalContactType',
+              ['personne', 'entreprise_privee', 'organisation_publique', 'ONG', 'autre']
+            )
+          } catch (e) {
+            this.logger.error(`Failed to create externalContactType: ${e.message}`)
+            throw e
+          }
 
+          // 2. Provision courier_assignments collection
+          try {
+            await this.ensureAssignmentsCollection(prefs.databaseId, team.$id)
+          } catch (e) {
+            this.logger.error(`Failed to create assignments collection: ${e.message}`)
+            throw e
+          }
+
+          // 3. Clean up/rename old attributes if necessary
           await this.renameOrCreateOptionalStringAttribute(
             prefs.databaseId,
             'contactName',
@@ -54,13 +76,13 @@ export default class ProvisionCourierInterface extends BaseCommand {
             'senderPhone'
           )
           await this.createOptionalDatetimeAttributeIfMissing(prefs.databaseId, 'receivedAt')
+          await this.createOptionalDatetimeAttributeIfMissing(prefs.databaseId, 'emittedAt')
 
           await this.deleteAttributeIfExists(prefs.databaseId, 'createdAt')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactNumber')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactStructureType')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactStructureName')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactIdNumber')
-          await this.deleteAttributeIfExists(prefs.databaseId, 'externalContactId')
 
           updatedCount += 1
           this.logger.success(`Updated courier interface for: ${team.name}`)
@@ -73,7 +95,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
 
           failedCount += 1
           this.logger.error(
-            `Failed for organisation ${team.name} (${team.$id}): ${orgError.message}`
+            `Failed for organisation ${team.name} (${team.$id}): ${orgError.stack}`
           )
         }
       }
@@ -102,14 +124,6 @@ export default class ProvisionCourierInterface extends BaseCommand {
         collectionId: Collections.COURIERS,
         key: newKey,
       })
-
-      await appwrite.databases.updateStringAttribute({
-        databaseId,
-        collectionId: Collections.COURIERS,
-        key: newKey,
-        required: false,
-        size: 255,
-      })
       return
     } catch (error: any) {
       if (error.code !== 404) {
@@ -125,6 +139,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
         required: false,
         size: 255,
         newKey,
+        xdefault: '',
       })
     } catch (error: any) {
       if (error.code !== 404) {
@@ -137,6 +152,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
         key: newKey,
         size: 255,
         required: false,
+        xdefault: '',
       })
     }
   }
@@ -174,5 +190,140 @@ export default class ProvisionCourierInterface extends BaseCommand {
         required: false,
       })
     }
+  }
+
+  private async createOptionalStringAttributeIfMissing(databaseId: string, key: string) {
+    try {
+      await appwrite.databases.getAttribute({
+        databaseId,
+        collectionId: Collections.COURIERS,
+        key,
+      })
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
+
+      await appwrite.databases.createStringAttribute({
+        databaseId,
+        collectionId: Collections.COURIERS,
+        key,
+        size: 36,
+        required: false,
+        xdefault: '',
+      })
+    }
+  }
+
+  private async createOptionalEnumAttributeIfMissing(databaseId: string, key: string, elements: string[]) {
+    try {
+      await appwrite.databases.getAttribute({
+        databaseId,
+        collectionId: Collections.COURIERS,
+        key,
+      })
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
+
+      await appwrite.databases.createEnumAttribute({
+        databaseId,
+        collectionId: Collections.COURIERS,
+        key,
+        elements,
+        required: false,
+        xdefault: elements[0],
+      })
+    }
+  }
+
+  private async ensureAssignmentsCollection(databaseId: string, orgId: string) {
+    const { Permission, Role, IndexType } = await import('node-appwrite')
+
+    try {
+      await appwrite.databases.getCollection({
+        databaseId,
+        collectionId: Collections.COURIER_ASSIGNMENTS,
+      })
+      return
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
+    }
+
+    await appwrite.databases.createCollection({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      name: 'Courier Assignments',
+      permissions: [
+        Permission.read(Role.team(orgId)),
+        Permission.create(Role.team(orgId)),
+        Permission.update(Role.team(orgId)),
+        Permission.delete(Role.team(orgId, 'admin')),
+      ],
+      documentSecurity: true,
+    })
+
+    // Create attributes
+    await appwrite.databases.createStringAttribute({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      key: 'courierId',
+      size: 36,
+      required: true,
+    })
+
+    await appwrite.databases.createStringAttribute({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      key: 'entityId',
+      size: 36,
+      required: true,
+    })
+
+    await appwrite.databases.createEnumAttribute({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      key: 'entityType',
+      elements: ['user', 'department'],
+      required: true,
+    })
+
+    await appwrite.databases.createStringAttribute({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      key: 'assignedBy',
+      size: 36,
+      required: true,
+    })
+
+    // Delay before creating indexes to let attributes register
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+
+    await appwrite.databases.createIndex({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      key: 'courier_idx',
+      type: IndexType.Key,
+      attributes: ['courierId'],
+    })
+
+    await appwrite.databases.createIndex({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      key: 'entity_idx',
+      type: IndexType.Key,
+      attributes: ['entityId'],
+    })
+
+    await appwrite.databases.createIndex({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      key: 'entity_type_idx',
+      type: IndexType.Key,
+      attributes: ['entityId', 'entityType'],
+    })
   }
 }

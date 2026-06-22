@@ -98,9 +98,14 @@ export default class CourierController {
       const courier = await service.get(params.id)
 
       // Permission Check: Manager OR Assigned User OR Assigned Department OR Creator
-      const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
-      const isAssignedDept =
-        courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isAssignedUser = courier.assignments.some(
+        (a) => a.entityId === user?.$id && a.entityType === 'user'
+      )
+      const isAssignedDept = departmentId
+        ? courier.assignments.some(
+            (a) => a.entityId === departmentId && a.entityType === 'department'
+          )
+        : false
       const isCreator = courier.createdBy === user?.$id
 
       if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
@@ -121,6 +126,31 @@ export default class CourierController {
   async store({ user, params, request, response }: HttpContext) {
     const payload = await request.validateUsing(createCourierValidator)
 
+    if (payload.type === 'incoming' || payload.type === 'outgoing') {
+      if (!payload.externalContactId) {
+        return response.badRequest({
+          errors: [
+            {
+              message: 'The externalContactId field is required for incoming and outgoing couriers',
+              field: 'externalContactId',
+              rule: 'required',
+            },
+          ],
+        })
+      }
+      if (!payload.externalContactType) {
+        return response.badRequest({
+          errors: [
+            {
+              message: 'The externalContactType field is required for incoming and outgoing couriers',
+              field: 'externalContactType',
+              rule: 'required',
+            },
+          ],
+        })
+      }
+    }
+
     try {
       const service = await CourierService.forOrg(params.orgId)
 
@@ -130,10 +160,13 @@ export default class CourierController {
           urgency: payload.urgency,
           subject: payload.subject,
           receivedAt: payload.receivedAt,
+          emittedAt: payload.emittedAt,
           senderName: payload.senderName,
           senderEmail: payload.senderEmail,
           senderPhone: payload.senderPhone,
-          internalEntityId: payload.internalEntityId,
+          externalContactId: payload.externalContactId,
+          externalContactType: payload.externalContactType,
+          entityIds: payload.entityIds,
           targetType: payload.targetType,
           createdBy: user?.$id || '',
         },
@@ -142,16 +175,19 @@ export default class CourierController {
           : undefined
       )
 
-      if (courier.internalEntityId) {
-        emitter.emit(
-          CourierAssigned,
-          new CourierAssigned(
-            params.orgId,
-            courier.id,
-            courier.targetType as 'user' | 'department',
-            courier.internalEntityId
+      // Emit assignment events for each assigned entity
+      if (courier.assignments && courier.assignments.length > 0) {
+        for (const assignment of courier.assignments) {
+          emitter.emit(
+            CourierAssigned,
+            new CourierAssigned(
+              params.orgId,
+              courier.id,
+              assignment.entityType,
+              assignment.entityId
+            )
           )
-        )
+        }
       }
 
       return response.created({ data: courier })
@@ -173,9 +209,14 @@ export default class CourierController {
       const courier = await service.get(params.id)
 
       // Permission Check: Manager OR Assigned User OR Assigned Department OR Creator
-      const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
-      const isAssignedDept =
-        courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isAssignedUser = courier.assignments.some(
+        (a) => a.entityId === user?.$id && a.entityType === 'user'
+      )
+      const isAssignedDept = departmentId
+        ? courier.assignments.some(
+            (a) => a.entityId === departmentId && a.entityType === 'department'
+          )
+        : false
       const isCreator = courier.createdBy === user?.$id
 
       if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
@@ -183,18 +224,6 @@ export default class CourierController {
       }
 
       const updatedCourier = await service.update(params.id, payload)
-
-      if (payload.internalEntityId && payload.internalEntityId !== courier.internalEntityId) {
-        emitter.emit(
-          CourierAssigned,
-          new CourierAssigned(
-            params.orgId,
-            updatedCourier.id,
-            (payload.targetType || updatedCourier.targetType) as 'user' | 'department',
-            payload.internalEntityId
-          )
-        )
-      }
 
       return response.ok({ data: updatedCourier })
     } catch (error: any) {
@@ -240,9 +269,14 @@ export default class CourierController {
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id)
 
-      const isAssignedUser = courier.internalEntityId === user?.$id && courier.targetType === 'user'
-      const isAssignedDept =
-        courier.internalEntityId === departmentId && courier.targetType === 'department'
+      const isAssignedUser = courier.assignments.some(
+        (a) => a.entityId === user?.$id && a.entityType === 'user'
+      )
+      const isAssignedDept = departmentId
+        ? courier.assignments.some(
+            (a) => a.entityId === departmentId && a.entityType === 'department'
+          )
+        : false
       const isCreator = courier.createdBy === user?.$id
 
       if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {

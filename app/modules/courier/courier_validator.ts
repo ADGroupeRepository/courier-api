@@ -3,11 +3,15 @@ import {
   CourierUrgency,
   CourierStatus,
   CourierType,
+  CourierStructureType,
   DocumentStatus,
 } from '#modules/courier/courier_enums'
 
 /**
  * Validator for creating a new courier.
+ *
+ * `targetType` determines whether `entityIds` refer to users or departments.
+ * A courier targets either users OR departments, never both.
  */
 export const createCourierValidator = vine.create(
   vine.object({
@@ -15,11 +19,17 @@ export const createCourierValidator = vine.create(
     urgency: vine.enum(CourierUrgency),
     subject: vine.string().minLength(3).maxLength(255).trim(),
     receivedAt: vine.string().optional(),
+    emittedAt: vine.string().optional(),
     senderName: vine.string().minLength(2).maxLength(255).trim().optional(),
     senderEmail: vine.string().email().optional(),
     senderPhone: vine.string().maxLength(255).trim().optional(),
-    internalEntityId: vine.string().maxLength(36).trim(),
+    externalContactId: vine.string().maxLength(36).trim().optional(),
+    externalContactType: vine.enum(CourierStructureType).optional(),
     targetType: vine.enum(['user', 'department']),
+    entityIds: vine
+      .array(vine.string().maxLength(36).trim())
+      .minLength(1)
+      .maxLength(50),
     file: vine
       .file({
         size: '10mb',
@@ -37,11 +47,12 @@ export const updateCourierValidator = vine.create(
     urgency: vine.enum(CourierUrgency).optional(),
     subject: vine.string().minLength(3).maxLength(255).trim().optional(),
     receivedAt: vine.string().optional(),
+    emittedAt: vine.string().optional(),
     senderName: vine.string().minLength(2).maxLength(255).trim().optional(),
     senderEmail: vine.string().email().optional(),
     senderPhone: vine.string().maxLength(255).trim().optional(),
-    internalEntityId: vine.string().maxLength(36).trim().optional(),
-    targetType: vine.enum(['user', 'department']).optional(),
+    externalContactId: vine.string().maxLength(36).trim().optional(),
+    externalContactType: vine.enum(CourierStructureType).optional(),
     status: vine.enum(CourierStatus).optional(),
     isFavorite: vine.boolean().optional(),
     isArchived: vine.boolean().optional(),
