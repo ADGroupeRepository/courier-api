@@ -43,16 +43,23 @@ export const courierModule: ModuleDefinition = {
         },
         { key: 'subject', type: 'string', size: 255, required: true },
         { key: 'receivedAt', type: 'datetime', required: false },
+        { key: 'emittedAt', type: 'datetime', required: false },
         { key: 'senderName', type: 'string', size: 255, required: false },
         { key: 'senderEmail', type: 'string', size: 255, required: false },
         { key: 'senderPhone', type: 'string', size: 255, required: false },
-        { key: 'internalEntityId', type: 'string', size: 36, required: true }, // ID of User or Department (Sender for Outgoing, Recipient for Incoming)
+        { key: 'externalContactId', type: 'string', size: 36, required: false },
+        {
+          key: 'externalContactType',
+          type: 'enum',
+          elements: Object.values(CourierStructureType),
+          required: false,
+        },
+        { key: 'internalEntityId', type: 'string', size: 36, required: false }, // @deprecated — use courier_assignments collection
         {
           key: 'targetType',
           type: 'enum',
           elements: ['user', 'department'],
-          required: true,
-          default: 'user',
+          required: false,
         },
         { key: 'fileId', type: 'string', size: 36, required: false },
         { key: 'createdBy', type: 'string', size: 36, required: true },
@@ -73,12 +80,40 @@ export const courierModule: ModuleDefinition = {
       ],
       indexes: [
         { key: 'subject_idx', type: 'key', attributes: ['subject'] },
+        { key: 'external_contact_idx', type: 'key', attributes: ['externalContactId'] },
         { key: 'internal_entity_idx', type: 'key', attributes: ['internalEntityId'] },
         { key: 'creator_idx', type: 'key', attributes: ['createdBy'] },
         { key: 'status_idx', type: 'key', attributes: ['status'] },
         { key: 'archived_idx', type: 'key', attributes: ['isArchived'] },
         { key: 'favorite_idx', type: 'key', attributes: ['isFavorite'] },
         { key: 'deleted_idx', type: 'key', attributes: ['isDeleted'] },
+      ],
+    },
+    {
+      id: Collections.COURIER_ASSIGNMENTS,
+      name: 'Courier Assignments',
+      documentSecurity: true,
+      permissions: (orgId: string) => [
+        Permission.read(Role.team(orgId)),
+        Permission.create(Role.team(orgId)),
+        Permission.update(Role.team(orgId)),
+        Permission.delete(Role.team(orgId, 'admin')),
+      ],
+      attributes: [
+        { key: 'courierId', type: 'string', size: 36, required: true },
+        { key: 'entityId', type: 'string', size: 36, required: true },
+        {
+          key: 'entityType',
+          type: 'enum',
+          elements: ['user', 'department'],
+          required: true,
+        },
+        { key: 'assignedBy', type: 'string', size: 36, required: true },
+      ],
+      indexes: [
+        { key: 'courier_idx', type: 'key', attributes: ['courierId'] },
+        { key: 'entity_idx', type: 'key', attributes: ['entityId'] },
+        { key: 'entity_type_idx', type: 'key', attributes: ['entityId', 'entityType'] },
       ],
     },
     {

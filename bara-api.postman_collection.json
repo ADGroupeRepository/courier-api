@@ -427,13 +427,23 @@
                   "type": "text"
                 },
                 {
-                  "key": "internalEntityId",
+                  "key": "externalContactType",
+                  "value": "personne",
+                  "type": "text"
+                },
+                {
+                  "key": "entityIds[]",
                   "value": "{{memberUserId}}",
                   "type": "text"
                 },
                 {
                   "key": "targetType",
                   "value": "user",
+                  "type": "text"
+                },
+                {
+                  "key": "emittedAt",
+                  "value": "2026-06-22T18:25:39Z",
                   "type": "text"
                 }
               ]
@@ -494,13 +504,28 @@
                   "type": "text"
                 },
                 {
-                  "key": "internalEntityId",
+                  "key": "entityIds[]",
                   "value": "{{deptId}}",
                   "type": "text"
                 },
                 {
                   "key": "targetType",
                   "value": "department",
+                  "type": "text"
+                },
+                {
+                  "key": "emittedAt",
+                  "value": "2026-06-22T18:25:39Z",
+                  "type": "text"
+                },
+                {
+                  "key": "externalContactId",
+                  "value": "{{scenarioContactId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "externalContactType",
+                  "value": "personne",
                   "type": "text"
                 }
               ]
@@ -557,13 +582,28 @@
                   "type": "text"
                 },
                 {
-                  "key": "internalEntityId",
+                  "key": "entityIds[]",
                   "value": "{{memberUserId}}",
                   "type": "text"
                 },
                 {
                   "key": "targetType",
                   "value": "user",
+                  "type": "text"
+                },
+                {
+                  "key": "emittedAt",
+                  "value": "2026-06-22T18:25:39Z",
+                  "type": "text"
+                },
+                {
+                  "key": "externalContactId",
+                  "value": "{{scenarioContactId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "externalContactType",
+                  "value": "personne",
                   "type": "text"
                 }
               ]
@@ -2766,17 +2806,12 @@
                   "type": "text"
                 },
                 {
-                  "key": "contactName",
+                  "key": "senderName",
                   "value": "EDF {{$randomCompanyName}}",
                   "type": "text"
                 },
                 {
-                  "key": "contactNumber",
-                  "value": "REF-{{$randomInt}}",
-                  "type": "text"
-                },
-                {
-                  "key": "internalEntityId",
+                  "key": "entityIds[]",
                   "value": "{{memberId}}",
                   "type": "text"
                 },
@@ -2789,6 +2824,11 @@
                   "key": "file",
                   "type": "file",
                   "src": []
+                },
+                {
+                  "key": "emittedAt",
+                  "value": "2026-06-22T18:25:39Z",
+                  "type": "text"
                 }
               ]
             },
@@ -2851,17 +2891,12 @@
                   "type": "text"
                 },
                 {
-                  "key": "contactName",
+                  "key": "senderName",
                   "value": "EDF Service Client",
                   "type": "text"
                 },
                 {
-                  "key": "contactNumber",
-                  "value": "OUT-002",
-                  "type": "text"
-                },
-                {
-                  "key": "internalEntityId",
+                  "key": "entityIds[]",
                   "value": "{{memberId}}",
                   "type": "text"
                 },
@@ -2879,6 +2914,11 @@
                   "key": "file",
                   "type": "file",
                   "src": []
+                },
+                {
+                  "key": "emittedAt",
+                  "value": "2026-06-22T18:25:39Z",
+                  "type": "text"
                 }
               ]
             },
@@ -2952,7 +2992,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"subject\": \"Sujet de courrier modifié\",\n  \"urgency\": \"urgent\"\n}"
+              "raw": "{\n  \"subject\": \"Sujet de courrier modifié\",\n  \"urgency\": \"urgent\",\n  \"emittedAt\": \"2026-06-22T18:25:39Z\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
@@ -3314,9 +3354,16 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/contacts",
+              "raw": "{{base_url}}/organisations/{{orgId}}/contacts?type=personne",
               "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "contacts"]
+              "path": ["organisations", "{{orgId}}", "contacts"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "personne",
+                  "description": "Filtrer par type de structure (personne, entreprise_privee, organisation_publique, ONG, autre)"
+                }
+              ]
             }
           },
           "response": [],
@@ -3494,12 +3541,12 @@
     },
     {
       "key": "appwrite_endpoint",
-      "value": "https://bara-appwrite.akumba.io/v1",
+      "value": "https://bara.akumba.io/v1",
       "type": "string"
     },
     {
       "key": "appwrite_project_id",
-      "value": "bara-app-adg",
+      "value": "6a33df3a000fafc94c3f",
       "type": "string"
     },
     {

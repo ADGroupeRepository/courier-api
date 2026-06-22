@@ -51,10 +51,11 @@ export default class ExternalContactsController {
   async index({ request, params, response }: HttpContext) {
     const limit = request.input('limit') ? Number.parseInt(request.input('limit'), 10) : 25
     const page = request.input('page') ? Number.parseInt(request.input('page'), 10) : 1
+    const structureType = request.input('type')
 
     try {
       const service = await ExternalContactService.forOrg(params.orgId)
-      const { documents, total } = await service.list({ limit, page })
+      const { documents, total } = await service.list({ limit, page, structureType })
       return response.ok({
         total,
         limit,

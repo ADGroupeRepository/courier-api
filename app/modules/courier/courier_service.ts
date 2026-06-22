@@ -3,19 +3,34 @@ import logger from '@adonisjs/core/services/logger'
 import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
-import { type CourierUrgency, CourierStatus, CourierType } from '#modules/courier/courier_enums'
+import {
+  type CourierUrgency,
+  type CourierStructureType,
+  CourierStatus,
+  CourierType,
+} from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
+
+// ── Payload interfaces ────────────────────────────────────────────────
+
+export interface CourierAssignment {
+  entityId: string
+  entityType: 'user' | 'department'
+}
 
 export interface CreateCourierPayload {
   type: CourierType
   urgency: CourierUrgency
   subject: string
   receivedAt?: string
+  emittedAt?: string
   senderName?: string
   senderEmail?: string
   senderPhone?: string
-  internalEntityId: string
+  externalContactId?: string
+  externalContactType?: CourierStructureType
   targetType: 'user' | 'department'
+  entityIds: string[]
   createdBy: string
 }
 
@@ -23,15 +38,18 @@ export interface UpdateCourierPayload {
   urgency?: CourierUrgency
   subject?: string
   receivedAt?: string
+  emittedAt?: string
   senderName?: string
   senderEmail?: string
   senderPhone?: string
-  internalEntityId?: string
-  targetType?: 'user' | 'department'
+  externalContactId?: string
+  externalContactType?: CourierStructureType
   status?: CourierStatus
   isFavorite?: boolean
   isArchived?: boolean
 }
+
+// ── Service ───────────────────────────────────────────────────────────
 
 /**
  * Service for managing couriers within an organisation's isolated database and bucket.
@@ -40,6 +58,7 @@ export default class CourierService {
   private readonly databaseId: string
   private readonly bucketId: string
   private readonly collectionId = Collections.COURIERS
+  private readonly assignmentsCollectionId = Collections.COURIER_ASSIGNMENTS
 
   /**
    * Initializes the CourierService with organization-specific resources.
@@ -65,6 +84,102 @@ export default class CourierService {
     }
     return new CourierService(prefs.databaseId, prefs.bucketId)
   }
+
+  // ── Assignment helpers ──────────────────────────────────────────────
+
+  /**
+   * Create assignment documents for a courier.
+   * @param courierId - The courier to assign.
+   * @param entityIds - Array of user or department IDs.
+   * @param entityType - Whether the IDs are users or departments.
+   * @param assignedBy - The user creating the assignments.
+   */
+  async createAssignments(
+    courierId: string,
+    entityIds: string[],
+    entityType: 'user' | 'department',
+    assignedBy: string
+  ): Promise<CourierAssignment[]> {
+    const assignments: CourierAssignment[] = []
+
+    for (const entityId of entityIds) {
+      await appwrite.databases.createDocument({
+        databaseId: this.databaseId,
+        collectionId: this.assignmentsCollectionId,
+        documentId: ID.unique(),
+        data: {
+          courierId,
+          entityId,
+          entityType,
+          assignedBy,
+        },
+      })
+      assignments.push({ entityId, entityType })
+    }
+
+    return assignments
+  }
+
+  /**
+   * Get all assignments for a courier.
+   * @param courierId - The courier ID.
+   * @returns Array of assignment objects.
+   */
+  async getAssignments(courierId: string): Promise<CourierAssignment[]> {
+    const result = await appwrite.databases.listDocuments({
+      databaseId: this.databaseId,
+      collectionId: this.assignmentsCollectionId,
+      queries: [Query.equal('courierId', courierId), Query.limit(100)],
+    })
+
+    return result.documents.map((doc: any) => ({
+      entityId: doc.entityId,
+      entityType: doc.entityType,
+    }))
+  }
+
+  /**
+   * Delete all assignments for a courier.
+   * @param courierId - The courier ID.
+   */
+  async deleteAssignments(courierId: string): Promise<void> {
+    const result = await appwrite.databases.listDocuments({
+      databaseId: this.databaseId,
+      collectionId: this.assignmentsCollectionId,
+      queries: [Query.equal('courierId', courierId), Query.limit(100)],
+    })
+
+    for (const doc of result.documents) {
+      await appwrite.databases.deleteDocument({
+        databaseId: this.databaseId,
+        collectionId: this.assignmentsCollectionId,
+        documentId: doc.$id,
+      })
+    }
+  }
+
+  /**
+   * Check if a user or department is assigned to a courier.
+   */
+  async isAssigned(
+    courierId: string,
+    entityId: string,
+    entityType: 'user' | 'department'
+  ): Promise<boolean> {
+    const result = await appwrite.databases.listDocuments({
+      databaseId: this.databaseId,
+      collectionId: this.assignmentsCollectionId,
+      queries: [
+        Query.equal('courierId', courierId),
+        Query.equal('entityId', entityId),
+        Query.equal('entityType', entityType),
+        Query.limit(1),
+      ],
+    })
+    return result.total > 0
+  }
+
+  // ── CRUD ────────────────────────────────────────────────────────────
 
   /**
    * List couriers for the organisation based on provided filters.
@@ -112,50 +227,67 @@ export default class CourierService {
       })
       return {
         total: result.total,
-        documents: result.documents.map((doc) => this.mapDocument(doc)),
+        documents: await Promise.all(
+          result.documents.map((doc) => this.mapDocumentWithAssignments(doc))
+        ),
       }
     }
 
-    // If not a manager, filter by assignment
-    const queries = [...baseQueries]
+    // If not a manager, find courier IDs the user/department is assigned to
+    const assignmentQueries: any[] = []
 
-    // Construct OR query for assignment
-    // Note: Appwrite 1.5+ supports Query.or
-    const orQueries = [
-      Query.and([
-        Query.equal('internalEntityId', options.userId),
-        Query.equal('targetType', 'user'),
-      ]),
-      Query.equal('createdBy', options.userId),
-    ]
+    // User assignments
+    assignmentQueries.push(
+      Query.and([Query.equal('entityId', options.userId), Query.equal('entityType', 'user')])
+    )
 
+    // Department assignments
     if (options.departmentId) {
-      orQueries.push(
+      assignmentQueries.push(
         Query.and([
-          Query.equal('internalEntityId', options.departmentId),
-          Query.equal('targetType', 'department'),
+          Query.equal('entityId', options.departmentId),
+          Query.equal('entityType', 'department'),
         ])
       )
     }
 
-    queries.push(Query.or(orQueries))
+    const assignmentResult = await appwrite.databases.listDocuments({
+      databaseId: this.databaseId,
+      collectionId: this.assignmentsCollectionId,
+      queries: [Query.or(assignmentQueries), Query.limit(500)],
+    })
+
+    const assignedCourierIds = [
+      ...new Set(assignmentResult.documents.map((doc: any) => doc.courierId)),
+    ]
+
+    // Build OR query: assigned courier IDs OR created by user
+    const orQueries: any[] = [Query.equal('createdBy', options.userId)]
+
+    if (assignedCourierIds.length > 0) {
+      orQueries.push(Query.equal('$id', assignedCourierIds))
+    }
+
+    baseQueries.push(Query.or(orQueries))
 
     const result = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
-      queries,
+      queries: baseQueries,
     })
 
     return {
       total: result.total,
-      documents: result.documents.map((doc) => this.mapDocument(doc)),
+      documents: await Promise.all(
+        result.documents.map((doc) => this.mapDocumentWithAssignments(doc))
+      ),
     }
   }
 
   /**
-   * Get a single courier by ID.
+   * Get a single courier by ID, including its assignments.
    * @param courierId - The ID of the courier to retrieve.
-   * @returns The mapped courier document.
+   * @returns The mapped courier document with assignments.
    */
   async get(courierId: string) {
     const doc = await appwrite.databases.getDocument({
@@ -164,14 +296,15 @@ export default class CourierService {
       documentId: courierId,
     })
 
-    return this.mapDocument(doc)
+    return this.mapDocumentWithAssignments(doc)
   }
 
   /**
-   * Create a new courier record with an optional file attachment.
-   * @param payload - The courier details.
+   * Create a new courier record with an optional file attachment,
+   * then create assignment documents for each entity ID.
+   * @param payload - The courier details including entityIds.
    * @param fileOptions - Optional temporary path and filename for the file attachment.
-   * @returns The created and mapped courier document.
+   * @returns The created courier document with assignments.
    */
   async create(payload: CreateCourierPayload, fileOptions?: { tmpPath: string; fileName: string }) {
     let fileId: string | undefined
@@ -187,12 +320,26 @@ export default class CourierService {
     }
 
     try {
+      // Create the courier document (without per-entity assignment data)
       const doc = await appwrite.databases.createDocument({
         databaseId: this.databaseId,
         collectionId: this.collectionId,
         documentId: ID.unique(),
         data: {
-          ...this.omitUndefined(payload),
+          ...this.omitUndefined({
+            type: payload.type,
+            urgency: payload.urgency,
+            subject: payload.subject,
+            receivedAt: payload.receivedAt,
+            emittedAt: payload.emittedAt,
+            senderName: payload.senderName,
+            senderEmail: payload.senderEmail,
+            senderPhone: payload.senderPhone,
+            externalContactId: payload.externalContactId,
+            externalContactType: payload.externalContactType,
+            createdBy: payload.createdBy,
+            targetType: payload.targetType,
+          }),
           replyCount: 0,
           fileId: fileId || null,
           status:
@@ -203,7 +350,15 @@ export default class CourierService {
         },
       })
 
-      return this.mapDocument(doc)
+      // Create assignment documents
+      const assignments = await this.createAssignments(
+        doc.$id,
+        payload.entityIds,
+        payload.targetType,
+        payload.createdBy
+      )
+
+      return this.mapDocument(doc, assignments)
     } catch (error) {
       // Cleanup orphaned file if document creation fails
       if (fileId) {
@@ -237,7 +392,7 @@ export default class CourierService {
       data,
     })
 
-    return this.mapDocument(doc)
+    return this.mapDocumentWithAssignments(doc)
   }
 
   /**
@@ -281,7 +436,7 @@ export default class CourierService {
       documentId: courierId,
       data: { isDeleted: true },
     })
-    return this.mapDocument(doc)
+    return this.mapDocumentWithAssignments(doc)
   }
 
   /**
@@ -296,16 +451,19 @@ export default class CourierService {
       documentId: courierId,
       data: { isDeleted: false },
     })
-    return this.mapDocument(doc)
+    return this.mapDocumentWithAssignments(doc)
   }
 
   /**
-   * Permanently delete a courier and its associated file if it exists.
+   * Permanently delete a courier, its assignments, and its associated file.
    * @param courierId - The ID of the courier to permanently delete.
    * @throws Error if the courier or file cannot be deleted.
    */
   async forceDelete(courierId: string) {
     const courier = await this.get(courierId)
+
+    // Delete assignments first
+    await this.deleteAssignments(courierId)
 
     if (courier.fileId) {
       try {
@@ -328,13 +486,24 @@ export default class CourierService {
     })
   }
 
+  // ── Mapping helpers ─────────────────────────────────────────────────
+
+  /**
+   * Map document and fetch its assignments in one call.
+   */
+  private async mapDocumentWithAssignments(doc: any) {
+    const assignments = await this.getAssignments(doc.$id)
+    return this.mapDocument(doc, assignments)
+  }
+
   /**
    * Helper to map an Appwrite document to our domain model.
    * Calculates the public view URL for the file attachment if it exists.
    * @param doc - The raw Appwrite document.
+   * @param assignments - Pre-fetched assignment list.
    * @returns The formatted domain model object.
    */
-  private mapDocument(doc: any) {
+  private mapDocument(doc: any, assignments: CourierAssignment[]) {
     const fileUrl = doc.fileId
       ? `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${doc.fileId}/view?project=${appwriteConfig.projectId}`
       : null
@@ -345,11 +514,14 @@ export default class CourierService {
       urgency: doc.urgency,
       subject: doc.subject,
       receivedAt: doc.receivedAt || null,
+      emittedAt: doc.emittedAt || null,
       senderName: doc.senderName ?? doc.contactName ?? null,
       senderEmail: doc.senderEmail ?? doc.contactEmail ?? null,
       senderPhone: doc.senderPhone ?? doc.contactPhone ?? null,
-      internalEntityId: doc.internalEntityId,
-      targetType: doc.targetType,
+      externalContactId: doc.externalContactId || null,
+      externalContactType: doc.externalContactType || null,
+      targetType: doc.targetType || null,
+      assignments,
       fileUrl,
       fileId: doc.fileId || null,
       createdBy: doc.createdBy,
