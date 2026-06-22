@@ -142,7 +142,8 @@ export default class CourierController {
         return response.badRequest({
           errors: [
             {
-              message: 'The externalContactType field is required for incoming and outgoing couriers',
+              message:
+                'The externalContactType field is required for incoming and outgoing couriers',
               field: 'externalContactType',
               rule: 'required',
             },

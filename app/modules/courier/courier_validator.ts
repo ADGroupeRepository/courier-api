@@ -26,10 +26,7 @@ export const createCourierValidator = vine.create(
     externalContactId: vine.string().maxLength(36).trim().optional(),
     externalContactType: vine.enum(CourierStructureType).optional(),
     targetType: vine.enum(['user', 'department']),
-    entityIds: vine
-      .array(vine.string().maxLength(36).trim())
-      .minLength(1)
-      .maxLength(50),
+    entityIds: vine.array(vine.string().maxLength(36).trim()).minLength(1).maxLength(50),
     file: vine
       .file({
         size: '10mb',

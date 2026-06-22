@@ -3355,14 +3355,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts?type=personne",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "organisations",
-                "{{orgId}}",
-                "contacts"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "contacts"],
               "query": [
                 {
                   "key": "type",

@@ -94,9 +94,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
           }
 
           failedCount += 1
-          this.logger.error(
-            `Failed for organisation ${team.name} (${team.$id}): ${orgError.stack}`
-          )
+          this.logger.error(`Failed for organisation ${team.name} (${team.$id}): ${orgError.stack}`)
         }
       }
 
@@ -215,7 +213,11 @@ export default class ProvisionCourierInterface extends BaseCommand {
     }
   }
 
-  private async createOptionalEnumAttributeIfMissing(databaseId: string, key: string, elements: string[]) {
+  private async createOptionalEnumAttributeIfMissing(
+    databaseId: string,
+    key: string,
+    elements: string[]
+  ) {
     try {
       await appwrite.databases.getAttribute({
         databaseId,
