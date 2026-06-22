@@ -417,13 +417,8 @@
                   "type": "text"
                 },
                 {
-                  "key": "contactName",
+                  "key": "senderName",
                   "value": "External {{$randomCompanyName}}",
-                  "type": "text"
-                },
-                {
-                  "key": "contactNumber",
-                  "value": "REF-{{$randomInt}}",
                   "type": "text"
                 },
                 {
@@ -494,13 +489,8 @@
                   "type": "text"
                 },
                 {
-                  "key": "contactName",
+                  "key": "senderName",
                   "value": "External {{$randomCompanyName}}",
-                  "type": "text"
-                },
-                {
-                  "key": "contactNumber",
-                  "value": "REF-{{$randomInt}}",
                   "type": "text"
                 },
                 {
@@ -562,13 +552,8 @@
                   "type": "text"
                 },
                 {
-                  "key": "contactName",
+                  "key": "senderName",
                   "value": "Bara Corp {{$randomCompanyName}}",
-                  "type": "text"
-                },
-                {
-                  "key": "contactNumber",
-                  "value": "OUT-{{$randomInt}}",
                   "type": "text"
                 },
                 {

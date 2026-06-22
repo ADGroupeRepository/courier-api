@@ -3,26 +3,17 @@ import logger from '@adonisjs/core/services/logger'
 import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
-import {
-  type CourierUrgency,
-  CourierStatus,
-  CourierType,
-  type CourierStructureType,
-} from '#modules/courier/courier_enums'
+import { type CourierUrgency, CourierStatus, CourierType } from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
 
 export interface CreateCourierPayload {
   type: CourierType
   urgency: CourierUrgency
   subject: string
-  contactName: string
-  contactNumber: string
-  contactStructureType?: CourierStructureType
-  contactStructureName?: string
-  contactIdNumber?: string
-  contactPhone?: string
-  contactEmail?: string
-  externalContactId?: string
+  receivedAt?: string
+  senderName?: string
+  senderEmail?: string
+  senderPhone?: string
   internalEntityId: string
   targetType: 'user' | 'department'
   createdBy: string
@@ -31,14 +22,10 @@ export interface CreateCourierPayload {
 export interface UpdateCourierPayload {
   urgency?: CourierUrgency
   subject?: string
-  contactName?: string
-  contactNumber?: string
-  contactStructureType?: CourierStructureType
-  contactStructureName?: string
-  contactIdNumber?: string
-  contactPhone?: string
-  contactEmail?: string
-  externalContactId?: string
+  receivedAt?: string
+  senderName?: string
+  senderEmail?: string
+  senderPhone?: string
   internalEntityId?: string
   targetType?: 'user' | 'department'
   status?: CourierStatus
@@ -205,7 +192,8 @@ export default class CourierService {
         collectionId: this.collectionId,
         documentId: ID.unique(),
         data: {
-          ...payload,
+          ...this.omitUndefined(payload),
+          replyCount: 0,
           fileId: fileId || null,
           status:
             payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
@@ -356,14 +344,10 @@ export default class CourierService {
       type: doc.type,
       urgency: doc.urgency,
       subject: doc.subject,
-      contactName: doc.contactName,
-      contactNumber: doc.contactNumber,
-      contactStructureType: doc.contactStructureType || null,
-      contactStructureName: doc.contactStructureName || null,
-      contactIdNumber: doc.contactIdNumber || null,
-      contactPhone: doc.contactPhone || null,
-      contactEmail: doc.contactEmail || null,
-      externalContactId: doc.externalContactId || null,
+      receivedAt: doc.receivedAt || null,
+      senderName: doc.senderName ?? doc.contactName ?? null,
+      senderEmail: doc.senderEmail ?? doc.contactEmail ?? null,
+      senderPhone: doc.senderPhone ?? doc.contactPhone ?? null,
       internalEntityId: doc.internalEntityId,
       targetType: doc.targetType,
       fileUrl,
@@ -377,5 +361,9 @@ export default class CourierService {
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
     }
+  }
+
+  private omitUndefined<T extends Record<string, any>>(data: T) {
+    return Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined))
   }
 }

@@ -8,6 +8,23 @@ import appwrite from '#services/appwrite_service'
 import { Query } from 'node-appwrite'
 
 export default class ExternalContactsController {
+  private readonly missingCollectionMessage =
+    'External contacts are not provisioned for this organisation. Run `node ace provision:external-contacts` to create the missing collection for courier-enabled organisations.'
+
+  private isMissingExternalContactsCollection(error: any) {
+    return (
+      error?.code === 404 &&
+      typeof error?.message === 'string' &&
+      error.message.toLowerCase().includes('collection')
+    )
+  }
+
+  private missingCollectionResponse(response: HttpContext['response']) {
+    return response.status(503).send({
+      message: this.missingCollectionMessage,
+    })
+  }
+
   /**
    * Helper to get user roles in an organisation.
    */
@@ -46,6 +63,9 @@ export default class ExternalContactsController {
         data: documents,
       })
     } catch (error: any) {
+      if (this.isMissingExternalContactsCollection(error)) {
+        return this.missingCollectionResponse(response)
+      }
       return response.internalServerError({ message: error.message })
     }
   }
@@ -59,7 +79,12 @@ export default class ExternalContactsController {
       const contact = await service.get(params.id)
       return response.ok({ data: contact })
     } catch (error: any) {
-      if (error.code === 404) return response.notFound({ message: 'Contact not found' })
+      if (this.isMissingExternalContactsCollection(error)) {
+        return this.missingCollectionResponse(response)
+      }
+      if (error.code === 404) {
+        return response.notFound({ message: 'Contact not found' })
+      }
       return response.internalServerError({ message: error.message })
     }
   }
@@ -78,6 +103,9 @@ export default class ExternalContactsController {
       })
       return response.created({ data: contact })
     } catch (error: any) {
+      if (this.isMissingExternalContactsCollection(error)) {
+        return this.missingCollectionResponse(response)
+      }
       return response.internalServerError({ message: error.message })
     }
   }
@@ -93,7 +121,12 @@ export default class ExternalContactsController {
       const contact = await service.update(params.id, payload)
       return response.ok({ data: contact })
     } catch (error: any) {
-      if (error.code === 404) return response.notFound({ message: 'Contact not found' })
+      if (this.isMissingExternalContactsCollection(error)) {
+        return this.missingCollectionResponse(response)
+      }
+      if (error.code === 404) {
+        return response.notFound({ message: 'Contact not found' })
+      }
       return response.internalServerError({ message: error.message })
     }
   }
@@ -112,7 +145,12 @@ export default class ExternalContactsController {
       await service.delete(params.id)
       return response.ok({ message: 'Contact deleted successfully' })
     } catch (error: any) {
-      if (error.code === 404) return response.notFound({ message: 'Contact not found' })
+      if (this.isMissingExternalContactsCollection(error)) {
+        return this.missingCollectionResponse(response)
+      }
+      if (error.code === 404) {
+        return response.notFound({ message: 'Contact not found' })
+      }
       return response.internalServerError({ message: error.message })
     }
   }

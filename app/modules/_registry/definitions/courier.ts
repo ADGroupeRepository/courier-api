@@ -13,7 +13,7 @@ export const courierModule: ModuleDefinition = {
   name: 'courier',
   label: 'Courier Management',
   description:
-    'Manage incoming and outgoing couriers, assignments, file attachments, and external contacts.',
+    'Manage incoming, outgoing, and internal couriers, assignments, file attachments, and external contacts.',
   core: false,
   collections: [
     {
@@ -27,7 +27,6 @@ export const courierModule: ModuleDefinition = {
         Permission.delete(Role.team(orgId, 'admin')),
       ],
       attributes: [
-        { key: 'createdAt', type: 'datetime', required: true, default: new Date() },
         {
           key: 'type',
           type: 'enum',
@@ -43,19 +42,10 @@ export const courierModule: ModuleDefinition = {
           default: CourierUrgency.NORMAL,
         },
         { key: 'subject', type: 'string', size: 255, required: true },
-        { key: 'contactName', type: 'string', size: 255, required: true },
-        { key: 'contactNumber', type: 'string', size: 255, required: true },
-        {
-          key: 'contactStructureType',
-          type: 'enum',
-          elements: Object.values(CourierStructureType),
-          required: false,
-        },
-        { key: 'contactStructureName', type: 'string', size: 255, required: false },
-        { key: 'contactIdNumber', type: 'string', size: 255, required: false },
-        { key: 'contactPhone', type: 'string', size: 255, required: false },
-        { key: 'contactEmail', type: 'string', size: 255, required: false },
-        { key: 'externalContactId', type: 'string', size: 36, required: false }, // Link to external contact directory
+        { key: 'receivedAt', type: 'datetime', required: false },
+        { key: 'senderName', type: 'string', size: 255, required: false },
+        { key: 'senderEmail', type: 'string', size: 255, required: false },
+        { key: 'senderPhone', type: 'string', size: 255, required: false },
         { key: 'internalEntityId', type: 'string', size: 36, required: true }, // ID of User or Department (Sender for Outgoing, Recipient for Incoming)
         {
           key: 'targetType',

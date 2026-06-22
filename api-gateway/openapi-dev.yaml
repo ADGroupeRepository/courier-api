@@ -618,7 +618,7 @@ paths:
           in: query
           required: false
           type: string
-          enum: [incoming, outgoing]
+          enum: [incoming, outgoing, internal]
       responses:
         '200':
           description: Success
@@ -1290,22 +1290,22 @@ definitions:
     type: object
     properties:
       id: { type: string }
-      type: { type: string, enum: [incoming, outgoing] }
+      type: { type: string, enum: [incoming, outgoing, internal] }
       urgency: { type: string, enum: [normal, urgent, very_urgent] }
       subject: { type: string }
+      receivedAt: { type: string }
       senderName: { type: string }
-      senderNumber: { type: string }
-      senderStructureType: { type: string, enum: [physique, privee, publique, ong, autre] }
-      senderStructureName: { type: string }
-      senderIdNumber: { type: string }
-      senderPhone: { type: string }
       senderEmail: { type: string }
-      assignedTo: { type: string }
+      senderPhone: { type: string }
+      internalEntityId: { type: string }
       targetType: { type: string, enum: [user, department] }
       fileUrl: { type: string }
+      fileId: { type: string }
       status: { type: string }
       isFavorite: { type: boolean }
       isArchived: { type: boolean }
+      isDeleted: { type: boolean }
+      replyCount: { type: integer }
       createdAt: { type: string }
       updatedAt: { type: string }
 
