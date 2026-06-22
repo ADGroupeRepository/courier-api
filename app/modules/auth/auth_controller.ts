@@ -9,7 +9,6 @@ import {
 import OrganisationService from '#modules/organisations/organisation_service'
 import PlanService from '#modules/plans/plan_service'
 import appwrite from '#services/appwrite_service'
-import env from '#start/env'
 import type { HttpContext } from '@adonisjs/core/http'
 import logger from '@adonisjs/core/services/logger'
 import { Query } from 'node-appwrite'
