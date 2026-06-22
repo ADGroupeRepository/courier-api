@@ -11,12 +11,14 @@ interface CreateOrganisationPayload {
   name: string
   description?: string
   address?: string
+  rccm?: string
 }
 
 interface UpdateOrganisationPayload {
   name?: string
   description?: string
   address?: string
+  rccm?: string
 }
 
 /**
@@ -38,7 +40,7 @@ export default class OrganisationService {
    */
   async create(payload: CreateOrganisationPayload, creatorId: string) {
     console.error(`[OrgService] Starting creation for: ${payload.name} (Creator: ${creatorId})`)
-    const { name, description, address } = payload
+    const { name, description, address, rccm } = payload
     const teamId = ID.unique()
 
     // Step 1: Create the team
@@ -92,6 +94,7 @@ export default class OrganisationService {
         bucketId: bucket.$id,
         description: description ?? '',
         address: address ?? '',
+        rccm: rccm ?? '',
         modules: [],
         plan: 'free',
       },
@@ -107,6 +110,7 @@ export default class OrganisationService {
       name: team.name,
       description: description ?? null,
       address: address ?? null,
+      rccm: rccm ?? null,
       databaseId: database.$id,
       bucketId: bucket.$id,
       createdAt: team.$createdAt,
@@ -173,6 +177,7 @@ export default class OrganisationService {
       membersCount: team.total,
       description: prefs.description ?? null,
       address: prefs.address ?? null,
+      rccm: prefs.rccm ?? null,
       databaseId: prefs.databaseId,
       bucketId: prefs.bucketId,
       logoUrl,
@@ -242,7 +247,11 @@ export default class OrganisationService {
     }
 
     // Merge metadata into existing prefs
-    if (payload.description !== undefined || payload.address !== undefined) {
+    if (
+      payload.description !== undefined ||
+      payload.address !== undefined ||
+      payload.rccm !== undefined
+    ) {
       const existing = await appwrite.teams.getPrefs({ teamId })
       updates.push(
         appwrite.teams.updatePrefs({
@@ -251,6 +260,7 @@ export default class OrganisationService {
             ...existing,
             ...(payload.description !== undefined && { description: payload.description }),
             ...(payload.address !== undefined && { address: payload.address }),
+            ...(payload.rccm !== undefined && { rccm: payload.rccm }),
           },
         })
       )
