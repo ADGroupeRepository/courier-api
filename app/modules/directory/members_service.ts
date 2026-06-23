@@ -110,14 +110,29 @@ export default class MembersService {
 
   /**
    * Remove a member from their department (deletes their org_profile).
-   * @param profileId - The ID of the profile (org_profile) record.
+   * @param id - The user ID or the profile document ID.
    */
-  async removeFromDepartment(profileId: string) {
-    await appwrite.databases.deleteDocument({
+  async removeFromDepartment(id: string) {
+    const list = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
-      documentId: profileId,
+      queries: [Query.equal('userId', id)],
     })
+
+    if (list.total > 0) {
+      await appwrite.databases.deleteDocument({
+        databaseId: this.databaseId,
+        collectionId: this.collectionId,
+        documentId: list.documents[0].$id,
+      })
+    } else {
+      // Fallback: treat the ID directly as the document ID
+      await appwrite.databases.deleteDocument({
+        databaseId: this.databaseId,
+        collectionId: this.collectionId,
+        documentId: id,
+      })
+    }
   }
 
   private serializeProfile(

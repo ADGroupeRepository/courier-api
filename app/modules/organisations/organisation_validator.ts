@@ -30,7 +30,7 @@ export const updateOrganisationValidator = vine.create(
 export const addMemberValidator = vine.create(
   vine.object({
     email: vine.string().email().normalizeEmail().trim(),
-    roles: vine.array(vine.string().minLength(1).maxLength(81)).minLength(1).maxLength(100),
+    role: vine.enum(['admin', 'user']),
   })
 )
 
@@ -39,6 +39,6 @@ export const addMemberValidator = vine.create(
  */
 export const updateMemberValidator = vine.create(
   vine.object({
-    roles: vine.array(vine.string().minLength(1).maxLength(81)).minLength(1).maxLength(100),
+    role: vine.enum(['admin', 'user']),
   })
 )

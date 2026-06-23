@@ -33,10 +33,16 @@ export default class HttpExceptionHandler extends ExceptionHandler {
     if (ctx.request.url().startsWith('/api/')) {
       const status = (error as any).status || 500
       const message = (error as any).message || 'An unexpected error occurred'
-      return ctx.response.status(status).json({
+      const responsePayload: any = {
         message,
         code: (error as any).code,
-      })
+      }
+
+      if ((error as any).messages) {
+        responsePayload.errors = (error as any).messages
+      }
+
+      return ctx.response.status(status).json(responsePayload)
     }
 
     return super.handle(error, ctx)
