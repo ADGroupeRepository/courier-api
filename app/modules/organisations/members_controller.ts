@@ -5,6 +5,8 @@ import {
   updateMemberValidator,
 } from '#modules/organisations/organisation_validator'
 import PlanService from '#modules/plans/plan_service'
+import DepartmentsService from '#modules/directory/departments_service'
+import MembersService from '#modules/directory/members_service'
 
 export default class MembersController {
   /**
@@ -57,10 +59,38 @@ export default class MembersController {
       })
     }
 
-    const { email, role } = await request.validateUsing(addMemberValidator)
+    const { email, role, departmentId, jobTitle } = await request.validateUsing(addMemberValidator)
+
+    // Verify department exists in the organization
+    try {
+      const deptsService = await DepartmentsService.forOrg(orgId)
+      await deptsService.get(departmentId)
+    } catch {
+      return response.notFound({
+        message: 'Department not found. Please create a department first.',
+      })
+    }
 
     const service = new OrganisationService()
     const membership = await service.addMember(orgId, email, [role])
+
+    // Assign member to the department
+    try {
+      const membersService = await MembersService.forOrg(orgId)
+      await membersService.assignToDepartment({
+        userId: membership.userId,
+        membershipId: membership.id,
+        departmentId,
+        jobTitle,
+        departmentRole: 'member',
+      })
+    } catch (assignError: any) {
+      // Log error but don't fail the whole request since membership is already created
+      // Or we can let it throw, but since they are added, completing assignment is expected.
+      // Let's log it or return a message. Actually, since we already checked that the department exists,
+      // it should succeed unless there's a constraint error.
+      throw assignError
+    }
 
     return response.created({ message: 'Member added successfully', data: membership })
   }
