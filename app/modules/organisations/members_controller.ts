@@ -59,7 +59,8 @@ export default class MembersController {
       })
     }
 
-    const { email, role, departmentId, jobTitle } = await request.validateUsing(addMemberValidator)
+    const { email, role, departmentId, jobTitle, departmentRole } =
+      await request.validateUsing(addMemberValidator)
 
     // Verify department exists in the organization
     try {
@@ -82,8 +83,14 @@ export default class MembersController {
         membershipId: membership.id,
         departmentId,
         jobTitle,
-        departmentRole: 'member',
+        departmentRole: departmentRole ?? 'member',
       })
+
+      // If assigned as department manager, update department document
+      if (departmentRole === 'manager') {
+        const deptsService = await DepartmentsService.forOrg(orgId)
+        await deptsService.update(departmentId, { managerUserId: membership.userId })
+      }
     } catch (assignError: any) {
       // Log error but don't fail the whole request since membership is already created
       // Or we can let it throw, but since they are added, completing assignment is expected.
