@@ -37,11 +37,9 @@ export const addMemberValidator = vine.create(
   })
 )
 
-/**
- * Validator for updating a member's roles.
- */
 export const updateMemberValidator = vine.create(
   vine.object({
-    role: vine.enum(['admin', 'user']),
+    role: vine.enum(['admin', 'user']).optional(),
+    departmentRole: vine.enum(['manager', 'member']).optional(),
   })
 )

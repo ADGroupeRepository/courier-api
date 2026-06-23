@@ -135,6 +135,44 @@ export default class MembersService {
     }
   }
 
+  /**
+   * Update a member's department role.
+   * @param userId - The user ID.
+   * @param departmentRole - The new department role.
+   */
+  async updateDepartmentRole(userId: string, departmentRole: 'manager' | 'member') {
+    const list = await appwrite.databases.listDocuments({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      queries: [Query.equal('userId', userId)],
+    })
+
+    if (list.total > 0) {
+      const doc = list.documents[0]
+      await appwrite.databases.updateDocument({
+        databaseId: this.databaseId,
+        collectionId: this.collectionId,
+        documentId: doc.$id,
+        data: {
+          departmentRole,
+        },
+      })
+
+      if (departmentRole === 'manager') {
+        await appwrite.databases.updateDocument({
+          databaseId: this.databaseId,
+          collectionId: Collections.DEPARTMENTS,
+          documentId: doc.departmentId,
+          data: {
+            managerUserId: userId,
+          },
+        })
+      }
+    } else {
+      throw new Error('User does not have a department profile to update.')
+    }
+  }
+
   private serializeProfile(
     doc: any,
     membershipsById: Map<string, any>,

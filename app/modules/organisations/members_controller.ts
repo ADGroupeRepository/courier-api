@@ -7,6 +7,7 @@ import {
 import PlanService from '#modules/plans/plan_service'
 import DepartmentsService from '#modules/directory/departments_service'
 import MembersService from '#modules/directory/members_service'
+import appwrite from '#services/appwrite_service'
 
 export default class MembersController {
   /**
@@ -109,12 +110,36 @@ export default class MembersController {
   async update({ request, response }: HttpContext) {
     const orgId = request.param('orgId')
     const membershipId = request.param('memberId')
-    const { role } = await request.validateUsing(updateMemberValidator)
+    const { role, departmentRole } = await request.validateUsing(updateMemberValidator)
 
     const service = new OrganisationService()
-    const membership = await service.updateMember(orgId, membershipId, [role])
+    let updatedMembership: any = null
 
-    return response.ok({ message: 'Member roles updated', data: membership })
+    // 1. If role is provided, update organisation-level role
+    if (role) {
+      updatedMembership = await service.updateMember(orgId, membershipId, [role])
+    }
+
+    // 2. If departmentRole is provided, update department-level role
+    if (departmentRole) {
+      const membership = await appwrite.teams.getMembership({
+        teamId: orgId,
+        membershipId,
+      })
+
+      const membersService = await MembersService.forOrg(orgId)
+      await membersService.updateDepartmentRole(membership.userId, departmentRole)
+
+      if (!updatedMembership) {
+        updatedMembership = {
+          id: membership.$id,
+          userId: membership.userId,
+          roles: membership.roles,
+        }
+      }
+    }
+
+    return response.ok({ message: 'Member updated successfully', data: updatedMembership })
   }
 
   /**
