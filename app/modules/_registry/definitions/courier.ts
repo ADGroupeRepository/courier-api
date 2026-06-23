@@ -61,7 +61,7 @@ export const courierModule: ModuleDefinition = {
           elements: ['user', 'department'],
           required: false,
         },
-        { key: 'fileId', type: 'string', size: 36, required: false },
+        { key: 'fileIds', type: 'string', size: 36, required: false, array: true },
         { key: 'createdBy', type: 'string', size: 36, required: true },
         {
           key: 'status',

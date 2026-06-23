@@ -13,37 +13,11 @@ x-google-backend:
   address: 'https://backend-dev-n4xxd6pd2q-ew.a.run.app/api/v1'
   path_translation: APPEND_PATH_TO_ADDRESS
 
-x-google-management:
-  metrics:
-    - name: 'all-requests'
-      displayName: 'Total Requests'
-      valueType: INT64
-      metricKind: DELTA
-    - name: 'auth-requests'
-      displayName: 'Authentication Requests'
-      valueType: INT64
-      metricKind: DELTA
-  quota:
-    limits:
-      - name: 'all-limit'
-        metric: 'all-requests'
-        unit: '1/min/{project}'
-        values:
-          STANDARD: 1000
-      - name: 'auth-limit'
-        metric: 'auth-requests'
-        unit: '1/min/{project}'
-        values:
-          STANDARD: 20
-
 paths:
   /auth/signup:
     post:
       summary: Inscription (Signup)
       operationId: signup
-      x-google-quota:
-        metricCosts:
-          'auth-requests': 1
       parameters:
         - name: body
           in: body
@@ -154,9 +128,6 @@ paths:
     get:
       summary: Profil Utilisateur (Profile)
       operationId: getProfile
-      x-google-quota:
-        metricCosts:
-          'all-requests': 1
       responses:
         '200':
           description: Success
@@ -165,6 +136,8 @@ paths:
     patch:
       summary: Mettre à jour le profil (Update Profile)
       operationId: updateProfile
+      consumes:
+        - multipart/form-data
       parameters:
         - name: name
           in: formData
@@ -177,11 +150,15 @@ paths:
         - name: avatar
           in: formData
           required: false
-          type: file
+          type: string
+          format: binary
+          description: Multipart file part named avatar. Google API Gateway does not support Swagger type file.
         - name: signature
           in: formData
           required: false
-          type: file
+          type: string
+          format: binary
+          description: Multipart file part named signature. Google API Gateway does not support Swagger type file.
       responses:
         '200':
           description: Success
@@ -192,18 +169,12 @@ paths:
     get:
       summary: Lister les organisations
       operationId: listOrganisations
-      x-google-quota:
-        metricCosts:
-          'all-requests': 1
       responses:
         '200':
           description: Success
     post:
       summary: Créer une organisation
       operationId: createOrganisation
-      x-google-quota:
-        metricCosts:
-          'all-requests': 1
       responses:
         '200':
           description: Success
@@ -214,9 +185,6 @@ paths:
     get:
       summary: Voir une organisation
       operationId: getOrganisation
-      x-google-quota:
-        metricCosts:
-          'all-requests': 1
       parameters:
         - name: orgId
           in: path
@@ -254,11 +222,19 @@ paths:
     post:
       summary: Uploader le Logo
       operationId: uploadOrganisationLogo
+      consumes:
+        - multipart/form-data
       parameters:
         - name: orgId
           in: path
           required: true
           type: string
+        - name: logo
+          in: formData
+          required: true
+          type: string
+          format: binary
+          description: Multipart file part named logo. Google API Gateway does not support Swagger type file.
       responses:
         '200':
           description: Success
@@ -349,17 +325,6 @@ paths:
     get:
       summary: Lister les modules actifs
       operationId: listActiveModules
-      parameters:
-        - name: orgId
-          in: path
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Success
-    post:
-      summary: Activer un module
-      operationId: activateModule
       parameters:
         - name: orgId
           in: path
@@ -641,76 +606,99 @@ paths:
     post:
       summary: Créer un courrier
       operationId: createCourier
-      consumes:
-        - multipart/form-data
       parameters:
         - name: orgId
           in: path
           required: true
           type: string
-        - name: type
-          in: formData
+        - name: body
+          in: body
           required: true
-          type: string
-          enum: [incoming, outgoing, internal]
-        - name: urgency
-          in: formData
-          required: true
-          type: string
-          enum: [normal, urgent, very_urgent]
-        - name: subject
-          in: formData
-          required: true
-          type: string
-        - name: targetType
-          in: formData
-          required: true
-          type: string
-          enum: [user, department]
-        - name: entityIds[]
-          in: formData
-          required: true
-          type: array
-          items:
-            type: string
-        - name: receivedAt
-          in: formData
-          required: false
-          type: string
-        - name: emittedAt
-          in: formData
-          required: false
-          type: string
-        - name: senderName
-          in: formData
-          required: false
-          type: string
-        - name: senderEmail
-          in: formData
-          required: false
-          type: string
-        - name: senderPhone
-          in: formData
-          required: false
-          type: string
-        - name: externalContactId
-          in: formData
-          required: false
-          type: string
-          description: Required for incoming/outgoing couriers
-        - name: externalContactType
-          in: formData
-          required: false
-          type: string
-          enum: [personne, entreprise_privee, organisation_publique, ONG, autre]
-          description: Required for incoming/outgoing couriers
-        - name: file
-          in: formData
-          required: false
-          type: file
+          schema:
+            type: object
+            required:
+              - type
+              - urgency
+              - subject
+              - targetType
+              - entityIds
+            properties:
+              type:
+                type: string
+                enum: [incoming, outgoing, internal]
+              urgency:
+                type: string
+                enum: [normal, urgent, very_urgent]
+              subject: { type: string }
+              targetType:
+                type: string
+                enum: [user, department]
+              entityIds:
+                type: array
+                items: { type: string }
+              receivedAt: { type: string }
+              emittedAt: { type: string }
+              senderName: { type: string }
+              senderEmail: { type: string }
+              senderPhone: { type: string }
+              externalContactId:
+                type: string
+                description: Required for incoming/outgoing couriers
+              externalContactType:
+                type: string
+                enum: [personne, entreprise_privee, organisation_publique, ONG, autre]
+                description: Required for incoming/outgoing couriers
+              fileIds:
+                type: array
+                items: { type: string }
+                description: Appwrite file IDs uploaded through the upload-url flow.
       responses:
         '201':
           description: Created
+
+  /organisations/{orgId}/couriers/upload-url:
+    post:
+      summary: Préparer les URLs d'upload direct pour documents courrier
+      operationId: createCourierUploadUrl
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - files
+            properties:
+              files:
+                type: array
+                minItems: 1
+                maxItems: 20
+                items:
+                  type: object
+                  required:
+                    - fileName
+                    - size
+                  properties:
+                    fileName: { type: string }
+                    contentType: { type: string }
+                    size:
+                      type: integer
+                      maximum: 26214400
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/CourierUploadTarget'
+
   /organisations/{orgId}/couriers/{id}:
     get:
       summary: Voir un courrier
@@ -969,7 +957,7 @@ paths:
           in: query
           required: false
           type: string
-          enum: [physique, privee, publique, ong, autre]
+          enum: [personne, entreprise_privee, organisation_publique, ONG, autre]
           description: Filter contacts by structure type
       responses:
         '200':
@@ -1003,8 +991,7 @@ paths:
               phone: { type: string }
               structureType:
                 type: string
-                enum: [physique, privee, publique, ong, autre]
-              structureName: { type: string }
+                enum: [personne, entreprise_privee, organisation_publique, ONG, autre]
               idNumber: { type: string }
               address: { type: string }
       responses:
@@ -1060,8 +1047,7 @@ paths:
               phone: { type: string }
               structureType:
                 type: string
-                enum: [physique, privee, publique, ong, autre]
-              structureName: { type: string }
+                enum: [personne, entreprise_privee, organisation_publique, ONG, autre]
               idNumber: { type: string }
               address: { type: string }
       responses:
@@ -1383,13 +1369,18 @@ definitions:
       senderEmail: { type: string }
       senderPhone: { type: string }
       externalContactId: { type: string }
-      externalContactType: { type: string, enum: [personne, entreprise_privee, organisation_publique, ONG, autre] }
+      externalContactType:
+        { type: string, enum: [personne, entreprise_privee, organisation_publique, ONG, autre] }
       targetType: { type: string, enum: [user, department] }
       entityIds:
         type: array
         items: { type: string }
-      fileUrl: { type: string }
-      fileId: { type: string }
+      fileUrls:
+        type: array
+        items: { type: string }
+      fileIds:
+        type: array
+        items: { type: string }
       status: { type: string }
       isFavorite: { type: boolean }
       isArchived: { type: boolean }
@@ -1492,11 +1483,23 @@ definitions:
       phone: { type: string }
       structureType:
         type: string
-        enum: [physique, privee, publique, ong, autre]
-      structureName: { type: string }
+        enum: [personne, entreprise_privee, organisation_publique, ONG, autre]
       idNumber: { type: string }
       address: { type: string }
       createdBy: { type: string }
+
+  CourierUploadTarget:
+    type: object
+    properties:
+      fileId: { type: string }
+      fileName: { type: string }
+      contentType: { type: string }
+      size: { type: integer }
+      bucketId: { type: string }
+      projectId: { type: string }
+      uploadUrl: { type: string }
+      method: { type: string, enum: [POST] }
+      expiresInSeconds: { type: integer }
 
   CourierMessage:
     type: object

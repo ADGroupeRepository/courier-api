@@ -32,12 +32,12 @@ export const requestPasswordResetValidator = vine.create(
 )
 
 /**
- * Validator for resetting the password using userId and secret.
+ * Validator for resetting the password using email and OTP.
  */
 export const confirmPasswordResetValidator = vine.create(
   vine.object({
-    userId: vine.string().trim(),
-    secret: vine.string().trim(),
+    email: vine.string().email().normalizeEmail().trim(),
+    otp: vine.string().trim().minLength(6).maxLength(6),
     password: vine.string().minLength(8).maxLength(256),
   })
 )

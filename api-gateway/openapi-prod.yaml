@@ -415,19 +415,6 @@ paths:
       responses:
         '200':
           description: Success
-    post:
-      summary: Activer un module
-      operationId: activateModule
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: orgId
-          in: path
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Success
   /organisations/{orgId}/modules/{module}:
     delete:
       summary: Désactiver un module

@@ -3,7 +3,11 @@ import CourierService from '#modules/courier/courier_service'
 import MembersService from '#modules/directory/members_service'
 import appwrite from '#services/appwrite_service'
 import { Query } from 'node-appwrite'
-import { createCourierValidator, updateCourierValidator } from '#modules/courier/courier_validator'
+import {
+  createCourierUploadUrlValidator,
+  createCourierValidator,
+  updateCourierValidator,
+} from '#modules/courier/courier_validator'
 import { type CourierType } from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
 import emitter from '@adonisjs/core/services/emitter'
@@ -121,7 +125,7 @@ export default class CourierController {
 
   /**
    * POST /api/v1/organisations/:orgId/couriers
-   * Create a new courier record (supports multipart data with file).
+   * Create a new courier record.
    */
   async store({ user, params, request, response }: HttpContext) {
     const payload = await request.validateUsing(createCourierValidator)
@@ -155,26 +159,22 @@ export default class CourierController {
     try {
       const service = await CourierService.forOrg(params.orgId)
 
-      const courier = await service.create(
-        {
-          type: payload.type,
-          urgency: payload.urgency,
-          subject: payload.subject,
-          receivedAt: payload.receivedAt,
-          emittedAt: payload.emittedAt,
-          senderName: payload.senderName,
-          senderEmail: payload.senderEmail,
-          senderPhone: payload.senderPhone,
-          externalContactId: payload.externalContactId,
-          externalContactType: payload.externalContactType,
-          entityIds: payload.entityIds,
-          targetType: payload.targetType,
-          createdBy: user?.$id || '',
-        },
-        payload.file
-          ? { tmpPath: payload.file.tmpPath!, fileName: payload.file.clientName }
-          : undefined
-      )
+      const courier = await service.create({
+        type: payload.type,
+        urgency: payload.urgency,
+        subject: payload.subject,
+        receivedAt: payload.receivedAt,
+        emittedAt: payload.emittedAt,
+        senderName: payload.senderName,
+        senderEmail: payload.senderEmail,
+        senderPhone: payload.senderPhone,
+        externalContactId: payload.externalContactId,
+        externalContactType: payload.externalContactType,
+        entityIds: payload.entityIds,
+        targetType: payload.targetType,
+        createdBy: user?.$id || '',
+        fileIds: payload.fileIds,
+      })
 
       // Emit assignment events for each assigned entity
       if (courier.assignments && courier.assignments.length > 0) {
@@ -192,6 +192,28 @@ export default class CourierController {
       }
 
       return response.created({ data: courier })
+    } catch (error: any) {
+      return response.internalServerError({ message: error.message })
+    }
+  }
+
+  /**
+   * POST /api/v1/organisations/:orgId/couriers/upload-url
+   * Prepare direct Appwrite upload targets for courier documents.
+   */
+  async createUploadUrl({ params, request, response }: HttpContext) {
+    const payload = await request.validateUsing(createCourierUploadUrlValidator)
+
+    try {
+      const service = await CourierService.forOrg(params.orgId)
+      const uploads = service.createUploadTargets(payload.files)
+
+      return response.ok({
+        data: uploads,
+        attachUsing: {
+          createCourierFields: ['fileIds'],
+        },
+      })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }

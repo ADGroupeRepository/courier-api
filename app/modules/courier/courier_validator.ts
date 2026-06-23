@@ -1,11 +1,11 @@
-import vine from '@vinejs/vine'
 import {
-  CourierUrgency,
   CourierStatus,
-  CourierType,
   CourierStructureType,
+  CourierType,
+  CourierUrgency,
   DocumentStatus,
 } from '#modules/courier/courier_enums'
+import vine from '@vinejs/vine'
 
 /**
  * Validator for creating a new courier.
@@ -27,12 +27,28 @@ export const createCourierValidator = vine.create(
     externalContactType: vine.enum(CourierStructureType).optional(),
     targetType: vine.enum(['user', 'department']),
     entityIds: vine.array(vine.string().maxLength(36).trim()).minLength(1).maxLength(50),
-    file: vine
-      .file({
-        size: '10mb',
-        extnames: ['jpg', 'png', 'pdf', 'docx', 'doc'],
-      })
-      .optional(),
+    fileIds: vine.array(vine.string().maxLength(36).trim()).maxLength(20).optional(),
+  })
+)
+
+/**
+ * Validator for preparing direct courier document uploads.
+ */
+export const createCourierUploadUrlValidator = vine.create(
+  vine.object({
+    files: vine
+      .array(
+        vine.object({
+          fileName: vine.string().trim().minLength(1).maxLength(255),
+          contentType: vine.string().trim().maxLength(120).optional(),
+          size: vine
+            .number()
+            .positive()
+            .max(25 * 1024 * 1024),
+        })
+      )
+      .minLength(1)
+      .maxLength(20),
   })
 )
 

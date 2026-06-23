@@ -20,7 +20,6 @@ export type ScannedRoutes = {
     'org_licenses.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.revoke': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.index_active': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisation_modules.activate': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.deactivate': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'module': ParamValue} }
     'organisations.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -53,6 +52,7 @@ export type ScannedRoutes = {
     'notifications.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'courier.create_upload_url': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
@@ -80,7 +80,6 @@ export type ScannedRoutes = {
     'members.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.revoke': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisation_modules.activate': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisations.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.store': { paramsTuple?: []; params?: {} }
     'admin_marketplace.publish': { paramsTuple?: []; params?: {} }
@@ -89,6 +88,7 @@ export type ScannedRoutes = {
     'departments.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'department_members.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'courier.create_upload_url': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.restore': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }

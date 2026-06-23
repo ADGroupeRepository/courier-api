@@ -30,9 +30,6 @@ router
 
         // Module Management (Active modules listing and deactivation)
         router.get('organisations/:orgId/modules', [OrganisationModulesController, 'indexActive'])
-        router
-          .post('organisations/:orgId/modules', [OrganisationModulesController, 'activate'])
-          .use(middleware.planGuard('limit:maxModules'))
         router.delete('organisations/:orgId/modules/:module', [
           OrganisationModulesController,
           'deactivate',

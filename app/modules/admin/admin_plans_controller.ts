@@ -5,6 +5,7 @@ import CacheService from '#services/cache_service'
 import { Collections } from '#modules/_registry/collection_ids'
 import { ID, Query } from 'node-appwrite'
 import EmailService from '#services/email_service'
+import ModuleProvisioningService from '#modules/_registry/provisioning_service'
 import {
   createPlanValidator,
   updatePlanValidator,
@@ -203,7 +204,7 @@ export default class AdminPlansController {
    * POST /api/v1/admin/subscriptions
    * Issue a new subscription to an organisation.
    */
-  async issueSubscription({ request, response, user }: HttpContext) {
+  async issueSubscription({ request, response, user, logger }: HttpContext) {
     const payload = await request.validateUsing(issueSubscriptionValidator)
 
     if (!user) {
@@ -250,6 +251,19 @@ export default class AdminPlansController {
 
       // Clear subscription info cache
       await CacheService.delete(`subscription:info:${payload.orgId}`)
+
+      // Auto-activate courier module if allowed in plan
+      if (plan.allowedModules && plan.allowedModules.includes('courier')) {
+        try {
+          const moduleService = new ModuleProvisioningService()
+          await moduleService.activate(payload.orgId, 'courier')
+        } catch (moduleError) {
+          logger.error(
+            { err: moduleError, orgId: payload.orgId },
+            'Failed to auto-activate courier module during subscription issue'
+          )
+        }
+      }
 
       return response.created({
         data: cleanAppwriteDoc(subscription),
@@ -329,6 +343,20 @@ export default class AdminPlansController {
 
       // If status changed to active, assign license and send email notification
       if (payload.status === 'active' && existing.status !== 'active') {
+        // Auto-activate courier module if allowed in plan
+        try {
+          const planDoc = await PlanService.getPlan(existing.planId)
+          if (planDoc.allowedModules && planDoc.allowedModules.includes('courier')) {
+            const moduleService = new ModuleProvisioningService()
+            await moduleService.activate(existing.orgId, 'courier')
+          }
+        } catch (moduleError) {
+          logger.error(
+            { err: moduleError, orgId: existing.orgId },
+            'Failed to auto-activate courier module during subscription update'
+          )
+        }
+
         if (existing.issuedBy) {
           try {
             await PlanService.assignLicenseToUser(
