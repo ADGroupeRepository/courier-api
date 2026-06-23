@@ -8,6 +8,7 @@ import PlanService from '#modules/plans/plan_service'
 import DepartmentsService from '#modules/directory/departments_service'
 import MembersService from '#modules/directory/members_service'
 import appwrite from '#services/appwrite_service'
+import { Query } from 'node-appwrite'
 
 export default class MembersController {
   /**
@@ -45,12 +46,38 @@ export default class MembersController {
   }
 
   /**
+   * Helper to verify if the requesting user is an owner or admin of the organisation.
+   */
+  private async checkAdminAccess(user: any, orgId: string): Promise<boolean> {
+    try {
+      const memberships = await appwrite.teams.listMemberships({
+        teamId: orgId,
+        queries: [Query.equal('userId', user?.$id || '')],
+      })
+
+      if (memberships.total === 0) return false
+
+      const membership = memberships.memberships[0]
+      return membership?.roles?.some((r: string) => ['owner', 'admin'].includes(r)) ?? false
+    } catch {
+      return false
+    }
+  }
+
+  /**
    * POST /api/v1/organisations/:orgId/members
    * Add a new member to the organisation by email address.
    * Using the admin API key means the membership is confirmed instantly.
    */
-  async store({ request, response }: HttpContext) {
+  async store({ request, response, user }: HttpContext) {
     const orgId = request.param('orgId')
+
+    const isAdmin = await this.checkAdminAccess(user, orgId)
+    if (!isAdmin) {
+      return response.forbidden({
+        message: 'Only organisation owners or admins can add members.',
+      })
+    }
 
     // Check Plan Limit for Max Members
     const usage = await PlanService.getOrgUsage(orgId)
@@ -107,9 +134,17 @@ export default class MembersController {
    * PATCH /api/v1/organisations/:orgId/members/:memberId
    * Update a member's roles within the organisation.
    */
-  async update({ request, response }: HttpContext) {
+  async update({ request, response, user }: HttpContext) {
     const orgId = request.param('orgId')
     const membershipId = request.param('memberId')
+
+    const isAdmin = await this.checkAdminAccess(user, orgId)
+    if (!isAdmin) {
+      return response.forbidden({
+        message: 'Only organisation owners or admins can update members.',
+      })
+    }
+
     const { role, departmentRole } = await request.validateUsing(updateMemberValidator)
 
     const service = new OrganisationService()
@@ -146,9 +181,16 @@ export default class MembersController {
    * DELETE /api/v1/organisations/:orgId/members/:memberId
    * Remove a member from the organisation.
    */
-  async destroy({ request, response }: HttpContext) {
+  async destroy({ request, response, user }: HttpContext) {
     const orgId = request.param('orgId')
     const membershipId = request.param('memberId')
+
+    const isAdmin = await this.checkAdminAccess(user, orgId)
+    if (!isAdmin) {
+      return response.forbidden({
+        message: 'Only organisation owners or admins can remove members.',
+      })
+    }
 
     const service = new OrganisationService()
     await service.removeMember(orgId, membershipId)
