@@ -5,7 +5,6 @@ import EmailService from '#services/email_service'
 import logger from '@adonisjs/core/services/logger'
 import { AppwriteException, ID, Query } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
-import { randomBytes } from 'node:crypto'
 
 interface SignupPayload {
   name: string
@@ -255,13 +254,12 @@ export default class AuthService {
   }
 
   /**
-   * Request a password reset — looks up the user, generates a secure Redis-backed
-   * token, and sends a recovery email via Resend (bypassing Appwrite SMTP).
+   * Request a password reset — looks up the user, generates a 6-digit OTP,
+   * stores it in Redis, and sends it by email via Resend.
    * Silently succeeds if the email is not found (prevents email enumeration).
    * @param email - The email address to send recovery to.
-   * @param redirectUrl - The base URL the front-end will use with the token.
    */
-  async requestPasswordReset(email: string, redirectUrl: string): Promise<{ sent: boolean }> {
+  async requestPasswordReset(email: string): Promise<{ sent: boolean }> {
     try {
       // Find user by email via Admin SDK
       const usersResult = await appwrite.users.list({
@@ -276,22 +274,22 @@ export default class AuthService {
 
       const user = usersResult.users[0]
 
-      // Generate a cryptographically secure token
-      const secret = randomBytes(32).toString('hex')
-      const cacheKey = `pwd_reset:${secret}`
-      const recoveryLink = `${redirectUrl}?userId=${user.$id}&secret=${secret}`
+      // Generate a 6-digit numeric OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString()
+      const cacheKey = `pwd_reset:${user.$id}`
+      const OTP_TTL_SECONDS = 30 * 60 // 30 minutes
 
-      // Store userId in Redis with 1h TTL
-      await CacheService.set(cacheKey, { userId: user.$id }, 60 * 60)
+      // Store OTP in Redis with 30-minute TTL
+      await CacheService.set(cacheKey, { otp, email: user.email }, OTP_TTL_SECONDS)
 
-      logger.info({ userId: user.$id, email }, 'Password reset token generated')
+      logger.info({ userId: user.$id, email }, 'Password reset OTP generated')
 
-      // Send email via Resend
+      // Send OTP email via Resend
       await EmailService.send({
         to: user.email,
         subject: 'Réinitialisez votre mot de passe',
-        html: buildPasswordResetEmailHtml(user.name, recoveryLink),
-        text: `Bonjour ${user.name},\n\nRéinitialisez votre mot de passe en cliquant sur le lien ci-dessous :\n\n${recoveryLink}\n\nCe lien expire dans 1 heure. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.`,
+        html: buildPasswordResetOtpEmailHtml(user.name, otp),
+        text: `Bonjour ${user.name},\n\nVotre code de réinitialisation de mot de passe est : ${otp}\n\nCe code expire dans 30 minutes. Ne le partagez avec personne.`,
       })
     } catch (err: any) {
       // Log but do not expose internal errors to prevent information leakage
@@ -302,33 +300,45 @@ export default class AuthService {
   }
 
   /**
-   * Confirm password reset using a custom Redis-backed token.
-   * Updates the user's password via the Appwrite Admin SDK.
-   * @param userId - The user ID from the recovery link.
-   * @param secret - The recovery secret from the recovery link.
+   * Confirm password reset using a 6-digit OTP sent by email.
+   * Looks up the user by email, verifies the OTP, then updates the password.
+   * @param email - The user's email address.
+   * @param otp - The 6-digit OTP from the email.
    * @param password - The new password.
    */
   async confirmPasswordReset(
-    userId: string,
-    secret: string,
+    email: string,
+    otp: string,
     password: string
   ): Promise<{ reset: boolean }> {
-    const cacheKey = `pwd_reset:${secret}`
-    const cached = await CacheService.get<{ userId: string }>(cacheKey)
+    // Look up user by email
+    const usersResult = await appwrite.users.list({
+      queries: [Query.equal('email', email)],
+    })
 
-    if (!cached || cached.userId !== userId) {
-      const error = new Error('Invalid or expired password reset link.')
+    if (usersResult.total === 0) {
+      const error = new Error('Code de réinitialisation invalide ou expiré.')
+      ;(error as any).status = 400
+      throw error
+    }
+
+    const user = usersResult.users[0]
+    const cacheKey = `pwd_reset:${user.$id}`
+    const cached = await CacheService.get<{ otp: string; email: string }>(cacheKey)
+
+    if (!cached || cached.otp !== otp) {
+      const error = new Error('Code de réinitialisation invalide ou expiré.')
       ;(error as any).status = 400
       throw error
     }
 
     // Update password via Admin SDK
-    await appwrite.users.updatePassword({ userId, password })
+    await appwrite.users.updatePassword({ userId: user.$id, password })
 
-    // Single-use: delete the token immediately
+    // Single-use: delete the OTP immediately
     await CacheService.delete(cacheKey)
 
-    logger.info({ userId }, 'Password reset successfully')
+    logger.info({ userId: user.$id }, 'Password reset successfully via OTP')
 
     return { reset: true }
   }
@@ -336,7 +346,7 @@ export default class AuthService {
 
 // ── Email HTML Templates ──────────────────────────────────────────────────────
 
-function buildPasswordResetEmailHtml(name: string, link: string): string {
+function buildPasswordResetOtpEmailHtml(name: string, otp: string): string {
   const appUrl = 'https://bara.akumba.io'
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -355,9 +365,11 @@ function buildPasswordResetEmailHtml(name: string, link: string): string {
         <tr><td style="padding:32px">
           <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;color:#111827">Réinitialisez votre mot de passe</h1>
           <p style="margin:0 0 16px;color:#374151">Bonjour ${name},</p>
-          <p style="margin:0 0 24px;color:#374151">Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour continuer. Ce lien expire dans <strong>1 heure</strong>.</p>
-          <a href="${link}" style="display:inline-block;padding:12px 24px;background:#111827;color:#ffffff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">Réinitialiser le mot de passe &rarr;</a>
-          <p style="margin:24px 0 0;font-size:12px;color:#6b7280">Ou copiez et collez ce lien dans votre navigateur :<br/><a href="${link}" style="color:#111827">${link}</a></p>
+          <p style="margin:0 0 24px;color:#374151">Nous avons reçu une demande de réinitialisation de votre mot de passe. Utilisez le code ci-dessous pour continuer. Ce code expire dans <strong>30 minutes</strong>.</p>
+          <div style="display:inline-block;padding:16px 32px;background:#f3f4f6;color:#111827;border-radius:8px;font-size:24px;font-weight:700;letter-spacing:4px;margin-bottom:24px">
+            ${otp}
+          </div>
+          <p style="margin:0;font-size:12px;color:#6b7280">Ne partagez jamais ce code avec quiconque.</p>
         </td></tr>
         <tr><td style="padding:20px 32px;border-top:1px solid #f3f4f6">
           <p style="margin:0;font-size:12px;color:#6b7280">Si vous n'avez pas demandé de réinitialisation de mot de passe, vous pouvez ignorer cet e-mail en toute sécurité. Votre mot de passe restera inchangé. Visitez <a href="${appUrl}" style="color:#111827">${appUrl}</a> si vous avez des questions.</p>
@@ -396,6 +408,42 @@ function buildOtpEmailHtml(name: string, otp: string): string {
         </td></tr>
         <tr><td style="padding:20px 32px;border-top:1px solid #f3f4f6">
           <p style="margin:0;font-size:12px;color:#6b7280">Si vous n'avez pas demandé ce code, vous pouvez ignorer cet e-mail en toute sécurité. Visitez <a href="${appUrl}" style="color:#111827">${appUrl}</a> si vous avez des questions.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+/**
+ * HTML email template to notify a member they've been added to an organisation.
+ * Exported so OrganisationService can use it.
+ */
+export function buildMemberAddedEmailHtml(memberName: string, orgName: string): string {
+  const appUrl = 'https://bara.akumba.io'
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vous avez été ajouté à une organisation</title>
+</head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111827">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 0">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+        <tr><td style="background:#111827;padding:24px 32px">
+          <span style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px">Bara</span>
+        </td></tr>
+        <tr><td style="padding:32px">
+          <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;color:#111827">Bienvenue dans l'organisation</h1>
+          <p style="margin:0 0 16px;color:#374151">Bonjour ${memberName},</p>
+          <p style="margin:0 0 24px;color:#374151">Vous avez été ajouté à l'organisation <strong>${orgName}</strong> sur Bara. Vous pouvez dès maintenant accéder à votre espace de travail en vous connectant à la plateforme.</p>
+          <a href="${appUrl}" style="display:inline-block;padding:12px 24px;background:#111827;color:#ffffff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">Se connecter &rarr;</a>
+        </td></tr>
+        <tr><td style="padding:20px 32px;border-top:1px solid #f3f4f6">
+          <p style="margin:0;font-size:12px;color:#6b7280">Si vous pensez avoir reçu cet e-mail par erreur, vous pouvez l'ignorer en toute sécurité. Visitez <a href="${appUrl}" style="color:#111827">${appUrl}</a> si vous avez des questions.</p>
         </td></tr>
       </table>
     </td></tr>

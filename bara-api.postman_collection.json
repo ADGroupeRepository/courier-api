@@ -297,42 +297,7 @@
             }
           }
         },
-        {
-          "name": "8. Activer le Module Courrier",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"module\": \"courier\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/modules",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "modules"]
-            }
-          }
-        },
+
         {
           "name": "8.5. Créer un Contact Externe",
           "event": [

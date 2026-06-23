@@ -45,38 +45,6 @@ export default class OrganisationModulesController {
   }
 
   /**
-   * POST /api/v1/organisations/:orgId/modules
-   * Activate a module for an organisation.
-   */
-  async activate({ request, response }: HttpContext) {
-    const orgId = request.param('orgId')
-    const { module, moduleName } = request.only(['module', 'moduleName'])
-    const finalModule = module || moduleName
-
-    if (!finalModule || typeof finalModule !== 'string') {
-      return response.badRequest({
-        message: 'Module name is required (use "module" or "moduleName" field)',
-      })
-    }
-
-    // Check Plan Limit for Max Modules
-    const usage = await PlanService.getOrgUsage(orgId)
-    if (usage.modulesActive.max !== -1 && usage.modulesActive.used >= usage.modulesActive.max) {
-      return response.forbidden({
-        message: `Plan limit reached: You can only have ${usage.modulesActive.max} active modules on your current plan.`,
-      })
-    }
-
-    const service = new ModuleProvisioningService()
-    try {
-      await service.activate(orgId, finalModule)
-      return response.created({ message: `Module "${finalModule}" activated successfully` })
-    } catch (error: any) {
-      return response.badRequest({ message: error.message })
-    }
-  }
-
-  /**
    * DELETE /api/v1/organisations/:orgId/modules/:module
    * Deactivate a module for an organisation.
    */

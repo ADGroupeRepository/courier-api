@@ -1,7 +1,9 @@
 import appwriteConfig from '#config/appwrite'
+import { buildMemberAddedEmailHtml } from '#modules/auth/auth_service'
 import OrganisationCreated from '#events/organisation_created'
 import PlanService from '#modules/plans/plan_service'
 import appwrite from '#services/appwrite_service'
+import EmailService from '#services/email_service'
 import emitter from '@adonisjs/core/services/emitter'
 import logger from '@adonisjs/core/services/logger'
 import { Compression, ID, Permission, Query, Role } from 'node-appwrite'
@@ -111,8 +113,6 @@ export default class OrganisationService {
       description: description ?? null,
       address: address ?? null,
       rccm: rccm ?? null,
-      databaseId: database.$id,
-      bucketId: bucket.$id,
       createdAt: team.$createdAt,
       updatedAt: team.$updatedAt,
     }
@@ -178,8 +178,6 @@ export default class OrganisationService {
       description: prefs.description ?? null,
       address: prefs.address ?? null,
       rccm: prefs.rccm ?? null,
-      databaseId: prefs.databaseId,
-      bucketId: prefs.bucketId,
       logoUrl,
       modules: prefs.modules ?? [],
       plan: prefs.plan ?? 'free',
@@ -383,6 +381,21 @@ export default class OrganisationService {
       userId,
       roles,
     })
+
+    // 3. Send notification email to the new member (non-fatal)
+    try {
+      const team = await appwrite.teams.get({ teamId })
+      const memberName = membership.userName || email.split('@')[0]
+
+      await EmailService.send({
+        to: email,
+        subject: `Vous avez été ajouté à ${team.name}`,
+        html: buildMemberAddedEmailHtml(memberName, team.name),
+        text: `Bonjour ${memberName},\n\nVous avez été ajouté à l'organisation ${team.name} sur Bara. Connectez-vous sur https://bara.akumba.io pour accéder à votre espace de travail.`,
+      })
+    } catch (err: any) {
+      logger.warn({ teamId, email, error: err.message }, '[Member] Failed to send notification email')
+    }
 
     return {
       id: membership.$id,

@@ -219,8 +219,8 @@ export default class PlansController {
       // 6. Seat license is not assigned yet (will be assigned automatically upon admin approval)
 
       return response.created({
-        data: subscription,
-        message: 'Subscription request submitted successfully. Awaiting administrator approval.',
+        message:
+          'Your subscription request has been submitted. An administrator will activate your account as soon as possible.',
       })
     } catch (error: any) {
       if (error.code === 404) {
