@@ -198,7 +198,7 @@ export default class PlansController {
       const totalSeatsPurchased = plan.maxMembers === -1 ? 999999 : plan.maxMembers
 
       // 5. Create new subscription (starts as pending approval)
-      const subscription = await appwrite.databases.createDocument({
+      await appwrite.databases.createDocument({
         databaseId: 'bara-platform',
         collectionId: Collections.SUBSCRIPTIONS,
         documentId: ID.unique(),
