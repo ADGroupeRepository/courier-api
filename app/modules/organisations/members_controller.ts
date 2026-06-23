@@ -57,10 +57,10 @@ export default class MembersController {
       })
     }
 
-    const { email, roles } = await request.validateUsing(addMemberValidator)
+    const { email, role } = await request.validateUsing(addMemberValidator)
 
     const service = new OrganisationService()
-    const membership = await service.addMember(orgId, email, roles)
+    const membership = await service.addMember(orgId, email, [role])
 
     return response.created({ message: 'Member added successfully', data: membership })
   }
@@ -72,10 +72,10 @@ export default class MembersController {
   async update({ request, response }: HttpContext) {
     const orgId = request.param('orgId')
     const membershipId = request.param('memberId')
-    const { roles } = await request.validateUsing(updateMemberValidator)
+    const { role } = await request.validateUsing(updateMemberValidator)
 
     const service = new OrganisationService()
-    const membership = await service.updateMember(orgId, membershipId, roles)
+    const membership = await service.updateMember(orgId, membershipId, [role])
 
     return response.ok({ message: 'Member roles updated', data: membership })
   }
