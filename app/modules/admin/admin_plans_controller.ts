@@ -258,7 +258,10 @@ export default class AdminPlansController {
           const moduleService = new ModuleProvisioningService()
           await moduleService.activate(payload.orgId, 'courier')
         } catch (moduleError) {
-          logger.error({ err: moduleError, orgId: payload.orgId }, 'Failed to auto-activate courier module during subscription issue')
+          logger.error(
+            { err: moduleError, orgId: payload.orgId },
+            'Failed to auto-activate courier module during subscription issue'
+          )
         }
       }
 
@@ -348,7 +351,10 @@ export default class AdminPlansController {
             await moduleService.activate(existing.orgId, 'courier')
           }
         } catch (moduleError) {
-          logger.error({ err: moduleError, orgId: existing.orgId }, 'Failed to auto-activate courier module during subscription update')
+          logger.error(
+            { err: moduleError, orgId: existing.orgId },
+            'Failed to auto-activate courier module during subscription update'
+          )
         }
 
         if (existing.issuedBy) {

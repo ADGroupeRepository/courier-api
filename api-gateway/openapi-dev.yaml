@@ -1369,7 +1369,8 @@ definitions:
       senderEmail: { type: string }
       senderPhone: { type: string }
       externalContactId: { type: string }
-      externalContactType: { type: string, enum: [personne, entreprise_privee, organisation_publique, ONG, autre] }
+      externalContactType:
+        { type: string, enum: [personne, entreprise_privee, organisation_publique, ONG, autre] }
       targetType: { type: string, enum: [user, department] }
       entityIds:
         type: array

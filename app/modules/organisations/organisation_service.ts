@@ -394,7 +394,10 @@ export default class OrganisationService {
         text: `Bonjour ${memberName},\n\nVous avez été ajouté à l'organisation ${team.name} sur Bara. Connectez-vous sur https://bara.akumba.io pour accéder à votre espace de travail.`,
       })
     } catch (err: any) {
-      logger.warn({ teamId, email, error: err.message }, '[Member] Failed to send notification email')
+      logger.warn(
+        { teamId, email, error: err.message },
+        '[Member] Failed to send notification email'
+      )
     }
 
     return {

@@ -159,24 +159,22 @@ export default class CourierController {
     try {
       const service = await CourierService.forOrg(params.orgId)
 
-      const courier = await service.create(
-        {
-          type: payload.type,
-          urgency: payload.urgency,
-          subject: payload.subject,
-          receivedAt: payload.receivedAt,
-          emittedAt: payload.emittedAt,
-          senderName: payload.senderName,
-          senderEmail: payload.senderEmail,
-          senderPhone: payload.senderPhone,
-          externalContactId: payload.externalContactId,
-          externalContactType: payload.externalContactType,
-          entityIds: payload.entityIds,
-          targetType: payload.targetType,
-          createdBy: user?.$id || '',
-          fileIds: payload.fileIds,
-        }
-      )
+      const courier = await service.create({
+        type: payload.type,
+        urgency: payload.urgency,
+        subject: payload.subject,
+        receivedAt: payload.receivedAt,
+        emittedAt: payload.emittedAt,
+        senderName: payload.senderName,
+        senderEmail: payload.senderEmail,
+        senderPhone: payload.senderPhone,
+        externalContactId: payload.externalContactId,
+        externalContactType: payload.externalContactType,
+        entityIds: payload.entityIds,
+        targetType: payload.targetType,
+        createdBy: user?.$id || '',
+        fileIds: payload.fileIds,
+      })
 
       // Emit assignment events for each assigned entity
       if (courier.assignments && courier.assignments.length > 0) {
