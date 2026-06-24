@@ -1,13 +1,13 @@
-import { Permission, Role } from 'node-appwrite'
-import { type ModuleDefinition } from '../types.js'
+import { Collections } from '#modules/_registry/collection_ids'
 import {
-  CourierUrgency,
   CourierStatus,
-  CourierType,
   CourierStructureType,
+  CourierType,
+  CourierUrgency,
   DocumentStatus,
 } from '#modules/courier/courier_enums'
-import { Collections } from '#modules/_registry/collection_ids'
+import { Permission, Role } from 'node-appwrite'
+import { type ModuleDefinition } from '../types.js'
 
 export const courierModule: ModuleDefinition = {
   name: 'courier',
@@ -105,9 +105,10 @@ export const courierModule: ModuleDefinition = {
         {
           key: 'entityType',
           type: 'enum',
-          elements: ['user', 'department'],
+          elements: ['user', 'department', 'external_contact'],
           required: true,
         },
+        { key: 'entityName', type: 'string', size: 255, required: false },
         { key: 'assignedBy', type: 'string', size: 36, required: true },
       ],
       indexes: [

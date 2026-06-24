@@ -131,24 +131,18 @@ export default class CourierController {
     const payload = await request.validateUsing(createCourierValidator)
 
     if (payload.type === 'incoming' || payload.type === 'outgoing') {
-      if (!payload.externalContactId) {
-        return response.badRequest({
-          errors: [
-            {
-              message: 'The externalContactId field is required for incoming and outgoing couriers',
-              field: 'externalContactId',
-              rule: 'required',
-            },
-          ],
-        })
-      }
-      if (!payload.externalContactType) {
+      const hasExternalContact = Boolean(payload.externalContactId)
+      const hasManualSender = Boolean(
+        payload.senderName || payload.senderEmail || payload.senderPhone
+      )
+
+      if (!hasExternalContact && !hasManualSender) {
         return response.badRequest({
           errors: [
             {
               message:
-                'The externalContactType field is required for incoming and outgoing couriers',
-              field: 'externalContactType',
+                'Provide either an external contact or sender details (name, email, or phone) for incoming and outgoing couriers',
+              field: 'senderName',
               rule: 'required',
             },
           ],
@@ -169,7 +163,6 @@ export default class CourierController {
         senderEmail: payload.senderEmail,
         senderPhone: payload.senderPhone,
         externalContactId: payload.externalContactId,
-        externalContactType: payload.externalContactType,
         entityIds: payload.entityIds,
         targetType: payload.targetType,
         createdBy: user?.$id || '',
@@ -191,7 +184,7 @@ export default class CourierController {
         }
       }
 
-      return response.created({ data: courier })
+      return response.created({ message: 'Courier created successfully', data: courier })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })
     }

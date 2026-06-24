@@ -1,7 +1,7 @@
-import appwrite from '#services/appwrite_service'
-import { ID, Query } from 'node-appwrite'
 import { Collections } from '#modules/_registry/collection_ids'
 import { type CourierStructureType } from '#modules/courier/courier_enums'
+import appwrite from '#services/appwrite_service'
+import { ID, Query } from 'node-appwrite'
 
 export interface ExternalContact {
   $id: string
@@ -13,6 +13,7 @@ export interface ExternalContact {
   idNumber?: string
   address?: string
   createdBy: string
+  couriersCount?: number
 }
 
 export type CreateExternalContactPayload = Omit<ExternalContact, '$id' | '$createdAt'>
@@ -63,15 +64,36 @@ export class ExternalContactService {
       baseQueries.push(Query.equal('structureType', options.structureType))
     }
 
-    const response = await appwrite.databases.listDocuments({
-      databaseId: this.orgId,
-      collectionId: Collections.EXTERNAL_CONTACTS,
-      queries: baseQueries,
-    })
+    const [response, couriersResult] = await Promise.all([
+      appwrite.databases.listDocuments({
+        databaseId: this.orgId,
+        collectionId: Collections.EXTERNAL_CONTACTS,
+        queries: baseQueries,
+      }),
+      appwrite.databases.listDocuments({
+        databaseId: this.orgId,
+        collectionId: Collections.COURIERS,
+        queries: [
+          Query.equal('isDeleted', false),
+          Query.select(['externalContactId']),
+          Query.limit(5000),
+        ],
+      }),
+    ])
+
+    const courierCountByContactId = new Map<string, number>()
+    for (const courier of couriersResult.documents) {
+      const contactId = courier.externalContactId as string | undefined
+      if (contactId) {
+        courierCountByContactId.set(contactId, (courierCountByContactId.get(contactId) ?? 0) + 1)
+      }
+    }
 
     return {
       total: response.total,
-      documents: response.documents.map((doc) => this.mapToContact(doc)),
+      documents: response.documents.map((doc) =>
+        this.mapToContact(doc, courierCountByContactId.get(doc.$id) ?? 0)
+      ),
     }
   }
 
@@ -81,12 +103,25 @@ export class ExternalContactService {
    * @returns The contact details.
    */
   async get(id: string) {
-    const doc = await appwrite.databases.getDocument({
-      databaseId: this.orgId,
-      collectionId: Collections.EXTERNAL_CONTACTS,
-      documentId: id,
-    })
-    return this.mapToContact(doc)
+    const [doc, couriersResult] = await Promise.all([
+      appwrite.databases.getDocument({
+        databaseId: this.orgId,
+        collectionId: Collections.EXTERNAL_CONTACTS,
+        documentId: id,
+      }),
+      appwrite.databases.listDocuments({
+        databaseId: this.orgId,
+        collectionId: Collections.COURIERS,
+        queries: [
+          Query.equal('externalContactId', id),
+          Query.equal('isDeleted', false),
+          Query.select(['$id']),
+          Query.limit(5000),
+        ],
+      }),
+    ])
+
+    return this.mapToContact(doc, couriersResult.total)
   }
 
   /**
@@ -134,7 +169,7 @@ export class ExternalContactService {
     })
   }
 
-  private mapToContact(doc: any): ExternalContact {
+  private mapToContact(doc: any, couriersCount = 0): ExternalContact {
     return {
       $id: doc.$id,
       $createdAt: doc.$createdAt,
@@ -145,6 +180,7 @@ export class ExternalContactService {
       idNumber: doc.idNumber,
       address: doc.address,
       createdBy: doc.createdBy,
+      couriersCount,
     }
   }
 }
