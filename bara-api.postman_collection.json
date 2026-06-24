@@ -1355,7 +1355,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"redirectUrl\": \"{{base_url}}/reset-password\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/forgot-password",
@@ -1378,7 +1378,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": \"user-id\",\n  \"secret\": \"secret-code\",\n  \"password\": \"nouveauMotDePasse123!\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"secret-code\",\n  \"password\": \"nouveauMotDePasse123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/forgot-password",

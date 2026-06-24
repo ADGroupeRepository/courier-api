@@ -185,13 +185,23 @@ export default class AuthController {
 
   /**
    * POST /api/v1/auth/forgot-password
-   * Request password reset OTP.
+   * Request password reset OTP for a matching user email.
    */
   async requestPasswordReset({ request, response }: HttpContext) {
     const { email } = await request.validateUsing(requestPasswordResetValidator)
     const authService = new AuthService()
     const result = await authService.requestPasswordReset(email)
-    return response.ok({ message: 'Password recovery code sent successfully', data: result })
+
+    if (!result.sent) {
+      return response.notFound({
+        message: 'No user account was found for this email address',
+      })
+    }
+
+    return response.ok({
+      message: 'Password recovery code sent successfully to your email address',
+      data: result,
+    })
   }
 
   /**

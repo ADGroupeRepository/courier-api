@@ -122,12 +122,22 @@ export default class OrganisationService {
   /**
    * Build a public preview URL for any file stored in the public-media bucket.
    * @param fileId - The ID of the file.
-   * @param width - The desired width of the preview.
-   * @param height - The desired height of the preview.
+   * @param width - Optional desired width of the preview.
+   * @param height - Optional desired height of the preview.
    * @returns The public preview URL.
    */
-  static buildPreviewUrl(fileId: string, width = 200, height = 200): string {
-    return `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${fileId}/preview?width=${width}&height=${height}&project=${appwriteConfig.projectId}`
+  static buildPreviewUrl(fileId: string, width?: number, height?: number): string {
+    const params = new URLSearchParams({ project: appwriteConfig.projectId })
+
+    if (width !== undefined) {
+      params.set('width', width.toString())
+    }
+
+    if (height !== undefined) {
+      params.set('height', height.toString())
+    }
+
+    return `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${fileId}/preview?${params.toString()}`
   }
 
   /**
@@ -433,6 +443,7 @@ export default class OrganisationService {
     const documents = await Promise.all(
       result.memberships.map(async (m) => {
         let departments: Array<{ id: string; name: string; role: 'manager' | 'member' }> = []
+        let avatarUrl: string | null = null
 
         try {
           const membersService = await MembersService.forOrg(teamId)
@@ -444,6 +455,17 @@ export default class OrganisationService {
           )
         }
 
+        try {
+          const user = await appwrite.users.get({ userId: m.userId })
+          const avatarFileId = user.prefs?.avatarFileId
+          avatarUrl = avatarFileId ? OrganisationService.buildPreviewUrl(avatarFileId) : null
+        } catch (error: any) {
+          logger.warn(
+            { teamId, userId: m.userId, error: error?.message },
+            '[OrgService] Failed to load member avatar for list response'
+          )
+        }
+
         return {
           id: m.$id,
           userId: m.userId,
@@ -452,6 +474,7 @@ export default class OrganisationService {
           roles: m.roles,
           invited: m.invited,
           joined: m.joined,
+          avatarUrl,
           departments,
         }
       })
@@ -491,6 +514,7 @@ export default class OrganisationService {
     }
 
     let departments: Array<{ id: string; name: string; role: 'manager' | 'member' }> = []
+    let avatarUrl: string | null = null
 
     try {
       const membersService = await MembersService.forOrg(teamId)
@@ -502,6 +526,17 @@ export default class OrganisationService {
       )
     }
 
+    try {
+      const user = await appwrite.users.get({ userId: m.userId })
+      const avatarFileId = user.prefs?.avatarFileId
+      avatarUrl = avatarFileId ? OrganisationService.buildPreviewUrl(avatarFileId) : null
+    } catch (error: any) {
+      logger.warn(
+        { teamId, memberId, userId: m.userId, error: error?.message },
+        '[OrgService] Failed to load member avatar'
+      )
+    }
+
     return {
       id: m.$id,
       userId: m.userId,
@@ -510,6 +545,7 @@ export default class OrganisationService {
       roles: m.roles,
       invited: m.invited,
       joined: m.joined,
+      avatarUrl,
       departments,
     }
   }
