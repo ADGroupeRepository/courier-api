@@ -1,6 +1,6 @@
+import { Collections } from '#modules/_registry/collection_ids'
 import appwrite from '#services/appwrite_service'
 import { ID, Query } from 'node-appwrite'
-import { Collections } from '#modules/_registry/collection_ids'
 
 /**
  * Service for managing departments within an organisation's isolated database.
@@ -39,31 +39,43 @@ export default class DepartmentsService {
     const page = Math.max(options.page ?? 1, 1)
     const offset = (page - 1) * limit
 
-    const [deptResult, profilesResult, couriersResult] = await Promise.all([
-      // 1. Departments paginated query
-      appwrite.databases.listDocuments({
-        databaseId: this.databaseId,
-        collectionId: this.collectionId,
-        queries: [Query.orderAsc('name'), Query.limit(limit), Query.offset(offset)],
-      }),
-      // 2. All org profiles — lightweight, only need departmentId
-      appwrite.databases.listDocuments({
-        databaseId: this.databaseId,
-        collectionId: Collections.ORG_PROFILES,
-        queries: [Query.select(['departmentId']), Query.limit(5000)],
-      }),
-      // 3. All non-deleted couriers assigned to a department
-      appwrite.databases.listDocuments({
-        databaseId: this.databaseId,
-        collectionId: Collections.COURIERS,
-        queries: [
-          Query.equal('targetType', 'department'),
-          Query.equal('isDeleted', false),
-          Query.select(['internalEntityId']),
-          Query.limit(5000),
-        ],
-      }),
-    ])
+    const [deptResult, profilesResult, currentCouriersResult, assignmentResult] = await Promise.all(
+      [
+        // 1. Departments paginated query
+        appwrite.databases.listDocuments({
+          databaseId: this.databaseId,
+          collectionId: this.collectionId,
+          queries: [Query.orderAsc('name'), Query.limit(limit), Query.offset(offset)],
+        }),
+        // 2. All org profiles — lightweight, only need departmentId
+        appwrite.databases.listDocuments({
+          databaseId: this.databaseId,
+          collectionId: Collections.ORG_PROFILES,
+          queries: [Query.select(['departmentId']), Query.limit(5000)],
+        }),
+        // 3. Legacy department courier links stored on the courier document
+        appwrite.databases.listDocuments({
+          databaseId: this.databaseId,
+          collectionId: Collections.COURIERS,
+          queries: [
+            Query.equal('targetType', 'department'),
+            Query.equal('isDeleted', false),
+            Query.select(['internalEntityId']),
+            Query.limit(5000),
+          ],
+        }),
+        // 4. Current department assignments stored in the assignments collection
+        appwrite.databases.listDocuments({
+          databaseId: this.databaseId,
+          collectionId: Collections.COURIER_ASSIGNMENTS,
+          queries: [
+            Query.equal('entityType', 'department'),
+            Query.select(['entityId']),
+            Query.limit(5000),
+          ],
+        }),
+      ]
+    )
 
     // Build count maps: departmentId → count
     const membersCountMap = new Map<string, number>()
@@ -73,9 +85,18 @@ export default class DepartmentsService {
     }
 
     const couriersCountMap = new Map<string, number>()
-    for (const doc of couriersResult.documents) {
-      const deptId = doc.internalEntityId as string
-      couriersCountMap.set(deptId, (couriersCountMap.get(deptId) ?? 0) + 1)
+    for (const doc of currentCouriersResult.documents) {
+      const deptId = doc.internalEntityId as string | undefined
+      if (deptId) {
+        couriersCountMap.set(deptId, (couriersCountMap.get(deptId) ?? 0) + 1)
+      }
+    }
+
+    for (const doc of assignmentResult.documents) {
+      const deptId = doc.entityId as string | undefined
+      if (deptId) {
+        couriersCountMap.set(deptId, (couriersCountMap.get(deptId) ?? 0) + 1)
+      }
     }
 
     const documents = deptResult.documents.map((row) => ({
@@ -101,7 +122,7 @@ export default class DepartmentsService {
    * @returns The department details with membersCount and couriersCount.
    */
   async get(departmentId: string) {
-    const [row, profilesResult, couriersResult] = await Promise.all([
+    const [row, profilesResult, couriersResult, assignmentResult] = await Promise.all([
       appwrite.databases.getDocument({
         databaseId: this.databaseId,
         collectionId: this.collectionId,
@@ -123,6 +144,16 @@ export default class DepartmentsService {
           Query.limit(1),
         ],
       }),
+      appwrite.databases.listDocuments({
+        databaseId: this.databaseId,
+        collectionId: Collections.COURIER_ASSIGNMENTS,
+        queries: [
+          Query.equal('entityType', 'department'),
+          Query.equal('entityId', departmentId),
+          Query.select(['$id']),
+          Query.limit(1000),
+        ],
+      }),
     ])
 
     return {
@@ -131,7 +162,7 @@ export default class DepartmentsService {
       description: row.description || null,
       managerUserId: row.managerUserId || null,
       membersCount: profilesResult.total,
-      couriersCount: couriersResult.total,
+      couriersCount: couriersResult.total + assignmentResult.total,
       createdAt: row.$createdAt,
       updatedAt: row.$updatedAt,
     }

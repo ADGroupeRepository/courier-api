@@ -1,20 +1,18 @@
+import appwriteConfig from '#config/appwrite'
+import { Collections } from '#modules/_registry/collection_ids'
+import { type CourierUrgency, CourierStatus, CourierType } from '#modules/courier/courier_enums'
+import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
 import appwrite from '#services/appwrite_service'
 import logger from '@adonisjs/core/services/logger'
-import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
-import {
-  type CourierUrgency,
-  type CourierStructureType,
-  CourierStatus,
-  CourierType,
-} from '#modules/courier/courier_enums'
-import { Collections } from '#modules/_registry/collection_ids'
 
 // ── Payload interfaces ────────────────────────────────────────────────
 
 export interface CourierAssignment {
   entityId: string
   entityType: 'user' | 'department'
+  entityName?: string | null
+  entityEmail?: string | null
 }
 
 export interface CreateCourierPayload {
@@ -27,7 +25,6 @@ export interface CreateCourierPayload {
   senderEmail?: string
   senderPhone?: string
   externalContactId?: string
-  externalContactType?: CourierStructureType
   targetType: 'user' | 'department'
   entityIds: string[]
   createdBy: string
@@ -43,7 +40,6 @@ export interface UpdateCourierPayload {
   senderEmail?: string
   senderPhone?: string
   externalContactId?: string
-  externalContactType?: CourierStructureType
   status?: CourierStatus
   isFavorite?: boolean
   isArchived?: boolean
@@ -57,6 +53,7 @@ export interface UpdateCourierPayload {
 export default class CourierService {
   private readonly databaseId: string
   private readonly bucketId: string
+  private readonly teamId?: string
   private readonly collectionId = Collections.COURIERS
   private readonly assignmentsCollectionId = Collections.COURIER_ASSIGNMENTS
 
@@ -65,9 +62,10 @@ export default class CourierService {
    * @param databaseId - The ID of the organization's database.
    * @param bucketId - The ID of the organization's storage bucket.
    */
-  constructor(databaseId: string, bucketId: string) {
+  constructor(databaseId: string, bucketId: string, teamId?: string) {
     this.databaseId = databaseId
     this.bucketId = bucketId
+    this.teamId = teamId
   }
 
   /**
@@ -82,7 +80,7 @@ export default class CourierService {
     if (!prefs.databaseId || !prefs.bucketId) {
       throw new Error(`Organisation ${orgId} does not have provisioned resources.`)
     }
-    return new CourierService(prefs.databaseId, prefs.bucketId)
+    return new CourierService(prefs.databaseId, prefs.bucketId, orgId)
   }
 
   // ── Assignment helpers ──────────────────────────────────────────────
@@ -97,13 +95,15 @@ export default class CourierService {
   async createAssignments(
     courierId: string,
     entityIds: string[],
-    entityType: 'user' | 'department',
+    entityType: CourierAssignment['entityType'],
     assignedBy: string
   ): Promise<CourierAssignment[]> {
     const assignments: CourierAssignment[] = []
 
     for (const entityId of entityIds) {
-      await appwrite.databases.createDocument({
+      const entityName = await this.resolveEntityName(entityId, entityType)
+
+      const assignmentDoc = await appwrite.databases.createDocument({
         databaseId: this.databaseId,
         collectionId: this.assignmentsCollectionId,
         documentId: ID.unique(),
@@ -112,9 +112,15 @@ export default class CourierService {
           entityId,
           entityType,
           assignedBy,
+          entityName: entityName ?? null,
         },
       })
-      assignments.push({ entityId, entityType })
+
+      assignments.push({
+        entityId,
+        entityType,
+        entityName: assignmentDoc.entityName ?? entityName ?? null,
+      })
     }
 
     return assignments
@@ -132,10 +138,19 @@ export default class CourierService {
       queries: [Query.equal('courierId', courierId), Query.limit(100)],
     })
 
-    return result.documents.map((doc: any) => ({
-      entityId: doc.entityId,
-      entityType: doc.entityType,
-    }))
+    return Promise.all(
+      result.documents.map(async (doc: any) => {
+        const entityName =
+          doc.entityName ?? (await this.resolveEntityName(doc.entityId, doc.entityType))
+
+        return {
+          entityId: doc.entityId,
+          entityType: doc.entityType,
+          entityName: entityName ?? null,
+          entityEmail: doc.entityEmail ?? null,
+        }
+      })
+    )
   }
 
   /**
@@ -313,7 +328,6 @@ export default class CourierService {
           senderEmail: payload.senderEmail,
           senderPhone: payload.senderPhone,
           externalContactId: payload.externalContactId,
-          externalContactType: payload.externalContactType,
           createdBy: payload.createdBy,
           targetType: payload.targetType,
           fileIds: fileIds.length > 0 ? fileIds : undefined,
@@ -417,12 +431,18 @@ export default class CourierService {
    * @throws Error if the courier or file cannot be deleted.
    */
   async forceDelete(courierId: string) {
-    const courier = await this.get(courierId)
+    const courierDoc = await appwrite.databases.getDocument({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      documentId: courierId,
+    })
 
     // Delete assignments first
     await this.deleteAssignments(courierId)
 
-    for (const fileId of courier.fileIds) {
+    const fileIds = Array.isArray(courierDoc.fileIds) ? courierDoc.fileIds.filter(Boolean) : []
+
+    for (const fileId of fileIds) {
       try {
         await appwrite.storage.deleteFile({ bucketId: this.bucketId, fileId })
       } catch (error) {
@@ -454,11 +474,123 @@ export default class CourierService {
    * @param assignments - Pre-fetched assignment list.
    * @returns The formatted domain model object.
    */
-  private mapDocument(doc: any, assignments: CourierAssignment[]) {
+  private async resolveSenderDetails(doc: any) {
+    if (doc.externalContactId) {
+      try {
+        const contactService = new ExternalContactService(this.databaseId)
+        const contact = await contactService.get(doc.externalContactId)
+
+        return {
+          id: doc.externalContactId,
+          type: contact.structureType ?? 'external_contact',
+          name: contact.name ?? doc.senderName ?? null,
+          email: contact.email ?? doc.senderEmail ?? null,
+          phone: contact.phone ?? doc.senderPhone ?? null,
+        }
+      } catch {
+        // Fall back to the manually provided sender details if the contact cannot be resolved.
+      }
+    }
+
+    return {
+      id: doc.externalContactId || null,
+      type: doc.senderName || doc.senderEmail || doc.senderPhone ? 'manual' : null,
+      name: doc.senderName ?? null,
+      email: doc.senderEmail ?? null,
+      phone: doc.senderPhone ?? null,
+    }
+  }
+
+  private async resolveEntityName(
+    entityId: string,
+    entityType: CourierAssignment['entityType']
+  ): Promise<string | null> {
+    if (entityType === 'department') {
+      try {
+        const department = await appwrite.databases.getDocument({
+          databaseId: this.databaseId,
+          collectionId: Collections.DEPARTMENTS,
+          documentId: entityId,
+        })
+
+        return department?.name ?? null
+      } catch {
+        // fall through to external contacts lookup below
+      }
+    }
+
+    if (entityType === 'user') {
+      try {
+        const user = await appwrite.users.get({ userId: entityId })
+        return user?.name ?? user?.email ?? null
+      } catch {
+        if (this.teamId) {
+          try {
+            const memberships = await appwrite.teams.listMemberships({
+              teamId: this.teamId,
+              queries: [Query.equal('userId', entityId)],
+            })
+
+            const membership = memberships.memberships?.[0]
+            return membership?.userName ?? membership?.userEmail ?? null
+          } catch {
+            // fall through to external contacts lookup below
+          }
+        }
+      }
+    }
+
+    try {
+      const contact = await appwrite.databases.getDocument({
+        databaseId: this.databaseId,
+        collectionId: Collections.EXTERNAL_CONTACTS,
+        documentId: entityId,
+      })
+
+      return contact?.name ?? null
+    } catch {
+      return null
+    }
+  }
+
+  private async enrichAssignment(assignment: CourierAssignment) {
+    if (assignment.entityName) {
+      return assignment
+    }
+
+    const entityName = await this.resolveEntityName(assignment.entityId, assignment.entityType)
+
+    if (assignment.entityType === 'user') {
+      try {
+        const user = await appwrite.users.get({ userId: assignment.entityId })
+        return {
+          ...assignment,
+          entityName: entityName ?? user?.name ?? user?.email ?? null,
+          entityEmail: user?.email ?? null,
+        }
+      } catch {
+        return {
+          ...assignment,
+          entityName: entityName ?? null,
+        }
+      }
+    }
+
+    return {
+      ...assignment,
+      entityName: entityName ?? null,
+    }
+  }
+
+  private async mapDocument(doc: any, assignments: CourierAssignment[]) {
     const fileIds = Array.isArray(doc.fileIds) ? doc.fileIds.filter(Boolean) : []
     const fileUrls = fileIds.map(
       (id: string) =>
         `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${id}/view?project=${appwriteConfig.projectId}`
+    )
+    const sender = await this.resolveSenderDetails(doc)
+    const enrichedAssignments = await Promise.all(
+      assignments.map((assignment) => this.enrichAssignment(assignment))
     )
 
     return {
@@ -468,15 +600,10 @@ export default class CourierService {
       subject: doc.subject,
       receivedAt: doc.receivedAt || null,
       emittedAt: doc.emittedAt || null,
-      senderName: doc.senderName ?? doc.contactName ?? null,
-      senderEmail: doc.senderEmail ?? doc.contactEmail ?? null,
-      senderPhone: doc.senderPhone ?? doc.contactPhone ?? null,
-      externalContactId: doc.externalContactId || null,
-      externalContactType: doc.externalContactType || null,
+      sender,
       targetType: doc.targetType || null,
-      assignments,
+      assignments: enrichedAssignments,
       fileUrls,
-      fileIds,
       createdBy: doc.createdBy,
       status: doc.status,
       isFavorite: doc.isFavorite ?? false,

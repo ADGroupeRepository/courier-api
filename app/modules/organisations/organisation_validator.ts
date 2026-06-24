@@ -48,6 +48,15 @@ export const addMemberValidator = vine.create(
 export const updateMemberValidator = vine.create(
   vine.object({
     role: vine.enum(['admin', 'user']).optional(),
-    departmentRole: vine.enum(['manager', 'member']).optional(),
+    name: vine.string().optional(),
+    departments: vine
+      .array(
+        vine.object({
+          id: vine.string(),
+          role: vine.enum(['manager', 'member']),
+        })
+      )
+      .optional(),
+    jobTitle: vine.string().maxLength(128).optional(),
   })
 )
