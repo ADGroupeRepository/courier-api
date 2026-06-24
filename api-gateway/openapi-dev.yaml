@@ -203,6 +203,28 @@ paths:
           in: path
           required: true
           type: string
+        - name: name
+          in: formData
+          required: false
+          type: string
+        - name: description
+          in: formData
+          required: false
+          type: string
+        - name: address
+          in: formData
+          required: false
+          type: string
+        - name: rccm
+          in: formData
+          required: false
+          type: string
+        - name: logo
+          in: formData
+          required: false
+          type: string
+          format: binary
+          description: Multipart file part named logo. Google API Gateway does not support Swagger type file.
       responses:
         '200':
           description: Success

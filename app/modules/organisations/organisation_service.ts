@@ -586,9 +586,11 @@ export default class OrganisationService {
    * @param membershipId - The ID of the membership record to remove.
    */
   async removeMember(teamId: string, membershipId: string) {
+    let membership: Awaited<ReturnType<typeof appwrite.teams.getMembership>> | undefined
+
     try {
       // 1. Get membership details to retrieve the userId
-      const membership = await appwrite.teams.getMembership({ teamId, membershipId })
+      membership = await appwrite.teams.getMembership({ teamId, membershipId })
 
       // 2. Revoke their seat license if it exists
       await PlanService.revokeLicenseFromUser(teamId, membership.userId)
@@ -606,5 +608,27 @@ export default class OrganisationService {
 
     // 3. Delete the team membership
     await appwrite.teams.deleteMembership({ teamId, membershipId })
+
+    // 4. Delete the associated Appwrite account
+    if (membership?.userId) {
+      try {
+        await appwrite.users.delete(membership.userId)
+        logger.info(
+          { userId: membership.userId, teamId },
+          '[Member] Deleted Appwrite user account upon removal'
+        )
+      } catch (err: any) {
+        logger.error(
+          { userId: membership.userId, teamId, error: err.message },
+          '[Member] Failed to delete Appwrite user account during removal'
+        )
+        throw err
+      }
+    } else {
+      logger.warn(
+        { membershipId, teamId },
+        '[Member] Skipping Appwrite account deletion because membership userId was unavailable'
+      )
+    }
   }
 }
