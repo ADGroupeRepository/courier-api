@@ -21,6 +21,7 @@ export const updateOrganisationValidator = vine.create(
     description: vine.string().maxLength(500).trim().optional(),
     address: vine.string().maxLength(256).trim().optional(),
     rccm: vine.string().maxLength(128).trim().optional(),
+    logo: vine.file({ size: '5mb', extnames: ['jpg', 'png', 'jpeg', 'webp'] }).optional(),
   })
 )
 

@@ -50,10 +50,16 @@ export default class OrganisationsController {
    */
   async update({ request, response }: HttpContext) {
     const teamId = request.param('id')
-    const payload = await request.validateUsing(updateOrganisationValidator)
+    const { logo, ...payload } = await request.validateUsing(updateOrganisationValidator)
 
     const service = new OrganisationService()
-    const organisation = await service.update(teamId, payload)
+    const organisation = await service.update(
+      teamId,
+      payload,
+      logo && logo.tmpPath && logo.clientName
+        ? { tmpPath: logo.tmpPath, fileName: logo.clientName }
+        : undefined
+    )
 
     return response.ok({ message: 'Organisation updated successfully', data: organisation })
   }
@@ -68,38 +74,5 @@ export default class OrganisationsController {
     await service.delete(teamId)
 
     return response.noContent()
-  }
-
-  /**
-   * POST /api/v1/organisations/:id/logo
-   * Upload or replace an organisation's logo.
-   */
-  async uploadLogo({ request, response }: HttpContext) {
-    const teamId = request.param('id')
-    const logo = request.file('logo', {
-      size: '5mb',
-      extnames: ['jpg', 'png', 'jpeg', 'webp'],
-    })
-
-    if (!logo || !logo.isValid) {
-      return response.badRequest({ errors: logo?.errors || 'Invalid file' })
-    }
-
-    const authHeader = request.header('Authorization')!
-    const token = authHeader.slice(7).trim()
-
-    // Basic check: Ensure user belongs to this team
-    const appwriteModule = await import('#services/appwrite_service')
-    const { teams } = appwriteModule.default.createSessionClient(token)
-    try {
-      await teams.get({ teamId }) // Throws 401/404 if user is not in the team
-    } catch {
-      return response.unauthorized({ message: 'You do not have access to this organisation' })
-    }
-
-    const service = new OrganisationService()
-    const logoUrl = await service.uploadLogo(teamId, logo.tmpPath!, logo.clientName)
-
-    return response.ok({ message: 'Logo uploaded successfully', data: { logoUrl } })
   }
 }
