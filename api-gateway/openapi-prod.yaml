@@ -321,6 +321,7 @@ paths:
           description: Success
         '201':
           description: Created
+
   /organisations/{orgId}/members/{memberId}:
     get:
       summary: Voir un membre

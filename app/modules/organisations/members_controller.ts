@@ -87,47 +87,83 @@ export default class MembersController {
       })
     }
 
-    const { email, role, departmentId, jobTitle, departmentRole } =
+    const { email, role, name, departments, jobTitle } =
       await request.validateUsing(addMemberValidator)
 
-    // Verify department exists in the organization
-    try {
-      const deptsService = await DepartmentsService.forOrg(orgId)
-      await deptsService.get(departmentId)
-    } catch {
-      return response.notFound({
-        message: 'Department not found. Please create a department first.',
+    const departmentAssignmentsById = new Map<string, 'manager' | 'member'>()
+
+    for (const department of departments ?? []) {
+      departmentAssignmentsById.set(department.id, department.role ?? 'member')
+    }
+
+    const departmentAssignments = [...departmentAssignmentsById].map(
+      ([departmentId, assignmentRole]) => ({
+        departmentId,
+        departmentRole: assignmentRole,
       })
+    )
+    const selectedDepartmentIds = departmentAssignments.map((assignment) => assignment.departmentId)
+
+    if (role !== 'admin' && departmentAssignments.length === 0) {
+      return response.badRequest({
+        message: 'At least one department must be provided for non-admin members.',
+      })
+    }
+
+    let deptsService: DepartmentsService | null = null
+
+    if (departmentAssignments.length > 0) {
+      deptsService = await DepartmentsService.forOrg(orgId)
+
+      try {
+        await Promise.all(
+          selectedDepartmentIds.map((departmentId) => deptsService!.get(departmentId))
+        )
+      } catch {
+        return response.notFound({
+          message: 'One or more departments were not found.',
+        })
+      }
     }
 
     const service = new OrganisationService()
-    const membership = await service.addMember(orgId, email, [role])
+    const membership = await service.addMember(orgId, email, [role], name)
 
-    // Assign member to the department
-    try {
-      const membersService = await MembersService.forOrg(orgId)
-      await membersService.assignToDepartment({
-        userId: membership.userId,
-        membershipId: membership.id,
-        departmentId,
-        jobTitle,
-        departmentRole: departmentRole ?? 'member',
-      })
+    if (departmentAssignments.length > 0) {
+      try {
+        const membersService = await MembersService.forOrg(orgId)
 
-      // If assigned as department manager, update department document
-      if (departmentRole === 'manager') {
-        const deptsService = await DepartmentsService.forOrg(orgId)
-        await deptsService.update(departmentId, { managerUserId: membership.userId })
+        await Promise.all(
+          departmentAssignments.map((assignment) =>
+            membersService.assignToDepartment({
+              userId: membership.userId,
+              membershipId: membership.id,
+              departmentId: assignment.departmentId,
+              jobTitle,
+              departmentRole: assignment.departmentRole,
+            })
+          )
+        )
+
+        await Promise.all(
+          departmentAssignments
+            .filter((assignment) => assignment.departmentRole === 'manager')
+            .map((assignment) =>
+              deptsService!.update(assignment.departmentId, { managerUserId: membership.userId })
+            )
+        )
+      } catch (assignError: any) {
+        throw assignError
       }
-    } catch (assignError: any) {
-      // Log error but don't fail the whole request since membership is already created
-      // Or we can let it throw, but since they are added, completing assignment is expected.
-      // Let's log it or return a message. Actually, since we already checked that the department exists,
-      // it should succeed unless there's a constraint error.
-      throw assignError
     }
 
-    return response.created({ message: 'Member added successfully', data: membership })
+    return response.created({
+      message: 'Member added successfully',
+      data: {
+        ...membership,
+        departments: departmentAssignments,
+      },
+    })
   }
 
   /**

@@ -202,22 +202,15 @@ export default class CourierService {
     const page = Math.max(options.page ?? 1, 1)
     const offset = (page - 1) * limit
 
-    const baseQueries = [Query.orderDesc('$createdAt'), Query.limit(limit), Query.offset(offset)]
-
-    if (options.type) {
-      baseQueries.push(Query.equal('type', options.type))
-    }
-
-    // Filter by archive status (default: show non-archived)
-    baseQueries.push(Query.equal('isArchived', options.archived ?? false))
-
-    // Filter by deleted status (bin)
-    baseQueries.push(Query.equal('isDeleted', options.deleted ?? false))
-
-    // Filter favorites only when explicitly requested
-    if (options.favorite) {
-      baseQueries.push(Query.equal('isFavorite', true))
-    }
+    const baseQueries = [
+      Query.orderDesc('$createdAt'),
+      Query.limit(limit),
+      Query.offset(offset),
+      ...(options.type ? [Query.equal('type', options.type)] : []),
+      Query.equal('isArchived', options.archived ?? false),
+      Query.equal('isDeleted', options.deleted ?? false),
+      ...(options.favorite ? [Query.equal('isFavorite', true)] : []),
+    ]
 
     if (options.canManage) {
       const result = await appwrite.databases.listDocuments({
@@ -370,28 +363,19 @@ export default class CourierService {
   /**
    * Prepare direct Appwrite upload targets for courier documents.
    */
-  createUploadTargets(files: { fileName: string; contentType?: string; size: number }[]) {
-    return files.map((file) => {
+  createUploadTargets(files: { fileName: string; fileExtension: string; size: number }[]) {
+    return files.map(() => {
       const fileId = ID.unique()
       const uploadUrl = `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files`
 
       return {
         fileId,
-        fileName: file.fileName,
-        contentType: file.contentType || null,
-        size: file.size,
-        bucketId: this.bucketId,
-        projectId: appwriteConfig.projectId,
         uploadUrl,
         method: 'POST',
         expiresInSeconds: 900,
         formData: {
           fileId,
           file: '<binary>',
-        },
-        headers: {
-          'X-Appwrite-Project': appwriteConfig.projectId,
-          'X-Appwrite-JWT': '<current-user-jwt>',
         },
       }
     })

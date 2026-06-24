@@ -38,16 +38,19 @@ export default class MembersService {
 
   /**
    * Assign a user to a department by creating an org_profile record.
-   * If they already have a profile, it updates it (one profile per org/user).
+   * A user may belong to multiple departments, but only once per department.
    * @param payload - The assignment details (user, department, role, title).
    * @returns The created or updated profile document.
    */
   async assignToDepartment(payload: AssignMemberPayload) {
-    // 1. Check if a profile already exists for this user in this org
+    // Check if this user is already assigned to the same department.
     const existing = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
-      queries: [Query.equal('userId', payload.userId)],
+      queries: [
+        Query.equal('userId', payload.userId),
+        Query.equal('departmentId', payload.departmentId),
+      ],
     })
 
     const data = {
@@ -59,7 +62,7 @@ export default class MembersService {
     }
 
     if (existing.total > 0) {
-      throw new Error('User is already assigned to a department in this organisation.')
+      throw new Error('User is already assigned to this department.')
     }
 
     // Create new profile
@@ -109,6 +112,44 @@ export default class MembersService {
   }
 
   /**
+   * List departments assigned to a user in the organisation.
+   * @param userId - The user ID.
+   * @returns A list of departments with their public profile shape.
+   */
+  async listDepartmentsForUser(userId: string) {
+    const profiles = await appwrite.databases.listDocuments({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      queries: [Query.equal('userId', userId), Query.limit(5000)],
+    })
+
+    const departmentIds = [
+      ...new Set(profiles.documents.map((profile) => profile.departmentId as string)),
+    ]
+    const profileByDepartmentId = new Map(
+      profiles.documents.map((profile) => [profile.departmentId as string, profile])
+    )
+
+    const departmentResults = await Promise.allSettled(
+      departmentIds.map((departmentId) =>
+        appwrite.databases.getDocument({
+          databaseId: this.databaseId,
+          collectionId: Collections.DEPARTMENTS,
+          documentId: departmentId,
+        })
+      )
+    )
+
+    return departmentResults
+      .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+      .map((result) => ({
+        id: result.value.$id,
+        name: result.value.name,
+        role: profileByDepartmentId.get(result.value.$id)?.departmentRole ?? 'member',
+      }))
+  }
+
+  /**
    * Remove a member from their department (deletes their org_profile).
    * @param id - The user ID or the profile document ID.
    */
@@ -148,26 +189,29 @@ export default class MembersService {
     })
 
     if (list.total > 0) {
-      const doc = list.documents[0]
-      await appwrite.databases.updateDocument({
-        databaseId: this.databaseId,
-        collectionId: this.collectionId,
-        documentId: doc.$id,
-        data: {
-          departmentRole,
-        },
-      })
+      await Promise.all(
+        list.documents.map(async (doc) => {
+          await appwrite.databases.updateDocument({
+            databaseId: this.databaseId,
+            collectionId: this.collectionId,
+            documentId: doc.$id,
+            data: {
+              departmentRole,
+            },
+          })
 
-      if (departmentRole === 'manager') {
-        await appwrite.databases.updateDocument({
-          databaseId: this.databaseId,
-          collectionId: Collections.DEPARTMENTS,
-          documentId: doc.departmentId,
-          data: {
-            managerUserId: userId,
-          },
+          if (departmentRole === 'manager') {
+            await appwrite.databases.updateDocument({
+              databaseId: this.databaseId,
+              collectionId: Collections.DEPARTMENTS,
+              documentId: doc.departmentId,
+              data: {
+                managerUserId: userId,
+              },
+            })
+          }
         })
-      }
+      )
     } else {
       throw new Error('User does not have a department profile to update.')
     }
@@ -181,6 +225,7 @@ export default class MembersService {
     const membership = membershipsById.get(doc.membershipId) || membershipsByUserId.get(doc.userId)
 
     return {
+      id: doc.$id,
       userId: doc.userId,
       userName: membership?.userName ?? null,
       userEmail: membership?.userEmail ?? null,

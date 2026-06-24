@@ -6,6 +6,7 @@ import {
   signupValidator,
   updateProfileValidator,
 } from '#modules/auth/auth_validator'
+import MembersService from '#modules/directory/members_service'
 import OrganisationService from '#modules/organisations/organisation_service'
 import PlanService from '#modules/plans/plan_service'
 import appwrite from '#services/appwrite_service'
@@ -43,14 +44,18 @@ export default class AuthController {
     const enrichedOrganisations = await Promise.all(
       organisations.map(async (org) => {
         // Use allSettled so one failure (e.g. missing collection attribute) doesn't lose everything
-        const [subInfoResult, userLicenseResult, membershipResult] = await Promise.allSettled([
-          PlanService.getOrgSubscriptionInfo(org.id),
-          PlanService.getUserLicense(org.id, profile.id),
-          appwrite.teams.listMemberships({
-            teamId: org.id,
-            queries: [Query.equal('userId', [profile.id])],
-          }),
-        ])
+        const [subInfoResult, userLicenseResult, membershipResult, departmentsResult] =
+          await Promise.allSettled([
+            PlanService.getOrgSubscriptionInfo(org.id),
+            PlanService.getUserLicense(org.id, profile.id),
+            appwrite.teams.listMemberships({
+              teamId: org.id,
+              queries: [Query.equal('userId', [profile.id])],
+            }),
+            MembersService.forOrg(org.id).then((service) =>
+              service.listDepartmentsForUser(profile.id)
+            ),
+          ])
 
         // Extract results with safe fallbacks
         const subInfo =
@@ -85,6 +90,15 @@ export default class AuthController {
           )
         }
 
+        const departments = departmentsResult.status === 'fulfilled' ? departmentsResult.value : []
+
+        if (departmentsResult.status === 'rejected') {
+          logger.warn(
+            { orgId: org.id, error: departmentsResult.reason?.message },
+            '[Profile] Failed to fetch user departments'
+          )
+        }
+
         const subscriptionStatus = subInfo.status
         const hasActiveSubscription =
           subscriptionStatus === 'active' || subscriptionStatus === 'grace_period'
@@ -95,6 +109,7 @@ export default class AuthController {
           name: org.name,
           logoUrl: org.logoUrl,
           roles,
+          departments,
           subscriptionStatus,
           hasActiveSubscription,
           hasValidLicense,

@@ -2,6 +2,7 @@ import appwriteConfig from '#config/appwrite'
 import { buildMemberAddedEmailHtml } from '#modules/auth/auth_service'
 import OrganisationCreated from '#events/organisation_created'
 import PlanService from '#modules/plans/plan_service'
+import MembersService from '#modules/directory/members_service'
 import appwrite from '#services/appwrite_service'
 import EmailService from '#services/email_service'
 import emitter from '@adonisjs/core/services/emitter'
@@ -349,9 +350,10 @@ export default class OrganisationService {
    * @param teamId - The ID of the organisation (team).
    * @param email - The member's email address.
    * @param roles - The roles to assign to the new member.
+   * @param name - The member's display name when provisioning a new account.
    * @returns The membership details.
    */
-  async addMember(teamId: string, email: string, roles: string[]) {
+  async addMember(teamId: string, email: string, roles: string[], name: string) {
     // 1. Find or create the user
     const userList = await appwrite.users.list({
       queries: [Query.equal('email', [email])],
@@ -368,7 +370,7 @@ export default class OrganisationService {
         userId: ID.unique(),
         email,
         password: appwriteConfig.tempMemberPassword,
-        name: email.split('@')[0], // Use email prefix as default name
+        name,
       })
       userId = newUser.$id
 
@@ -385,7 +387,7 @@ export default class OrganisationService {
     // 3. Send notification email to the new member (non-fatal)
     try {
       const team = await appwrite.teams.get({ teamId })
-      const memberName = membership.userName || email.split('@')[0]
+      const memberName = membership.userName || name
 
       await EmailService.send({
         to: email,
@@ -409,7 +411,6 @@ export default class OrganisationService {
       roles: membership.roles,
       invited: membership.invited,
       joined: membership.joined,
-      confirm: membership.confirm,
     }
   }
 
@@ -429,15 +430,32 @@ export default class OrganisationService {
       queries: [Query.limit(limit), Query.offset(offset)],
     })
 
-    const documents = result.memberships.map((m) => ({
-      id: m.userId,
-      userName: m.userName,
-      userEmail: m.userEmail,
-      roles: m.roles,
-      invited: m.invited,
-      joined: m.joined,
-      confirm: m.confirm,
-    }))
+    const documents = await Promise.all(
+      result.memberships.map(async (m) => {
+        let departments: Array<{ id: string; name: string; role: 'manager' | 'member' }> = []
+
+        try {
+          const membersService = await MembersService.forOrg(teamId)
+          departments = await membersService.listDepartmentsForUser(m.userId)
+        } catch (error: any) {
+          logger.warn(
+            { teamId, userId: m.userId, error: error?.message },
+            '[OrgService] Failed to load member departments for list response'
+          )
+        }
+
+        return {
+          id: m.$id,
+          userId: m.userId,
+          userName: m.userName,
+          userEmail: m.userEmail,
+          roles: m.roles,
+          invited: m.invited,
+          joined: m.joined,
+          departments,
+        }
+      })
+    )
 
     return {
       total: result.total,
@@ -448,10 +466,41 @@ export default class OrganisationService {
   /**
    * Get details of a single member in the organisation.
    * @param teamId - The ID of the organisation (team).
-   * @param membershipId - The ID of the membership record.
+   * @param memberId - The ID of the membership record, or the user ID for compatibility.
    */
-  async getMember(teamId: string, membershipId: string) {
-    const m = await appwrite.teams.getMembership({ teamId, membershipId })
+  async getMember(teamId: string, memberId: string) {
+    let m: any
+
+    try {
+      m = await appwrite.teams.getMembership({ teamId, membershipId: memberId })
+    } catch (error: any) {
+      if (error.type !== 'membership_not_found' && error.code !== 404) {
+        throw error
+      }
+
+      const memberships = await appwrite.teams.listMemberships({
+        teamId,
+        queries: [Query.equal('userId', memberId)],
+      })
+
+      if (memberships.total === 0) {
+        throw error
+      }
+
+      m = memberships.memberships[0]
+    }
+
+    let departments: Array<{ id: string; name: string; role: 'manager' | 'member' }> = []
+
+    try {
+      const membersService = await MembersService.forOrg(teamId)
+      departments = await membersService.listDepartmentsForUser(m.userId)
+    } catch (error: any) {
+      logger.warn(
+        { teamId, memberId, userId: m.userId, error: error?.message },
+        '[OrgService] Failed to load member departments'
+      )
+    }
 
     return {
       id: m.$id,
@@ -461,7 +510,7 @@ export default class OrganisationService {
       roles: m.roles,
       invited: m.invited,
       joined: m.joined,
-      confirm: m.confirm,
+      departments,
     }
   }
 
