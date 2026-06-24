@@ -177,43 +177,89 @@ export default class MembersService {
   }
 
   /**
-   * Update a member's department role.
-   * @param userId - The user ID.
-   * @param departmentRole - The new department role.
+   * Replace the member's department assignments with the provided list.
+   * @param payload - The department assignment updates.
    */
-  async updateDepartmentRole(userId: string, departmentRole: 'manager' | 'member') {
-    const list = await appwrite.databases.listDocuments({
+  async updateDepartmentAssignments(payload: {
+    userId: string
+    membershipId: string
+    departments?: Array<{ id: string; role: 'manager' | 'member' }>
+    jobTitle?: string
+  }) {
+    const existingProfiles = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
-      queries: [Query.equal('userId', userId)],
+      queries: [Query.equal('userId', payload.userId), Query.limit(5000)],
     })
 
-    if (list.total > 0) {
+    const desiredDepartmentIds = new Set(
+      (payload.departments ?? []).map((department) => department.id)
+    )
+
+    for (const profile of existingProfiles.documents) {
+      if (!desiredDepartmentIds.has(profile.departmentId as string)) {
+        await appwrite.databases.deleteDocument({
+          databaseId: this.databaseId,
+          collectionId: this.collectionId,
+          documentId: profile.$id,
+        })
+      }
+    }
+
+    if (payload.departments) {
       await Promise.all(
-        list.documents.map(async (doc) => {
+        payload.departments.map(async (department) => {
+          const existingProfile = existingProfiles.documents.find(
+            (profile) => profile.departmentId === department.id
+          )
+
+          const data = {
+            userId: payload.userId,
+            membershipId: payload.membershipId,
+            departmentId: department.id,
+            jobTitle: payload.jobTitle ?? '',
+            departmentRole: department.role,
+          }
+
+          if (existingProfile) {
+            await appwrite.databases.updateDocument({
+              databaseId: this.databaseId,
+              collectionId: this.collectionId,
+              documentId: existingProfile.$id,
+              data,
+            })
+          } else {
+            await appwrite.databases.createDocument({
+              databaseId: this.databaseId,
+              collectionId: this.collectionId,
+              documentId: ID.unique(),
+              data,
+            })
+          }
+
+          await appwrite.databases.updateDocument({
+            databaseId: this.databaseId,
+            collectionId: Collections.DEPARTMENTS,
+            documentId: department.id,
+            data: {
+              managerUserId: department.role === 'manager' ? payload.userId : null,
+            },
+          })
+        })
+      )
+    } else if (payload.jobTitle !== undefined) {
+      await Promise.all(
+        existingProfiles.documents.map(async (profile) => {
           await appwrite.databases.updateDocument({
             databaseId: this.databaseId,
             collectionId: this.collectionId,
-            documentId: doc.$id,
+            documentId: profile.$id,
             data: {
-              departmentRole,
+              jobTitle: payload.jobTitle,
             },
           })
-
-          if (departmentRole === 'manager') {
-            await appwrite.databases.updateDocument({
-              databaseId: this.databaseId,
-              collectionId: Collections.DEPARTMENTS,
-              documentId: doc.departmentId,
-              data: {
-                managerUserId: userId,
-              },
-            })
-          }
         })
       )
-    } else {
-      throw new Error('User does not have a department profile to update.')
     }
   }
 

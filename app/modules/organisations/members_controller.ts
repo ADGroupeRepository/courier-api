@@ -181,32 +181,42 @@ export default class MembersController {
       })
     }
 
-    const { role, departmentRole } = await request.validateUsing(updateMemberValidator)
+    const { role, name, departments, jobTitle } = await request.validateUsing(updateMemberValidator)
 
     const service = new OrganisationService()
     let updatedMembership: any = null
+
+    const membership = await appwrite.teams.getMembership({
+      teamId: orgId,
+      membershipId,
+    })
 
     // 1. If role is provided, update organisation-level role
     if (role) {
       updatedMembership = await service.updateMember(orgId, membershipId, [role])
     }
 
-    // 2. If departmentRole is provided, update department-level role
-    if (departmentRole) {
-      const membership = await appwrite.teams.getMembership({
-        teamId: orgId,
-        membershipId,
-      })
+    // 2. If name is provided, update the Appwrite user display name
+    if (name !== undefined) {
+      await appwrite.users.updateName({ userId: membership.userId, name })
+    }
 
+    // 3. If department assignments or job title are provided, update them
+    if (departments !== undefined || jobTitle !== undefined) {
       const membersService = await MembersService.forOrg(orgId)
-      await membersService.updateDepartmentRole(membership.userId, departmentRole)
+      await membersService.updateDepartmentAssignments({
+        userId: membership.userId,
+        membershipId,
+        departments,
+        jobTitle,
+      })
+    }
 
-      if (!updatedMembership) {
-        updatedMembership = {
-          id: membership.$id,
-          userId: membership.userId,
-          roles: membership.roles,
-        }
+    if (!updatedMembership) {
+      updatedMembership = {
+        id: membership.$id,
+        userId: membership.userId,
+        roles: membership.roles,
       }
     }
 
