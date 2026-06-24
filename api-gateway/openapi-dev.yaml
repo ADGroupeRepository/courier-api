@@ -58,11 +58,12 @@ paths:
             properties:
               email:
                 type: string
-              redirectUrl:
-                type: string
+                format: email
       responses:
         '200':
           description: Success
+        '404':
+          description: No user account found for this email address
     patch:
       summary: Confirmer la réinitialisation du mot de passe (Confirm password reset)
       operationId: confirmPasswordReset
@@ -73,13 +74,14 @@ paths:
           schema:
             type: object
             required:
-              - userId
-              - secret
+              - email
+              - otp
               - password
             properties:
-              userId:
+              email:
                 type: string
-              secret:
+                format: email
+              otp:
                 type: string
               password:
                 type: string

@@ -184,12 +184,22 @@ export default class AuthService {
   /**
    * Build a public preview URL for any file stored in the public-media bucket.
    * @param fileId - The ID of the file.
-   * @param width - The desired width of the preview.
-   * @param height - The desired height of the preview.
+   * @param width - Optional desired width of the preview.
+   * @param height - Optional desired height of the preview.
    * @returns The public preview URL.
    */
-  static buildPreviewUrl(fileId: string, width = 200, height = 200): string {
-    return `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${fileId}/preview?width=${width}&height=${height}&project=${appwriteConfig.projectId}`
+  static buildPreviewUrl(fileId: string, width?: number, height?: number): string {
+    const params = new URLSearchParams({ project: appwriteConfig.projectId })
+
+    if (width !== undefined) {
+      params.set('width', width.toString())
+    }
+
+    if (height !== undefined) {
+      params.set('height', height.toString())
+    }
+
+    return `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${fileId}/preview?${params.toString()}`
   }
 
   /**
