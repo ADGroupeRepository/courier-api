@@ -210,9 +210,6 @@ export default class CourierController {
 
       return response.ok({
         data: uploads,
-        attachUsing: {
-          createCourierFields: ['fileIds'],
-        },
       })
     } catch (error: any) {
       return response.internalServerError({ message: error.message })

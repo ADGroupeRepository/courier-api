@@ -1856,7 +1856,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"nouveau.membre@example.com\",\n  \"roles\": [\"admin\", \"user\"]\n}"
+              "raw": "{\n  \"email\": \"nouveau.membre@example.com\",\n  \"role\": \"admin\",\n  \"name\": \"Nouveau membre\",\n  \"departments\": [\n    {\n      \"id\": \"{{deptId}}\",\n      \"role\": \"member\"\n    }\n  ],\n  \"jobTitle\": \"Support Agent\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/members",

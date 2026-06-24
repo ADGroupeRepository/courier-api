@@ -259,6 +259,37 @@ paths:
           in: path
           required: true
           type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - email
+            properties:
+              email:
+                type: string
+                format: email
+              role:
+                type: string
+                enum: [admin, user]
+              name:
+                type: string
+              departments:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                  properties:
+                    id:
+                      type: string
+                    role:
+                      type: string
+                      enum: [manager, member]
+              jobTitle:
+                type: string
+                maxLength: 128
       responses:
         '200':
           description: Success

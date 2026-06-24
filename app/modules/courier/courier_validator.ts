@@ -40,7 +40,7 @@ export const createCourierUploadUrlValidator = vine.create(
       .array(
         vine.object({
           fileName: vine.string().trim().minLength(1).maxLength(255),
-          contentType: vine.string().trim().maxLength(120).optional(),
+          fileExtension: vine.enum(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'png']),
           size: vine
             .number()
             .positive()
