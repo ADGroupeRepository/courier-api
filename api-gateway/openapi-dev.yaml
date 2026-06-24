@@ -220,27 +220,6 @@ paths:
         '204':
           description: No Content
 
-  /organisations/{orgId}/logo:
-    post:
-      summary: Uploader le Logo
-      operationId: uploadOrganisationLogo
-      consumes:
-        - multipart/form-data
-      parameters:
-        - name: orgId
-          in: path
-          required: true
-          type: string
-        - name: logo
-          in: formData
-          required: true
-          type: string
-          format: binary
-          description: Multipart file part named logo. Google API Gateway does not support Swagger type file.
-      responses:
-        '200':
-          description: Success
-
   /organisations/{orgId}/members:
     get:
       summary: Lister les membres

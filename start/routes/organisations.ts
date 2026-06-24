@@ -35,8 +35,7 @@ router
           'deactivate',
         ])
 
-        // Organisation logo, update, and deactivation
-        router.post('organisations/:id/logo', [OrganisationsController, 'uploadLogo'])
+        // Organisation update, and deactivation
         router
           .route('organisations/:id', ['PUT', 'PATCH'], [OrganisationsController, 'update'])
           .as('organisations.update')

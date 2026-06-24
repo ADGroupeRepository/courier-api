@@ -21,7 +21,6 @@ export type ScannedRoutes = {
     'org_licenses.revoke': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.index_active': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.deactivate': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'module': ParamValue} }
-    'organisations.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.index': { paramsTuple?: []; params?: {} }
@@ -80,7 +79,6 @@ export type ScannedRoutes = {
     'members.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.revoke': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisations.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'organisations.store': { paramsTuple?: []; params?: {} }
     'admin_marketplace.publish': { paramsTuple?: []; params?: {} }
     'admin_plans.store_plan': { paramsTuple?: []; params?: {} }

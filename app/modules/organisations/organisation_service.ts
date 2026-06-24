@@ -247,7 +247,11 @@ export default class OrganisationService {
    * @param payload - The update details (name, description, address).
    * @returns The updated organisation details.
    */
-  async update(teamId: string, payload: UpdateOrganisationPayload) {
+  async update(
+    teamId: string,
+    payload: UpdateOrganisationPayload,
+    logoFile?: { tmpPath: string; fileName: string }
+  ) {
     const updates: Promise<unknown>[] = []
 
     // Update team name if provided
@@ -276,6 +280,11 @@ export default class OrganisationService {
     }
 
     await Promise.all(updates)
+
+    if (logoFile) {
+      await this.uploadLogo(teamId, logoFile.tmpPath, logoFile.fileName)
+    }
+
     return this.get(teamId)
   }
 
