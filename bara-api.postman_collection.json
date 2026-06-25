@@ -2743,6 +2743,83 @@
           ]
         },
         {
+          "name": "Préparer une URL d'upload pour un courrier",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"files\": [\n    {\n      \"fileName\": \"invoice.pdf\",\n      \"fileExtension\": \"pdf\",\n      \"size\": 102400\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/upload-url",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "upload-url"]
+            },
+            "description": "Prépare un ou plusieurs targets d'upload direct pour déposer des documents associés à un courrier."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le statut doit être 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && jsonData.data[0]) {",
+                  "    pm.collectionVariables.set('uploadUrl', jsonData.data[0].uploadUrl);",
+                  "    pm.collectionVariables.set('uploadFileId', jsonData.data[0].fileId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Téléverser un fichier vers l'URL préparée",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fileId",
+                  "value": "{{uploadFileId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{uploadUrl}}"
+            },
+            "description": "Exemple de téléversement d'un fichier vers l'URL retournée par l'endpoint d'upload. Remplacez l'URL et l'ID de fichier par les valeurs de la réponse précédente."
+          },
+          "response": []
+        },
+        {
           "name": "Créer un courrier",
           "request": {
             "method": "POST",

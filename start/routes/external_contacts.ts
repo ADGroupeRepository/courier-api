@@ -6,13 +6,14 @@ const ExternalContactsController = () =>
 
 router
   .group(() => {
-    router.get('/', [ExternalContactsController, 'index'])
-    router.get('/:id', [ExternalContactsController, 'show'])
-    router.post('/', [ExternalContactsController, 'store'])
-    router.patch('/:id', [ExternalContactsController, 'update'])
-    router.delete('/:id', [ExternalContactsController, 'destroy'])
+    router.resource('/contacts', ExternalContactsController).apiOnly()
+    // router.get('/', [ExternalContactsController, 'index'])
+    // router.get('/:id', [ExternalContactsController, 'show'])
+    // router.post('/', [ExternalContactsController, 'store'])
+    // router.patch('/:id', [ExternalContactsController, 'update'])
+    // router.delete('/:id', [ExternalContactsController, 'destroy'])
   })
-  .prefix('/api/v1/organisations/:orgId/contacts')
+  .prefix('/api/v1/organisations/:orgId')
   .use(middleware.auth())
   .use(middleware.verified())
   .use(middleware.moduleGuard('courier'))

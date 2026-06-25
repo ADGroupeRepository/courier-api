@@ -1,6 +1,11 @@
 import appwriteConfig from '#config/appwrite'
 import { Collections } from '#modules/_registry/collection_ids'
-import { type CourierUrgency, CourierStatus, CourierType } from '#modules/courier/courier_enums'
+import {
+  type CourierUrgency,
+  CourierStatus,
+  CourierType,
+  type CourierStructureType,
+} from '#modules/courier/courier_enums'
 import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
 import appwrite from '#services/appwrite_service'
 import logger from '@adonisjs/core/services/logger'
@@ -25,6 +30,7 @@ export interface CreateCourierPayload {
   senderEmail?: string
   senderPhone?: string
   externalContactId?: string
+  externalContactType?: CourierStructureType
   targetType: 'user' | 'department'
   entityIds: string[]
   createdBy: string
@@ -103,7 +109,7 @@ export default class CourierService {
     for (const entityId of entityIds) {
       const entityName = await this.resolveEntityName(entityId, entityType)
 
-      const assignmentDoc = await appwrite.databases.createDocument({
+      await appwrite.databases.createDocument({
         databaseId: this.databaseId,
         collectionId: this.assignmentsCollectionId,
         documentId: ID.unique(),
@@ -112,14 +118,13 @@ export default class CourierService {
           entityId,
           entityType,
           assignedBy,
-          entityName: entityName ?? null,
         },
       })
 
       assignments.push({
         entityId,
         entityType,
-        entityName: assignmentDoc.entityName ?? entityName ?? null,
+        entityName: entityName ?? null,
       })
     }
 
@@ -328,6 +333,7 @@ export default class CourierService {
           senderEmail: payload.senderEmail,
           senderPhone: payload.senderPhone,
           externalContactId: payload.externalContactId,
+          externalContactType: payload.externalContactType,
           createdBy: payload.createdBy,
           targetType: payload.targetType,
           fileIds: fileIds.length > 0 ? fileIds : undefined,

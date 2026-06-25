@@ -163,6 +163,7 @@ export default class CourierController {
         senderEmail: payload.senderEmail,
         senderPhone: payload.senderPhone,
         externalContactId: payload.externalContactId,
+        externalContactType: payload.externalContactType,
         entityIds: payload.entityIds,
         targetType: payload.targetType,
         createdBy: user?.$id || '',

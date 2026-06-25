@@ -36,7 +36,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
           // 1. Ensure externalContactId and externalContactType exist on couriers
           try {
             await this.createOptionalStringAttributeIfMissing(prefs.databaseId, 'externalContactId')
-          } catch (e) {
+          } catch (e: any) {
             this.logger.error(`Failed to create externalContactId: ${e.message}`)
             throw e
           }
@@ -46,7 +46,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
               'externalContactType',
               ['personne', 'entreprise_privee', 'organisation_publique', 'ONG', 'autre']
             )
-          } catch (e) {
+          } catch (e: any) {
             this.logger.error(`Failed to create externalContactType: ${e.message}`)
             throw e
           }
@@ -54,7 +54,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
           // 2. Provision courier_assignments collection
           try {
             await this.ensureAssignmentsCollection(prefs.databaseId, team.$id)
-          } catch (e) {
+          } catch (e: any) {
             this.logger.error(`Failed to create assignments collection: ${e.message}`)
             throw e
           }
@@ -313,8 +313,16 @@ export default class ProvisionCourierInterface extends BaseCommand {
       databaseId,
       collectionId: Collections.COURIER_ASSIGNMENTS,
       key: 'entityType',
-      elements: ['user', 'department'],
+      elements: ['user', 'department', 'external_contact'],
       required: true,
+    })
+
+    await appwrite.databases.createStringAttribute({
+      databaseId,
+      collectionId: Collections.COURIER_ASSIGNMENTS,
+      key: 'entityName',
+      size: 255,
+      required: false,
     })
 
     await appwrite.databases.createStringAttribute({
