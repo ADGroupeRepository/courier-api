@@ -1,5 +1,6 @@
 import {
   CourierStatus,
+  CourierStructureType,
   CourierType,
   CourierUrgency,
   DocumentStatus,
@@ -23,6 +24,7 @@ export const createCourierValidator = vine.create(
     senderEmail: vine.string().email().optional(),
     senderPhone: vine.string().maxLength(255).trim().optional(),
     externalContactId: vine.string().maxLength(36).trim().optional(),
+    externalContactType: vine.enum(Object.values(CourierStructureType)).optional(),
     targetType: vine.enum(['user', 'department']),
     entityIds: vine.array(vine.string().maxLength(36).trim()).minLength(1).maxLength(50),
     fileIds: vine.array(vine.string().maxLength(36).trim()).maxLength(20).optional(),

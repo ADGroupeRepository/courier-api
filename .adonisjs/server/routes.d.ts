@@ -62,11 +62,11 @@ export type ScannedRoutes = {
     'courier_replies.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.update': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue,'replyId': ParamValue} }
-    'external_contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'external_contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'external_contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'external_contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'external_contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'plans.index': { paramsTuple?: []; params?: {} }
     'plans.show': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'plans.org_subscription': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -90,7 +90,7 @@ export type ScannedRoutes = {
     'courier.restore': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'external_contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'plans.subscribe': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
   }
   PATCH: {
@@ -106,7 +106,7 @@ export type ScannedRoutes = {
     'notifications.mark_as_read': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.update': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue,'replyId': ParamValue} }
-    'external_contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   GET: {
     'auth.profile': { paramsTuple?: []; params?: {} }
@@ -127,8 +127,8 @@ export type ScannedRoutes = {
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'external_contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'external_contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'plans.index': { paramsTuple?: []; params?: {} }
     'plans.show': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'plans.org_subscription': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -152,8 +152,8 @@ export type ScannedRoutes = {
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'external_contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'external_contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'plans.index': { paramsTuple?: []; params?: {} }
     'plans.show': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'plans.org_subscription': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -162,6 +162,7 @@ export type ScannedRoutes = {
     'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
     'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'departments.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   DELETE: {
     'organisations.members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
@@ -175,7 +176,7 @@ export type ScannedRoutes = {
     'notifications.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.force_destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'external_contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'contacts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {
