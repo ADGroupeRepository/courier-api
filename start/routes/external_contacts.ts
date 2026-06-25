@@ -6,6 +6,7 @@ const ExternalContactsController = () =>
 
 router
   .group(() => {
+    router.get('/contacts/:contactId/couriers', [ExternalContactsController, 'listCouriers'])
     router.resource('/contacts', ExternalContactsController).apiOnly()
     // router.get('/', [ExternalContactsController, 'index'])
     // router.get('/:id', [ExternalContactsController, 'show'])

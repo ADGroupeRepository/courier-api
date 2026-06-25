@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import CourierService from '#modules/courier/courier_service'
 import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
 import {
   createExternalContactValidator,
@@ -79,6 +80,42 @@ export default class ExternalContactsController {
       const service = await ExternalContactService.forOrg(params.orgId)
       const contact = await service.get(params.id)
       return response.ok({ data: contact })
+    } catch (error: any) {
+      if (this.isMissingExternalContactsCollection(error)) {
+        return this.missingCollectionResponse(response)
+      }
+      if (error.code === 404) {
+        return response.notFound({ message: 'Contact not found' })
+      }
+      return response.internalServerError({ message: error.message })
+    }
+  }
+
+  /**
+   * GET /api/v1/organisations/:orgId/contacts/:contactId/couriers
+   */
+  async listCouriers({ params, request, response }: HttpContext) {
+    const limit = request.input('limit') ? Number.parseInt(request.input('limit'), 10) : 25
+    const page = request.input('page') ? Number.parseInt(request.input('page'), 10) : 1
+    const status = request.input('status')
+    const type = request.input('type')
+
+    try {
+      const service = await CourierService.forOrg(params.orgId)
+      const { documents, total } = await service.listByCorrespondent(params.contactId, {
+        limit,
+        page,
+        status,
+        type,
+      })
+
+      return response.ok({
+        total,
+        limit,
+        page,
+        lastPage: Math.ceil(total / limit),
+        data: documents,
+      })
     } catch (error: any) {
       if (this.isMissingExternalContactsCollection(error)) {
         return this.missingCollectionResponse(response)

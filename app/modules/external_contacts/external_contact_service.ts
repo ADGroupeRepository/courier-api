@@ -75,7 +75,7 @@ export class ExternalContactService {
         collectionId: Collections.COURIERS,
         queries: [
           Query.equal('isDeleted', false),
-          Query.select(['externalContactId']),
+          Query.select(['correspondentId']),
           Query.limit(5000),
         ],
       }),
@@ -83,7 +83,7 @@ export class ExternalContactService {
 
     const courierCountByContactId = new Map<string, number>()
     for (const courier of couriersResult.documents) {
-      const contactId = courier.externalContactId as string | undefined
+      const contactId = courier.correspondentId as string | undefined
       if (contactId) {
         courierCountByContactId.set(contactId, (courierCountByContactId.get(contactId) ?? 0) + 1)
       }
@@ -113,7 +113,7 @@ export class ExternalContactService {
         databaseId: this.orgId,
         collectionId: Collections.COURIERS,
         queries: [
-          Query.equal('externalContactId', id),
+          Query.equal('correspondentId', id),
           Query.equal('isDeleted', false),
           Query.select(['$id']),
           Query.limit(5000),

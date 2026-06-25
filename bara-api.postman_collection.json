@@ -339,6 +339,98 @@
           }
         },
         {
+          "name": "8.6. Obtenir URL d'Upload Courier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Retourne les cibles d\\'upload', function () {",
+                  "    pm.expect(jsonData.data).to.be.an('array').that.is.not.empty;",
+                  "    var uploadTarget = jsonData.data[0];",
+                  "    pm.collectionVariables.set('scenarioCourierFileId', uploadTarget.fileId);",
+                  "    pm.collectionVariables.set('scenarioCourierUploadUrl', uploadTarget.uploadUrl);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"files\": [\n    {\n      \"fileName\": \"document_test.pdf\",\n      \"fileExtension\": \"pdf\",\n      \"size\": 12345\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/upload-url",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "upload-url"]
+            }
+          }
+        },
+        {
+          "name": "8.7. Simuler Upload Fichier sur Appwrite",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created or 200 OK', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              },
+              {
+                "key": "X-Appwrite-JWT",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fileId",
+                  "value": "{{scenarioCourierFileId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "value": "",
+                  "type": "file",
+                  "description": "Sélectionner un fichier PDF factice pour exécuter la requête dans l'interface Postman"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{scenarioCourierUploadUrl}}",
+              "host": ["{{scenarioCourierUploadUrl}}"]
+            }
+          }
+        },
+        {
           "name": "9. Créer Courrier (Assigné au Membre)",
           "event": [
             {
@@ -382,18 +474,13 @@
                   "type": "text"
                 },
                 {
-                  "key": "senderName",
+                  "key": "delivererName",
                   "value": "External {{$randomCompanyName}}",
                   "type": "text"
                 },
                 {
-                  "key": "externalContactId",
+                  "key": "correspondentId",
                   "value": "{{scenarioContactId}}",
-                  "type": "text"
-                },
-                {
-                  "key": "externalContactType",
-                  "value": "personne",
                   "type": "text"
                 },
                 {
@@ -409,6 +496,11 @@
                 {
                   "key": "emittedAt",
                   "value": "2026-06-22T18:25:39Z",
+                  "type": "text"
+                },
+                {
+                  "key": "fileIds[]",
+                  "value": "{{scenarioCourierFileId}}",
                   "type": "text"
                 }
               ]
@@ -464,7 +556,7 @@
                   "type": "text"
                 },
                 {
-                  "key": "senderName",
+                  "key": "delivererName",
                   "value": "External {{$randomCompanyName}}",
                   "type": "text"
                 },
@@ -484,91 +576,8 @@
                   "type": "text"
                 },
                 {
-                  "key": "externalContactId",
+                  "key": "correspondentId",
                   "value": "{{scenarioContactId}}",
-                  "type": "text"
-                },
-                {
-                  "key": "externalContactType",
-                  "value": "personne",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
-            }
-          }
-        },
-        {
-          "name": "11. Créer Courrier Sortant (Assigné au Membre)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 201 Created', function () { pm.response.to.have.status(201); });"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "type",
-                  "value": "outgoing",
-                  "type": "text"
-                },
-                {
-                  "key": "urgency",
-                  "value": "normal",
-                  "type": "text"
-                },
-                {
-                  "key": "subject",
-                  "value": "Outgoing - {{$randomCatchPhrase}}",
-                  "type": "text"
-                },
-                {
-                  "key": "senderName",
-                  "value": "Bara Corp {{$randomCompanyName}}",
-                  "type": "text"
-                },
-                {
-                  "key": "entityIds[]",
-                  "value": "{{memberUserId}}",
-                  "type": "text"
-                },
-                {
-                  "key": "targetType",
-                  "value": "user",
-                  "type": "text"
-                },
-                {
-                  "key": "emittedAt",
-                  "value": "2026-06-22T18:25:39Z",
-                  "type": "text"
-                },
-                {
-                  "key": "externalContactId",
-                  "value": "{{scenarioContactId}}",
-                  "type": "text"
-                },
-                {
-                  "key": "externalContactType",
-                  "value": "personne",
                   "type": "text"
                 }
               ]
@@ -2793,8 +2802,12 @@
             "method": "POST",
             "header": [
               {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "key": "X-Appwrite-Project",
+                "value": "{{appwrite_project_id}}"
+              },
+              {
+                "key": "X-Appwrite-JWT",
+                "value": "{{token}}"
               }
             ],
             "body": {
@@ -2815,7 +2828,7 @@
             "url": {
               "raw": "{{uploadUrl}}"
             },
-            "description": "Exemple de téléversement d'un fichier vers l'URL retournée par l'endpoint d'upload. Remplacez l'URL et l'ID de fichier par les valeurs de la réponse précédente."
+            "description": "Téléverser directement le fichier vers Appwrite en utilisant le token JWT dans le header X-Appwrite-JWT."
           },
           "response": []
         },
@@ -2848,7 +2861,7 @@
                   "type": "text"
                 },
                 {
-                  "key": "senderName",
+                  "key": "delivererName",
                   "value": "EDF {{$randomCompanyName}}",
                   "type": "text"
                 },
@@ -2863,9 +2876,14 @@
                   "type": "text"
                 },
                 {
-                  "key": "file",
-                  "type": "file",
-                  "src": []
+                  "key": "fileIds[]",
+                  "value": "{{uploadFileId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "correspondentId",
+                  "value": "{{contactId}}",
+                  "type": "text"
                 },
                 {
                   "key": "emittedAt",
@@ -2879,7 +2897,7 @@
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers"]
             },
-            "description": "Enregistre un nouveau courrier dans le système."
+            "description": "Enregistre un nouveau courrier dans le système avec le fichier téléversé lié."
           },
           "response": [],
           "event": [
@@ -2933,7 +2951,7 @@
                   "type": "text"
                 },
                 {
-                  "key": "senderName",
+                  "key": "delivererName",
                   "value": "EDF Service Client",
                   "type": "text"
                 },
@@ -2948,7 +2966,7 @@
                   "type": "text"
                 },
                 {
-                  "key": "externalContactId",
+                  "key": "correspondentId",
                   "value": "{{contactId}}",
                   "type": "text"
                 },
