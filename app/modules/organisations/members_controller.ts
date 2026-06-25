@@ -1,13 +1,13 @@
-import type { HttpContext } from '@adonisjs/core/http'
+import DepartmentsService from '#modules/directory/departments_service'
+import MembersService from '#modules/directory/members_service'
 import OrganisationService from '#modules/organisations/organisation_service'
 import {
   addMemberValidator,
   updateMemberValidator,
 } from '#modules/organisations/organisation_validator'
 import PlanService from '#modules/plans/plan_service'
-import DepartmentsService from '#modules/directory/departments_service'
-import MembersService from '#modules/directory/members_service'
 import appwrite from '#services/appwrite_service'
+import type { HttpContext } from '@adonisjs/core/http'
 import { Query } from 'node-appwrite'
 
 export default class MembersController {
@@ -46,22 +46,30 @@ export default class MembersController {
   }
 
   /**
-   * Helper to verify if the requesting user is an owner or admin of the organisation.
+   * Helper to retrieve the requesting user's membership in the organisation.
+   * Returns the membership object if found, or null otherwise.
    */
-  private async checkAdminAccess(user: any, orgId: string): Promise<boolean> {
+  private async getUserMembership(user: any, orgId: string) {
     try {
       const memberships = await appwrite.teams.listMemberships({
         teamId: orgId,
         queries: [Query.equal('userId', user?.$id || '')],
       })
 
-      if (memberships.total === 0) return false
-
-      const membership = memberships.memberships[0]
-      return membership?.roles?.some((r: string) => ['owner', 'admin'].includes(r)) ?? false
+      if (memberships.total === 0) return null
+      return memberships.memberships[0] ?? null
     } catch {
-      return false
+      return null
     }
+  }
+
+  /**
+   * Helper to verify if the requesting user is an owner or admin of the organisation.
+   */
+  private async checkAdminAccess(user: any, orgId: string): Promise<boolean> {
+    const membership = await this.getUserMembership(user, orgId)
+    if (!membership) return false
+    return membership.roles?.some((r: string) => ['owner', 'admin'].includes(r)) ?? false
   }
 
   /**
@@ -174,8 +182,12 @@ export default class MembersController {
     const orgId = request.param('orgId')
     const membershipId = request.param('memberId')
 
-    const isAdmin = await this.checkAdminAccess(user, orgId)
-    if (!isAdmin) {
+    // Fetch the requester's membership to determine their privileges
+    const requesterMembership = await this.getUserMembership(user, orgId)
+    const requesterRoles: string[] = requesterMembership?.roles ?? []
+    const requesterIsAdmin = requesterRoles.some((r) => ['owner', 'admin'].includes(r))
+
+    if (!requesterIsAdmin) {
       return response.forbidden({
         message: 'Only organisation owners or admins can update members.',
       })
@@ -186,14 +198,29 @@ export default class MembersController {
     const service = new OrganisationService()
     let updatedMembership: any = null
 
+    // Fetch the target member's current membership
     const membership = await appwrite.teams.getMembership({
       teamId: orgId,
       membershipId,
     })
 
+    const targetIsOwner = membership.roles?.includes('owner') ?? false
+    const requesterIsOwner = requesterRoles.includes('owner')
+
+    // Block non-owners from modifying an owner's membership
+    if (targetIsOwner && !requesterIsOwner) {
+      return response.forbidden({
+        message: "Only organisation owners can modify another owner's membership.",
+      })
+    }
+
     // 1. If role is provided, update organisation-level role
     if (role) {
-      updatedMembership = await service.updateMember(orgId, membershipId, [role])
+      // Preserve the 'owner' role if the target already has it
+      const newRoles = targetIsOwner ? ['owner', role] : [role]
+      // Deduplicate in case role === 'owner'
+      const uniqueRoles = [...new Set(newRoles)]
+      updatedMembership = await service.updateMember(orgId, membershipId, uniqueRoles)
     }
 
     // 2. If name is provided, update the Appwrite user display name
@@ -235,6 +262,18 @@ export default class MembersController {
     if (!isAdmin) {
       return response.forbidden({
         message: 'Only organisation owners or admins can remove members.',
+      })
+    }
+
+    // Fetch the target member and block removal of owners
+    const targetMembership = await appwrite.teams.getMembership({
+      teamId: orgId,
+      membershipId,
+    })
+
+    if (targetMembership.roles?.includes('owner')) {
+      return response.forbidden({
+        message: 'Organisation owners cannot be removed. Transfer ownership first.',
       })
     }
 

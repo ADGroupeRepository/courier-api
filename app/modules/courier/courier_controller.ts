@@ -32,7 +32,7 @@ export default class CourierController {
     const roles = membership?.roles || []
 
     // 2. Determine if user can manage
-    const canManage = roles.some((r) => ['owner', 'admin', 'courier_manager'].includes(r))
+    const canManage = roles.some((r) => ['owner', 'admin'].includes(r))
 
     // 3. Get user's department assignment
     const memberService = await MembersService.forOrg(orgId)
@@ -131,18 +131,13 @@ export default class CourierController {
     const payload = await request.validateUsing(createCourierValidator)
 
     if (payload.type === 'incoming' || payload.type === 'outgoing') {
-      const hasExternalContact = Boolean(payload.externalContactId)
-      const hasManualSender = Boolean(
-        payload.senderName || payload.senderEmail || payload.senderPhone
-      )
-
-      if (!hasExternalContact && !hasManualSender) {
+      if (!payload.correspondentId) {
         return response.badRequest({
           errors: [
             {
               message:
-                'Provide either an external contact or sender details (name, email, or phone) for incoming and outgoing couriers',
-              field: 'senderName',
+                'Provide a correspondent (registered contact) for incoming and outgoing couriers',
+              field: 'correspondentId',
               rule: 'required',
             },
           ],
@@ -151,6 +146,17 @@ export default class CourierController {
     }
 
     try {
+      const { roles } = await this.getUserContext(user, params.orgId)
+
+      if (payload.type === 'incoming') {
+        const isAuthorized = roles.some((r) => ['owner', 'admin', 'secretariat'].includes(r))
+        if (!isAuthorized) {
+          return response.forbidden({
+            message: 'Only secretariat or administrators can register incoming couriers',
+          })
+        }
+      }
+
       const service = await CourierService.forOrg(params.orgId)
 
       const courier = await service.create({
@@ -159,11 +165,10 @@ export default class CourierController {
         subject: payload.subject,
         receivedAt: payload.receivedAt,
         emittedAt: payload.emittedAt,
-        senderName: payload.senderName,
-        senderEmail: payload.senderEmail,
-        senderPhone: payload.senderPhone,
-        externalContactId: payload.externalContactId,
-        externalContactType: payload.externalContactType,
+        delivererName: payload.delivererName,
+        delivererEmail: payload.delivererEmail,
+        delivererPhone: payload.delivererPhone,
+        correspondentId: payload.correspondentId,
         entityIds: payload.entityIds,
         targetType: payload.targetType,
         createdBy: user?.$id || '',

@@ -672,16 +672,12 @@ paths:
                 items: { type: string }
               receivedAt: { type: string }
               emittedAt: { type: string }
-              senderName: { type: string }
-              senderEmail: { type: string }
-              senderPhone: { type: string }
-              externalContactId:
+              delivererName: { type: string }
+              delivererEmail: { type: string }
+              delivererPhone: { type: string }
+              correspondentId:
                 type: string
-                description: Required for incoming/outgoing couriers
-              externalContactType:
-                type: string
-                enum: [personne, entreprise_privee, organisation_publique, ONG, autre]
-                description: Required for incoming/outgoing couriers
+                description: Required for incoming/outgoing couriers. Must reference a pre-registered contact ID.
               fileIds:
                 type: array
                 items: { type: string }
@@ -1399,12 +1395,20 @@ definitions:
       subject: { type: string }
       receivedAt: { type: string }
       emittedAt: { type: string }
-      senderName: { type: string }
-      senderEmail: { type: string }
-      senderPhone: { type: string }
-      externalContactId: { type: string }
-      externalContactType:
-        { type: string, enum: [personne, entreprise_privee, organisation_publique, ONG, autre] }
+      correspondent:
+        type: object
+        properties:
+          id: { type: string }
+          type: { type: string }
+          name: { type: string }
+          email: { type: string }
+          phone: { type: string }
+      deliverer:
+        type: object
+        properties:
+          name: { type: string }
+          email: { type: string }
+          phone: { type: string }
       targetType: { type: string, enum: [user, department] }
       entityIds:
         type: array

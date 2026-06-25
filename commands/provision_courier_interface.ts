@@ -33,21 +33,16 @@ export default class ProvisionCourierInterface extends BaseCommand {
             continue
           }
 
-          // 1. Ensure externalContactId and externalContactType exist on couriers
+          // 1. Ensure correspondentId exists on couriers
           try {
-            await this.createOptionalStringAttributeIfMissing(prefs.databaseId, 'externalContactId')
-          } catch (e: any) {
-            this.logger.error(`Failed to create externalContactId: ${e.message}`)
-            throw e
-          }
-          try {
-            await this.createOptionalEnumAttributeIfMissing(
+            await this.renameOrCreateOptionalStringAttribute(
               prefs.databaseId,
-              'externalContactType',
-              ['personne', 'entreprise_privee', 'organisation_publique', 'ONG', 'autre']
+              'externalContactId',
+              'correspondentId',
+              36
             )
           } catch (e: any) {
-            this.logger.error(`Failed to create externalContactType: ${e.message}`)
+            this.logger.error(`Failed to create correspondentId: ${e.message}`)
             throw e
           }
 
@@ -60,25 +55,71 @@ export default class ProvisionCourierInterface extends BaseCommand {
           }
 
           // 3. Clean up/rename old attributes if necessary
-          await this.renameOrCreateOptionalStringAttribute(
-            prefs.databaseId,
-            'contactName',
-            'senderName'
-          )
-          await this.renameOrCreateOptionalStringAttribute(
-            prefs.databaseId,
-            'contactEmail',
-            'senderEmail'
-          )
-          await this.renameOrCreateOptionalStringAttribute(
-            prefs.databaseId,
-            'contactPhone',
-            'senderPhone'
-          )
+          // Rename senderName to delivererName (or contactName if very old)
+          try {
+            await this.renameOrCreateOptionalStringAttribute(
+              prefs.databaseId,
+              'senderName',
+              'delivererName'
+            )
+          } catch {
+            await this.renameOrCreateOptionalStringAttribute(
+              prefs.databaseId,
+              'contactName',
+              'delivererName'
+            )
+          }
+
+          // Rename senderEmail to delivererEmail (or contactEmail if very old)
+          try {
+            await this.renameOrCreateOptionalStringAttribute(
+              prefs.databaseId,
+              'senderEmail',
+              'delivererEmail'
+            )
+          } catch {
+            await this.renameOrCreateOptionalStringAttribute(
+              prefs.databaseId,
+              'contactEmail',
+              'delivererEmail'
+            )
+          }
+
+          // Rename senderPhone to delivererPhone (or contactPhone if very old)
+          try {
+            await this.renameOrCreateOptionalStringAttribute(
+              prefs.databaseId,
+              'senderPhone',
+              'delivererPhone'
+            )
+          } catch {
+            await this.renameOrCreateOptionalStringAttribute(
+              prefs.databaseId,
+              'contactPhone',
+              'delivererPhone'
+            )
+          }
+
           await this.createOptionalDatetimeAttributeIfMissing(prefs.databaseId, 'receivedAt')
           await this.createOptionalDatetimeAttributeIfMissing(prefs.databaseId, 'emittedAt')
           await this.createOptionalStringArrayAttributeIfMissing(prefs.databaseId, 'fileIds')
 
+          // 4. Update Courier Indexes
+          await this.deleteIndexIfExists(
+            prefs.databaseId,
+            Collections.COURIERS,
+            'external_contact_idx'
+          )
+          await this.ensureIndex(
+            prefs.databaseId,
+            Collections.COURIERS,
+            'correspondent_idx',
+            'key',
+            ['correspondentId']
+          )
+
+          // 5. Delete unused legacy attributes
+          await this.deleteAttributeIfExists(prefs.databaseId, 'externalContactType')
           await this.deleteAttributeIfExists(prefs.databaseId, 'createdAt')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactNumber')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactStructureType')
@@ -115,7 +156,8 @@ export default class ProvisionCourierInterface extends BaseCommand {
   private async renameOrCreateOptionalStringAttribute(
     databaseId: string,
     oldKey: string,
-    newKey: string
+    newKey: string,
+    size: number = 255
   ) {
     try {
       await appwrite.databases.getAttribute({
@@ -136,7 +178,7 @@ export default class ProvisionCourierInterface extends BaseCommand {
         collectionId: Collections.COURIERS,
         key: oldKey,
         required: false,
-        size: 255,
+        size,
         newKey,
         xdefault: '',
       })
@@ -149,10 +191,57 @@ export default class ProvisionCourierInterface extends BaseCommand {
         databaseId,
         collectionId: Collections.COURIERS,
         key: newKey,
-        size: 255,
+        size,
         required: false,
         xdefault: '',
       })
+    }
+  }
+
+  private async ensureIndex(
+    databaseId: string,
+    collectionId: string,
+    key: string,
+    type: string,
+    attributes: string[]
+  ) {
+    try {
+      await appwrite.databases.getIndex({
+        databaseId,
+        collectionId,
+        key,
+      })
+      return
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
+    }
+
+    try {
+      await appwrite.databases.createIndex({
+        databaseId,
+        collectionId,
+        key,
+        type: type as any,
+        attributes,
+      })
+    } catch (error: any) {
+      this.logger.error(`Failed to create index ${key}: ${error.message}`)
+    }
+  }
+
+  private async deleteIndexIfExists(databaseId: string, collectionId: string, key: string) {
+    try {
+      await appwrite.databases.deleteIndex({
+        databaseId,
+        collectionId,
+        key,
+      })
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
     }
   }
 
@@ -191,29 +280,6 @@ export default class ProvisionCourierInterface extends BaseCommand {
     }
   }
 
-  private async createOptionalStringAttributeIfMissing(databaseId: string, key: string) {
-    try {
-      await appwrite.databases.getAttribute({
-        databaseId,
-        collectionId: Collections.COURIERS,
-        key,
-      })
-    } catch (error: any) {
-      if (error.code !== 404) {
-        throw error
-      }
-
-      await appwrite.databases.createStringAttribute({
-        databaseId,
-        collectionId: Collections.COURIERS,
-        key,
-        size: 36,
-        required: false,
-        xdefault: '',
-      })
-    }
-  }
-
   private async createOptionalStringArrayAttributeIfMissing(databaseId: string, key: string) {
     try {
       await appwrite.databases.getAttribute({
@@ -233,33 +299,6 @@ export default class ProvisionCourierInterface extends BaseCommand {
         size: 36,
         required: false,
         array: true,
-      })
-    }
-  }
-
-  private async createOptionalEnumAttributeIfMissing(
-    databaseId: string,
-    key: string,
-    elements: string[]
-  ) {
-    try {
-      await appwrite.databases.getAttribute({
-        databaseId,
-        collectionId: Collections.COURIERS,
-        key,
-      })
-    } catch (error: any) {
-      if (error.code !== 404) {
-        throw error
-      }
-
-      await appwrite.databases.createEnumAttribute({
-        databaseId,
-        collectionId: Collections.COURIERS,
-        key,
-        elements,
-        required: false,
-        xdefault: elements[0],
       })
     }
   }

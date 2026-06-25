@@ -1,11 +1,6 @@
 import appwriteConfig from '#config/appwrite'
 import { Collections } from '#modules/_registry/collection_ids'
-import {
-  type CourierUrgency,
-  CourierStatus,
-  CourierType,
-  type CourierStructureType,
-} from '#modules/courier/courier_enums'
+import { type CourierUrgency, CourierStatus, CourierType } from '#modules/courier/courier_enums'
 import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
 import appwrite from '#services/appwrite_service'
 import logger from '@adonisjs/core/services/logger'
@@ -26,11 +21,10 @@ export interface CreateCourierPayload {
   subject: string
   receivedAt?: string
   emittedAt?: string
-  senderName?: string
-  senderEmail?: string
-  senderPhone?: string
-  externalContactId?: string
-  externalContactType?: CourierStructureType
+  delivererName?: string
+  delivererEmail?: string
+  delivererPhone?: string
+  correspondentId?: string
   targetType: 'user' | 'department'
   entityIds: string[]
   createdBy: string
@@ -42,10 +36,10 @@ export interface UpdateCourierPayload {
   subject?: string
   receivedAt?: string
   emittedAt?: string
-  senderName?: string
-  senderEmail?: string
-  senderPhone?: string
-  externalContactId?: string
+  delivererName?: string
+  delivererEmail?: string
+  delivererPhone?: string
+  correspondentId?: string
   status?: CourierStatus
   isFavorite?: boolean
   isArchived?: boolean
@@ -313,6 +307,50 @@ export default class CourierService {
   }
 
   /**
+   * List couriers linked to a specific external contact.
+   * Returns a lightweight summary suitable for contact detail views.
+   */
+  /**
+   * List couriers linked to a specific correspondent.
+   * Returns a lightweight summary suitable for correspondent detail views.
+   */
+  async listByCorrespondent(
+    contactId: string,
+    options: {
+      limit?: number
+      page?: number
+      deleted?: boolean
+      status?: string
+      type?: string
+    } = {}
+  ) {
+    const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
+    const page = Math.max(options.page ?? 1, 1)
+    const offset = (page - 1) * limit
+
+    const queries = [
+      Query.equal('correspondentId', contactId),
+      Query.equal('isDeleted', options.deleted ?? false),
+      ...(options.status ? [Query.equal('status', options.status)] : []),
+      ...(options.type ? [Query.equal('type', options.type)] : []),
+      Query.orderDesc('$createdAt'),
+      Query.limit(limit),
+      Query.offset(offset),
+    ]
+
+    const result = await appwrite.databases.listDocuments({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      queries,
+    })
+
+    return {
+      total: result.total,
+      documents: await Promise.all(result.documents.map((doc: any) => this.mapContactCourier(doc))),
+    }
+  }
+
+  /**
    * Create a new courier record, then create assignment documents for each entity ID.
    */
   async create(payload: CreateCourierPayload) {
@@ -329,11 +367,10 @@ export default class CourierService {
           subject: payload.subject,
           receivedAt: payload.receivedAt,
           emittedAt: payload.emittedAt,
-          senderName: payload.senderName,
-          senderEmail: payload.senderEmail,
-          senderPhone: payload.senderPhone,
-          externalContactId: payload.externalContactId,
-          externalContactType: payload.externalContactType,
+          delivererName: payload.delivererName,
+          delivererEmail: payload.delivererEmail,
+          delivererPhone: payload.delivererPhone,
+          correspondentId: payload.correspondentId,
           createdBy: payload.createdBy,
           targetType: payload.targetType,
           fileIds: fileIds.length > 0 ? fileIds : undefined,
@@ -480,31 +517,43 @@ export default class CourierService {
    * @param assignments - Pre-fetched assignment list.
    * @returns The formatted domain model object.
    */
-  private async resolveSenderDetails(doc: any) {
-    if (doc.externalContactId) {
+  private async resolveCorrespondentDetails(doc: any) {
+    if (doc.correspondentId) {
       try {
         const contactService = new ExternalContactService(this.databaseId)
-        const contact = await contactService.get(doc.externalContactId)
+        const contact = await contactService.get(doc.correspondentId)
 
         return {
-          id: doc.externalContactId,
+          id: doc.correspondentId,
           type: contact.structureType ?? 'external_contact',
-          name: contact.name ?? doc.senderName ?? null,
-          email: contact.email ?? doc.senderEmail ?? null,
-          phone: contact.phone ?? doc.senderPhone ?? null,
+          name: contact.name ?? null,
+          email: contact.email ?? null,
+          phone: contact.phone ?? null,
         }
       } catch {
-        // Fall back to the manually provided sender details if the contact cannot be resolved.
+        return {
+          id: doc.correspondentId,
+          type: 'external_contact',
+          name: null,
+          email: null,
+          phone: null,
+        }
       }
     }
 
-    return {
-      id: doc.externalContactId || null,
-      type: doc.senderName || doc.senderEmail || doc.senderPhone ? 'manual' : null,
-      name: doc.senderName ?? null,
-      email: doc.senderEmail ?? null,
-      phone: doc.senderPhone ?? null,
+    return null
+  }
+
+  private resolveDelivererDetails(doc: any) {
+    if (doc.delivererName || doc.delivererEmail || doc.delivererPhone) {
+      return {
+        name: doc.delivererName ?? null,
+        email: doc.delivererEmail ?? null,
+        phone: doc.delivererPhone ?? null,
+      }
     }
+
+    return null
   }
 
   private async resolveEntityName(
@@ -594,7 +643,8 @@ export default class CourierService {
       (id: string) =>
         `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${id}/view?project=${appwriteConfig.projectId}`
     )
-    const sender = await this.resolveSenderDetails(doc)
+    const correspondent = await this.resolveCorrespondentDetails(doc)
+    const deliverer = this.resolveDelivererDetails(doc)
     const enrichedAssignments = await Promise.all(
       assignments.map((assignment) => this.enrichAssignment(assignment))
     )
@@ -606,7 +656,8 @@ export default class CourierService {
       subject: doc.subject,
       receivedAt: doc.receivedAt || null,
       emittedAt: doc.emittedAt || null,
-      sender,
+      correspondent,
+      deliverer,
       targetType: doc.targetType || null,
       assignments: enrichedAssignments,
       fileUrls,
@@ -618,6 +669,25 @@ export default class CourierService {
       replyCount: doc.replyCount ?? 0,
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
+    }
+  }
+
+  private async mapContactCourier(doc: any) {
+    const assignments = await this.getAssignments(doc.$id)
+    const enrichedAssignments = await Promise.all(
+      assignments.map((assignment) => this.enrichAssignment(assignment))
+    )
+
+    return {
+      id: doc.$id,
+      subject: doc.subject,
+      date: doc.emittedAt || doc.receivedAt || doc.$createdAt || null,
+      type: doc.type,
+      state: doc.status,
+      assignments: enrichedAssignments.map((assignment) => ({
+        entityType: assignment.entityType,
+        entityName: assignment.entityName,
+      })),
     }
   }
 

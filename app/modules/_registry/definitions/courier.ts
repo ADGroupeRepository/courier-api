@@ -44,16 +44,10 @@ export const courierModule: ModuleDefinition = {
         { key: 'subject', type: 'string', size: 255, required: true },
         { key: 'receivedAt', type: 'datetime', required: false },
         { key: 'emittedAt', type: 'datetime', required: false },
-        { key: 'senderName', type: 'string', size: 255, required: false },
-        { key: 'senderEmail', type: 'string', size: 255, required: false },
-        { key: 'senderPhone', type: 'string', size: 255, required: false },
-        { key: 'externalContactId', type: 'string', size: 36, required: false },
-        {
-          key: 'externalContactType',
-          type: 'enum',
-          elements: Object.values(CourierStructureType),
-          required: false,
-        },
+        { key: 'delivererName', type: 'string', size: 255, required: false },
+        { key: 'delivererEmail', type: 'string', size: 255, required: false },
+        { key: 'delivererPhone', type: 'string', size: 255, required: false },
+        { key: 'correspondentId', type: 'string', size: 36, required: false },
         { key: 'internalEntityId', type: 'string', size: 36, required: false }, // @deprecated — use courier_assignments collection
         {
           key: 'targetType',
@@ -80,7 +74,7 @@ export const courierModule: ModuleDefinition = {
       ],
       indexes: [
         { key: 'subject_idx', type: 'key', attributes: ['subject'] },
-        { key: 'external_contact_idx', type: 'key', attributes: ['externalContactId'] },
+        { key: 'correspondent_idx', type: 'key', attributes: ['correspondentId'] },
         { key: 'internal_entity_idx', type: 'key', attributes: ['internalEntityId'] },
         { key: 'creator_idx', type: 'key', attributes: ['createdBy'] },
         { key: 'status_idx', type: 'key', attributes: ['status'] },

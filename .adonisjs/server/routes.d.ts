@@ -62,6 +62,7 @@ export type ScannedRoutes = {
     'courier_replies.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.update': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue,'replyId': ParamValue} }
+    'external_contacts.list_couriers': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'contactId': ParamValue} }
     'contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
@@ -127,6 +128,7 @@ export type ScannedRoutes = {
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.list_couriers': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'contactId': ParamValue} }
     'contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'plans.index': { paramsTuple?: []; params?: {} }
@@ -152,6 +154,7 @@ export type ScannedRoutes = {
     'courier.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'external_contacts.list_couriers': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'contactId': ParamValue} }
     'contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'contacts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'plans.index': { paramsTuple?: []; params?: {} }
