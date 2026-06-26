@@ -97,11 +97,12 @@ export default class CourierController {
    */
   async show({ user, params, response }: HttpContext) {
     try {
-      const { canManage, departmentId } = await this.getUserContext(user, params.orgId)
+      const { roles, canManage, departmentId } = await this.getUserContext(user, params.orgId)
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id)
 
-      // Permission Check: Manager OR Assigned User OR Assigned Department OR Creator
+      // Permission Check: Manager OR Secretariat OR Assigned User OR Assigned Department OR Creator
+      const isSecretariat = roles.includes('secretariat')
       const isAssignedUser = courier.assignments.some(
         (a) => a.entityId === user?.$id && a.entityType === 'user'
       )
@@ -110,9 +111,9 @@ export default class CourierController {
             (a) => a.entityId === departmentId && a.entityType === 'department'
           )
         : false
-      const isCreator = courier.createdBy === user?.$id
+      const isCreator = courier.createdBy?.id === user?.$id
 
-      if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
+      if (!canManage && !isSecretariat && !isAssignedUser && !isAssignedDept && !isCreator) {
         return response.forbidden({ message: 'You do not have permission to view this courier' })
       }
 
@@ -223,11 +224,12 @@ export default class CourierController {
     const payload = await request.validateUsing(updateCourierValidator)
 
     try {
-      const { canManage, departmentId } = await this.getUserContext(user, params.orgId)
+      const { roles, canManage, departmentId } = await this.getUserContext(user, params.orgId)
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id)
 
-      // Permission Check: Manager OR Assigned User OR Assigned Department OR Creator
+      // Permission Check: Manager OR Secretariat OR Assigned User OR Assigned Department OR Creator
+      const isSecretariat = roles.includes('secretariat')
       const isAssignedUser = courier.assignments.some(
         (a) => a.entityId === user?.$id && a.entityType === 'user'
       )
@@ -236,9 +238,9 @@ export default class CourierController {
             (a) => a.entityId === departmentId && a.entityType === 'department'
           )
         : false
-      const isCreator = courier.createdBy === user?.$id
+      const isCreator = courier.createdBy?.id === user?.$id
 
-      if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
+      if (!canManage && !isSecretariat && !isAssignedUser && !isAssignedDept && !isCreator) {
         return response.forbidden({ message: 'You do not have permission to update this courier' })
       }
 
@@ -262,7 +264,7 @@ export default class CourierController {
       const courier = await service.get(params.id)
 
       // Permission Check: Manager OR Creator
-      const isCreator = courier.createdBy === user?.$id
+      const isCreator = courier.createdBy?.id === user?.$id
 
       if (!canManage && !isCreator) {
         return response.forbidden({
@@ -284,10 +286,11 @@ export default class CourierController {
    */
   async restore({ user, params, response }: HttpContext) {
     try {
-      const { canManage, departmentId } = await this.getUserContext(user, params.orgId)
+      const { roles, canManage, departmentId } = await this.getUserContext(user, params.orgId)
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id)
 
+      const isSecretariat = roles.includes('secretariat')
       const isAssignedUser = courier.assignments.some(
         (a) => a.entityId === user?.$id && a.entityType === 'user'
       )
@@ -296,9 +299,9 @@ export default class CourierController {
             (a) => a.entityId === departmentId && a.entityType === 'department'
           )
         : false
-      const isCreator = courier.createdBy === user?.$id
+      const isCreator = courier.createdBy?.id === user?.$id
 
-      if (!canManage && !isAssignedUser && !isAssignedDept && !isCreator) {
+      if (!canManage && !isSecretariat && !isAssignedUser && !isAssignedDept && !isCreator) {
         return response.forbidden({ message: 'You do not have permission to restore this courier' })
       }
 
@@ -321,7 +324,7 @@ export default class CourierController {
       const courier = await service.get(params.id)
 
       // Permission Check: Manager OR Creator
-      const isCreator = courier.createdBy === user?.$id
+      const isCreator = courier.createdBy?.id === user?.$id
 
       if (!canManage && !isCreator) {
         return response.forbidden({

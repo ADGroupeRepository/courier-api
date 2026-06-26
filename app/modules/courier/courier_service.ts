@@ -226,6 +226,8 @@ export default class CourierService {
       ...(options.favorite ? [Query.equal('isFavorite', true)] : []),
     ]
 
+    const userCache = new Map<string, any>()
+
     if (options.canManage) {
       const result = await appwrite.databases.listDocuments({
         databaseId: this.databaseId,
@@ -235,7 +237,7 @@ export default class CourierService {
       return {
         total: result.total,
         documents: await Promise.all(
-          result.documents.map((doc) => this.mapDocumentWithAssignments(doc))
+          result.documents.map((doc) => this.mapDocumentWithAssignments(doc, userCache))
         ),
       }
     }
@@ -286,7 +288,7 @@ export default class CourierService {
     return {
       total: result.total,
       documents: await Promise.all(
-        result.documents.map((doc) => this.mapDocumentWithAssignments(doc))
+        result.documents.map((doc) => this.mapDocumentWithAssignments(doc, userCache))
       ),
     }
   }
@@ -505,9 +507,43 @@ export default class CourierService {
   /**
    * Map document and fetch its assignments in one call.
    */
-  private async mapDocumentWithAssignments(doc: any) {
+  private async mapDocumentWithAssignments(doc: any, userCache?: Map<string, any>) {
     const assignments = await this.getAssignments(doc.$id)
-    return this.mapDocument(doc, assignments)
+    return this.mapDocument(doc, assignments, userCache)
+  }
+
+  /**
+   * Helper to resolve a user ID to their profile name and avatar URL.
+   */
+  private async resolveUserCreator(userId: string, userCache?: Map<string, any>) {
+    if (!userId) return null
+    if (userCache?.has(userId)) {
+      return userCache.get(userId)
+    }
+
+    try {
+      const user = await appwrite.users.get({ userId })
+      const avatarFileId = user.prefs?.avatarFileId
+      const avatarUrl = avatarFileId
+        ? `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${avatarFileId}/preview?project=${appwriteConfig.projectId}`
+        : null
+
+      const result = {
+        id: userId,
+        name: user.name || user.email || 'Unknown User',
+        avatarUrl,
+      }
+      userCache?.set(userId, result)
+      return result
+    } catch {
+      const result = {
+        id: userId,
+        name: 'Unknown User',
+        avatarUrl: null,
+      }
+      userCache?.set(userId, result)
+      return result
+    }
   }
 
   /**
@@ -637,7 +673,11 @@ export default class CourierService {
     }
   }
 
-  private async mapDocument(doc: any, assignments: CourierAssignment[]) {
+  private async mapDocument(
+    doc: any,
+    assignments: CourierAssignment[],
+    userCache?: Map<string, any>
+  ) {
     const fileIds = Array.isArray(doc.fileIds) ? doc.fileIds.filter(Boolean) : []
     const fileUrls = fileIds.map(
       (id: string) =>
@@ -648,6 +688,7 @@ export default class CourierService {
     const enrichedAssignments = await Promise.all(
       assignments.map((assignment) => this.enrichAssignment(assignment))
     )
+    const createdBy = await this.resolveUserCreator(doc.createdBy, userCache)
 
     return {
       id: doc.$id,
@@ -661,7 +702,7 @@ export default class CourierService {
       targetType: doc.targetType || null,
       assignments: enrichedAssignments,
       fileUrls,
-      createdBy: doc.createdBy,
+      createdBy,
       status: doc.status,
       isFavorite: doc.isFavorite ?? false,
       isArchived: doc.isArchived ?? false,

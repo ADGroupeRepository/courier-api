@@ -275,7 +275,7 @@ paths:
                 format: email
               role:
                 type: string
-                enum: [admin, user]
+                enum: [admin, user, secretariat]
               name:
                 type: string
               departments:
