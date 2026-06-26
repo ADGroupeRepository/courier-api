@@ -3,6 +3,7 @@ import { buildMemberAddedEmailHtml } from '#modules/auth/auth_service'
 import OrganisationCreated from '#events/organisation_created'
 import PlanService from '#modules/plans/plan_service'
 import MembersService from '#modules/directory/members_service'
+import { Collections } from '#modules/_registry/collection_ids'
 import appwrite from '#services/appwrite_service'
 import EmailService from '#services/email_service'
 import emitter from '@adonisjs/core/services/emitter'
@@ -449,6 +450,22 @@ export default class OrganisationService {
       queries: [Query.limit(limit), Query.offset(offset)],
     })
 
+    // Fetch active licenses in the organisation
+    let activeLicenseUserIds: string[] = []
+    try {
+      const licensesResult = await appwrite.databases.listDocuments({
+        databaseId: 'bara-platform',
+        collectionId: Collections.LICENSES,
+        queries: [Query.equal('orgId', teamId), Query.equal('isActive', true), Query.limit(100)],
+      })
+      activeLicenseUserIds = licensesResult.documents.map((doc: any) => doc.userId)
+    } catch (err: any) {
+      logger.warn(
+        { teamId, error: err?.message },
+        '[OrgService] Failed to load licenses for member list'
+      )
+    }
+
     const documents = await Promise.all(
       result.memberships.map(async (m) => {
         let departments: Array<{ id: string; name: string; role: 'manager' | 'member' }> = []
@@ -485,6 +502,7 @@ export default class OrganisationService {
           joined: m.joined,
           avatarUrl,
           departments,
+          hasLicense: activeLicenseUserIds.includes(m.userId),
         }
       })
     )
@@ -546,6 +564,27 @@ export default class OrganisationService {
       )
     }
 
+    // Fetch if the user has an active license
+    let hasLicense = false
+    try {
+      const licensesResult = await appwrite.databases.listDocuments({
+        databaseId: 'bara-platform',
+        collectionId: Collections.LICENSES,
+        queries: [
+          Query.equal('orgId', teamId),
+          Query.equal('userId', m.userId),
+          Query.equal('isActive', true),
+          Query.limit(1),
+        ],
+      })
+      hasLicense = licensesResult.total > 0
+    } catch (err: any) {
+      logger.warn(
+        { teamId, userId: m.userId, error: err?.message },
+        '[OrgService] Failed to load license info for getMember'
+      )
+    }
+
     return {
       id: m.$id,
       userId: m.userId,
@@ -556,6 +595,7 @@ export default class OrganisationService {
       joined: m.joined,
       avatarUrl,
       departments,
+      hasLicense,
     }
   }
 
@@ -629,6 +669,76 @@ export default class OrganisationService {
         { membershipId, teamId },
         '[Member] Skipping Appwrite account deletion because membership userId was unavailable'
       )
+    }
+  }
+
+  /**
+   * Automatically ensures a "Courier Service" department exists and maps secretariat members to it.
+   */
+  async ensureCourierDepartmentAndSecretariatMembers(orgId: string) {
+    const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
+    const databaseId = prefs.databaseId
+    if (!databaseId) return
+
+    // 1. Ensure "Courier Service" department exists
+    let courierDeptId: string | null = null
+    const depts = await appwrite.databases.listDocuments({
+      databaseId,
+      collectionId: Collections.DEPARTMENTS,
+      queries: [Query.equal('name', 'Courier Service'), Query.limit(1)],
+    })
+
+    if (depts.total > 0) {
+      courierDeptId = depts.documents[0].$id
+    } else {
+      const newDept = await appwrite.databases.createDocument({
+        databaseId,
+        collectionId: Collections.DEPARTMENTS,
+        documentId: ID.unique(),
+        data: {
+          name: 'Courier Service',
+          description: 'Department responsible for mail, courier pickup, and dispatching.',
+          managerUserId: '',
+        },
+      })
+      courierDeptId = newDept.$id
+    }
+
+    // 2. Fetch all members with secretariat role
+    const memberships = await appwrite.teams.listMemberships({
+      teamId: orgId,
+    })
+
+    const secretariatMembers = memberships.memberships.filter((m) =>
+      m.roles?.includes('secretariat')
+    )
+
+    // 3. For each secretariat member, ensure they have a profile in the Courier Service department
+    for (const member of secretariatMembers) {
+      const existingProfile = await appwrite.databases.listDocuments({
+        databaseId: databaseId,
+        collectionId: Collections.ORG_PROFILES,
+        queries: [
+          Query.equal('userId', member.userId),
+          Query.equal('departmentId', courierDeptId),
+          Query.limit(1),
+        ],
+      })
+
+      if (existingProfile.total === 0) {
+        await appwrite.databases.createDocument({
+          databaseId: databaseId,
+          collectionId: Collections.ORG_PROFILES,
+          documentId: ID.unique(),
+          data: {
+            userId: member.userId,
+            membershipId: member.$id,
+            departmentId: courierDeptId,
+            jobTitle: 'Secretariat Agent',
+            departmentRole: 'member',
+          },
+        })
+      }
     }
   }
 }

@@ -12,9 +12,9 @@ export type ScannedRoutes = {
     'auth.request_email_verification': { paramsTuple?: []; params?: {} }
     'auth.confirm_email_verification': { paramsTuple?: []; params?: {} }
     'organisations.members.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
-    'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
-    'organisations.members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'userId': ParamValue} }
+    'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'userId': ParamValue} }
+    'organisations.members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'userId': ParamValue} }
     'members.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'org_licenses.assign': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -57,11 +57,13 @@ export type ScannedRoutes = {
     'courier.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.force_destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.restore': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.pickup': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.handover': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.dispatch': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.index': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'courier_replies.update': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue,'replyId': ParamValue} }
     'external_contacts.list_couriers': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'contactId': ParamValue} }
     'contacts.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -89,6 +91,9 @@ export type ScannedRoutes = {
     'courier.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.create_upload_url': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'courier.restore': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.pickup': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.handover': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
+    'courier.dispatch': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_chat.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier_replies.store': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'contacts.store': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
@@ -98,7 +103,7 @@ export type ScannedRoutes = {
     'auth.confirm_password_reset': { paramsTuple?: []; params?: {} }
     'auth.update_profile': { paramsTuple?: []; params?: {} }
     'auth.confirm_email_verification': { paramsTuple?: []; params?: {} }
-    'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'userId': ParamValue} }
     'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin_plans.update_plan': { paramsTuple: [ParamValue]; params: {'planId': ParamValue} }
     'admin_plans.update_subscription': { paramsTuple: [ParamValue]; params: {'subscriptionId': ParamValue} }
@@ -106,13 +111,12 @@ export type ScannedRoutes = {
     'notifications.mark_all_as_read': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'notifications.mark_as_read': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'courier.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
-    'courier_replies.update': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue,'replyId': ParamValue} }
     'contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   GET: {
     'auth.profile': { paramsTuple?: []; params?: {} }
     'organisations.members.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'userId': ParamValue} }
     'org_licenses.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.index_active': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisations.index': { paramsTuple?: []; params?: {} }
@@ -138,7 +142,7 @@ export type ScannedRoutes = {
   HEAD: {
     'auth.profile': { paramsTuple?: []; params?: {} }
     'organisations.members.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
-    'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.members.show': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'userId': ParamValue} }
     'org_licenses.index': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisation_modules.index_active': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'organisations.index': { paramsTuple?: []; params?: {} }
@@ -162,13 +166,13 @@ export type ScannedRoutes = {
     'plans.org_subscription': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
   }
   PUT: {
-    'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.members.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'userId': ParamValue} }
     'organisations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'departments.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
     'contacts.update': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'id': ParamValue} }
   }
   DELETE: {
-    'organisations.members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'memberId': ParamValue} }
+    'organisations.members.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'userId': ParamValue} }
     'organisation_modules.deactivate': { paramsTuple: [ParamValue,ParamValue]; params: {'orgId': ParamValue,'module': ParamValue} }
     'organisations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin_marketplace.unpublish': { paramsTuple: [ParamValue]; params: {'moduleName': ParamValue} }

@@ -2,6 +2,8 @@ import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
 import appwrite from '#services/appwrite_service'
 import { Collections } from '#modules/_registry/collection_ids'
+import { CourierCustodyState } from '#modules/courier/courier_enums'
+import OrganisationService from '#modules/organisations/organisation_service'
 
 export default class ProvisionCourierInterface extends BaseCommand {
   static readonly commandName = 'provision:courier-interface'
@@ -104,6 +106,73 @@ export default class ProvisionCourierInterface extends BaseCommand {
           await this.createOptionalDatetimeAttributeIfMissing(prefs.databaseId, 'emittedAt')
           await this.createOptionalStringArrayAttributeIfMissing(prefs.databaseId, 'fileIds')
 
+          // Physical custody tracking attributes
+          await this.createOptionalEnumAttributeIfMissing(
+            prefs.databaseId,
+            'currentCustody',
+            Object.values(CourierCustodyState),
+            CourierCustodyState.COURIER_SERVICE
+          )
+          await this.createOptionalStringAttributeIfMissing(prefs.databaseId, 'custodyUserId', 36)
+          await this.createOptionalStringAttributeIfMissing(prefs.databaseId, 'custodyDeptId', 36)
+          await this.createOptionalStringAttributeIfMissing(
+            prefs.databaseId,
+            'signedProofFileId',
+            36
+          )
+          await this.createOptionalDatetimeAttributeIfMissing(prefs.databaseId, 'dispatchedAt')
+          await this.createOptionalStringAttributeIfMissing(prefs.databaseId, 'dispatchedBy', 36)
+          await this.createOptionalStringAttributeIfMissing(prefs.databaseId, 'receivedBy', 36)
+          await this.createOptionalStringAttributeIfMissing(prefs.databaseId, 'handlerUserId', 36)
+
+          // Provision courier replies attributes
+          await this.createOptionalStringAttributeIfMissing(
+            prefs.databaseId,
+            'subject',
+            255,
+            Collections.COURIER_REPLIES
+          )
+          await this.createOptionalStringAttributeIfMissing(
+            prefs.databaseId,
+            'notes',
+            2000,
+            Collections.COURIER_REPLIES
+          )
+          await this.createOptionalDatetimeAttributeIfMissing(
+            prefs.databaseId,
+            'emittedAt',
+            Collections.COURIER_REPLIES
+          )
+          await this.createOptionalStringArrayAttributeIfMissing(
+            prefs.databaseId,
+            'fileIds',
+            Collections.COURIER_REPLIES
+          )
+          await this.createOptionalStringAttributeIfMissing(
+            prefs.databaseId,
+            'delivererName',
+            255,
+            Collections.COURIER_REPLIES
+          )
+          await this.createOptionalStringAttributeIfMissing(
+            prefs.databaseId,
+            'delivererEmail',
+            255,
+            Collections.COURIER_REPLIES
+          )
+          await this.createOptionalStringAttributeIfMissing(
+            prefs.databaseId,
+            'delivererPhone',
+            255,
+            Collections.COURIER_REPLIES
+          )
+          await this.createOptionalStringAttributeIfMissing(
+            prefs.databaseId,
+            'note',
+            2000,
+            Collections.COURIER_REPLIES
+          )
+
           // 4. Update Courier Indexes
           await this.deleteIndexIfExists(
             prefs.databaseId,
@@ -117,6 +186,9 @@ export default class ProvisionCourierInterface extends BaseCommand {
             'key',
             ['correspondentId']
           )
+          await this.ensureIndex(prefs.databaseId, Collections.COURIERS, 'custody_idx', 'key', [
+            'currentCustody',
+          ])
 
           // 5. Delete unused legacy attributes
           await this.deleteAttributeIfExists(prefs.databaseId, 'externalContactType')
@@ -125,6 +197,15 @@ export default class ProvisionCourierInterface extends BaseCommand {
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactStructureType')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactStructureName')
           await this.deleteAttributeIfExists(prefs.databaseId, 'contactIdNumber')
+          await this.deleteAttributeIfExists(
+            prefs.databaseId,
+            'documentStatus',
+            Collections.COURIER_REPLIES
+          )
+
+          // 6. Ensure Courier Service department and secretariat member mappings exist
+          const orgService = new OrganisationService()
+          await orgService.ensureCourierDepartmentAndSecretariatMembers(team.$id)
 
           updatedCount += 1
           this.logger.success(`Updated courier interface for: ${team.name}`)
@@ -245,11 +326,15 @@ export default class ProvisionCourierInterface extends BaseCommand {
     }
   }
 
-  private async deleteAttributeIfExists(databaseId: string, key: string) {
+  private async deleteAttributeIfExists(
+    databaseId: string,
+    key: string,
+    collectionId: string = Collections.COURIERS
+  ) {
     try {
       await appwrite.databases.deleteAttribute({
         databaseId,
-        collectionId: Collections.COURIERS,
+        collectionId,
         key,
       })
     } catch (error: any) {
@@ -259,11 +344,15 @@ export default class ProvisionCourierInterface extends BaseCommand {
     }
   }
 
-  private async createOptionalDatetimeAttributeIfMissing(databaseId: string, key: string) {
+  private async createOptionalDatetimeAttributeIfMissing(
+    databaseId: string,
+    key: string,
+    collectionId: string = Collections.COURIERS
+  ) {
     try {
       await appwrite.databases.getAttribute({
         databaseId,
-        collectionId: Collections.COURIERS,
+        collectionId,
         key,
       })
     } catch (error: any) {
@@ -273,14 +362,73 @@ export default class ProvisionCourierInterface extends BaseCommand {
 
       await appwrite.databases.createDatetimeAttribute({
         databaseId,
-        collectionId: Collections.COURIERS,
+        collectionId,
         key,
         required: false,
       })
     }
   }
 
-  private async createOptionalStringArrayAttributeIfMissing(databaseId: string, key: string) {
+  private async createOptionalStringArrayAttributeIfMissing(
+    databaseId: string,
+    key: string,
+    collectionId: string = Collections.COURIERS
+  ) {
+    try {
+      await appwrite.databases.getAttribute({
+        databaseId,
+        collectionId,
+        key,
+      })
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
+
+      await appwrite.databases.createStringAttribute({
+        databaseId,
+        collectionId,
+        key,
+        size: 36,
+        required: false,
+        array: true,
+      })
+    }
+  }
+
+  private async createOptionalStringAttributeIfMissing(
+    databaseId: string,
+    key: string,
+    size: number = 36,
+    collectionId: string = Collections.COURIERS
+  ) {
+    try {
+      await appwrite.databases.getAttribute({
+        databaseId,
+        collectionId,
+        key,
+      })
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
+
+      await appwrite.databases.createStringAttribute({
+        databaseId,
+        collectionId,
+        key,
+        size,
+        required: false,
+      })
+    }
+  }
+
+  private async createOptionalEnumAttributeIfMissing(
+    databaseId: string,
+    key: string,
+    elements: string[],
+    defaultValue: string
+  ) {
     try {
       await appwrite.databases.getAttribute({
         databaseId,
@@ -292,13 +440,13 @@ export default class ProvisionCourierInterface extends BaseCommand {
         throw error
       }
 
-      await appwrite.databases.createStringAttribute({
+      await appwrite.databases.createEnumAttribute({
         databaseId,
         collectionId: Collections.COURIERS,
         key,
-        size: 36,
+        elements,
         required: false,
-        array: true,
+        xdefault: defaultValue,
       })
     }
   }

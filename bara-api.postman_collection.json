@@ -1885,13 +1885,10 @@
                   "});",
                   "pm.test(\"Enregistre l'ID du membre dans les variables\", function () {",
                   "    var jsonData = pm.response.json();",
-                  "    if (jsonData && jsonData.id) {",
-                  "        pm.collectionVariables.set(\"memberId\", jsonData.id);",
-                  "    } else if (jsonData && jsonData.data && jsonData.data.id) {",
-                  "        pm.collectionVariables.set(\"memberId\", jsonData.data.id);",
-                  "    } else if (jsonData && jsonData.data && jsonData.data.$id) {",
-                  "        pm.collectionVariables.set(\"memberId\", jsonData.data.$id);",
-                  "    }",
+                  "    var id = jsonData.id || (jsonData.data && jsonData.data.id) || (jsonData.data && jsonData.data.$id);",
+                  "    var uId = (jsonData.data && jsonData.data.userId) || id;",
+                  "    pm.collectionVariables.set(\"memberId\", id);",
+                  "    pm.collectionVariables.set(\"userId\", uId);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -1910,9 +1907,9 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{memberId}}",
+              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{userId}}",
               "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members", "{{memberId}}"]
+              "path": ["organisations", "{{orgId}}", "members", "{{userId}}"]
             },
             "description": "Récupère les détails d'un membre spécifique au sein de l'organisation."
           },
@@ -1950,9 +1947,9 @@
               "raw": "{\n  \"roles\": [\"user\"]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{memberId}}",
+              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{userId}}",
               "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members", "{{memberId}}"]
+              "path": ["organisations", "{{orgId}}", "members", "{{userId}}"]
             },
             "description": "Met à jour les rôles attribués à un membre spécifique."
           },
@@ -1982,9 +1979,9 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{memberId}}",
+              "raw": "{{base_url}}/organisations/{{orgId}}/members/{{userId}}",
               "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members", "{{memberId}}"]
+              "path": ["organisations", "{{orgId}}", "members", "{{userId}}"]
             },
             "description": "Supprime un utilisateur de l'organisation."
           },
@@ -3303,31 +3300,57 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
-              },
-              {
-                "key": "x-org-id",
-                "value": "{{orgId}}"
               }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "content",
-                  "value": "Official Reply: {{$randomLoremParagraph}}",
+                  "key": "subject",
+                  "value": "Official Reply - {{$randomCatchPhrase}}",
                   "type": "text"
                 },
                 {
-                  "key": "file",
-                  "type": "file",
-                  "src": []
+                  "key": "emittedAt",
+                  "value": "2026-06-26T16:22:32Z",
+                  "type": "text"
+                },
+                {
+                  "key": "fileIds[]",
+                  "value": "{{scenarioCourierFileId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "delivererName",
+                  "value": "John Deliverer",
+                  "type": "text"
+                },
+                {
+                  "key": "delivererEmail",
+                  "value": "deliverer@test.com",
+                  "type": "text"
+                },
+                {
+                  "key": "delivererPhone",
+                  "value": "+33612345678",
+                  "type": "text"
+                },
+                {
+                  "key": "ccUserIds[]",
+                  "value": "{{memberUserId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "note",
+                  "value": "This is an official reply note.",
+                  "type": "text"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/replies",
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}/replies",
               "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "replies"]
+              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}", "replies"]
             },
             "description": "Initie une réponse officielle pour ce courrier (form-data)."
           },
@@ -3396,6 +3419,87 @@
               }
             }
           ]
+        },
+        {
+          "name": "Enregistrer la collecte physique d'un courrier (Pickup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/pickup",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "pickup"]
+            },
+            "description": "Permet aux membres du secrétariat ou aux administrateurs d'enregistrer la collecte physique d'un courrier."
+          },
+          "response": []
+        },
+        {
+          "name": "Enregistrer la remise physique d'un courrier (Handover)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientUserId\": \"{{memberUserId}}\",\n  \"recipientDeptId\": \"{{deptId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/handover",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "handover"]
+            },
+            "description": "Permet d'enregistrer la remise physique d'un courrier à un destinataire (utilisateur ou département)."
+          },
+          "response": []
+        },
+        {
+          "name": "Enregistrer l'expédition externe d'un courrier (Dispatch)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"signedProofFileId\": \"65ab374829ad8c7a83e0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/dispatch",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "dispatch"]
+            },
+            "description": "Permet aux membres du secrétariat ou aux administrateurs d'enregistrer l'expédition externe d'un courrier sortant."
+          },
+          "response": []
         }
       ]
     },
@@ -3621,6 +3725,11 @@
     },
     {
       "key": "memberId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
       "value": "",
       "type": "string"
     },

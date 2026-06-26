@@ -17,10 +17,12 @@ router
           .resource('organisations.members', MembersController)
           .apiOnly()
           .except(['store'])
-          .params({ organisations: 'orgId', members: 'memberId' })
+          .params({ organisations: 'orgId', members: 'userId' })
+          .use('*', middleware.orgAuth())
 
         router
           .post('organisations/:orgId/members', [MembersController, 'store'])
+          .use(middleware.orgAuth())
           .use(middleware.planGuard('limit:maxMembers'))
 
         // Seat Licenses

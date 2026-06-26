@@ -2,7 +2,7 @@ import {
   CourierStatus,
   CourierType,
   CourierUrgency,
-  DocumentStatus,
+  CourierCustodyState,
 } from '#modules/courier/courier_enums'
 import vine from '@vinejs/vine'
 
@@ -66,30 +66,28 @@ export const updateCourierValidator = vine.create(
     status: vine.enum(CourierStatus).optional(),
     isFavorite: vine.boolean().optional(),
     isArchived: vine.boolean().optional(),
+    currentCustody: vine.enum(CourierCustodyState).optional(),
+    custodyUserId: vine.string().maxLength(36).trim().nullable().optional(),
+    custodyDeptId: vine.string().maxLength(36).trim().nullable().optional(),
+    requiresPickup: vine.boolean().optional(),
+    signedProofFileId: vine.string().maxLength(36).trim().nullable().optional(),
+    dispatchedAt: vine.string().nullable().optional(),
+    dispatchedBy: vine.string().maxLength(36).trim().nullable().optional(),
+    receivedBy: vine.string().maxLength(36).trim().nullable().optional(),
+    handlerUserId: vine.string().maxLength(36).trim().nullable().optional(),
   })
 )
 
-/**
- * Validator for creating a courier reply.
- */
 export const createCourierReplyValidator = vine.create(
   vine.object({
-    content: vine.string().maxLength(10000).trim(),
-    file: vine
-      .file({
-        size: '10mb',
-        extnames: ['jpg', 'png', 'pdf', 'docx', 'doc'],
-      })
-      .optional(),
-  })
-)
-
-/**
- * Validator for updating a courier reply.
- */
-export const updateCourierReplyValidator = vine.create(
-  vine.object({
-    documentStatus: vine.enum(DocumentStatus).optional(),
+    subject: vine.string().minLength(3).maxLength(255).trim(),
+    emittedAt: vine.string().trim().optional(),
+    fileIds: vine.array(vine.string().maxLength(36).trim()).optional(),
+    delivererName: vine.string().maxLength(255).trim().optional(),
+    delivererEmail: vine.string().email().maxLength(255).trim().optional(),
+    delivererPhone: vine.string().maxLength(255).trim().optional(),
+    ccUserIds: vine.array(vine.string().maxLength(36).trim()).optional(),
+    note: vine.string().maxLength(2000).trim().optional(),
   })
 )
 

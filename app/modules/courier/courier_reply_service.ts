@@ -1,19 +1,21 @@
 import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
-import { InputFile } from 'node-appwrite/file'
 import { Collections } from '#modules/_registry/collection_ids'
 import CourierService from '#modules/courier/courier_service'
-import { type DocumentStatus } from '#modules/courier/courier_enums'
+import { CourierCustodyState } from '#modules/courier/courier_enums'
 
 export interface CreateCourierReplyPayload {
   courierId: string
-  content: string
+  subject: string
+  emittedAt?: string
+  fileIds?: string[]
+  delivererName?: string
+  delivererEmail?: string
+  delivererPhone?: string
+  ccUserIds?: string[]
+  note?: string
   createdBy: string
-}
-
-export interface UpdateCourierReplyPayload {
-  documentStatus?: DocumentStatus
 }
 
 /**
@@ -62,103 +64,150 @@ export default class CourierReplyService {
       ],
     })
 
+    const userCache = new Map<string, any>()
+    const documents = await Promise.all(
+      result.documents.map((doc) => this.mapDocument(doc, userCache))
+    )
+
     return {
       total: result.total,
-      documents: result.documents.map((doc) => this.mapDocument(doc)),
+      documents,
     }
   }
 
   /**
-   * Create a new reply with an optional file attachment.
+   * Create a new reply.
    */
-  async create(
-    payload: CreateCourierReplyPayload,
-    fileOptions?: { tmpPath: string; fileName: string }
-  ) {
-    let fileId: string | undefined
+  async create(payload: CreateCourierReplyPayload) {
+    if (payload.fileIds && payload.fileIds.length > 0) {
+      for (const fileId of payload.fileIds) {
+        try {
+          await appwrite.storage.getFile({ bucketId: this.bucketId, fileId })
+        } catch (err: any) {
+          throw new Error(`Attached file with ID '${fileId}' was not found in storage.`)
+        }
+      }
+    }
 
-    if (fileOptions) {
-      const file = InputFile.fromPath(fileOptions.tmpPath, fileOptions.fileName)
-      const uploadedFile = await appwrite.storage.createFile({
-        bucketId: this.bucketId,
-        fileId: ID.unique(),
-        file,
+    const doc = await appwrite.databases.createDocument({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      documentId: ID.unique(),
+      data: {
+        courierId: payload.courierId,
+        subject: payload.subject,
+        content: payload.note || payload.subject || 'Courier Reply',
+        emittedAt: payload.emittedAt || null,
+        fileIds: payload.fileIds || [],
+        delivererName: payload.delivererName || null,
+        delivererEmail: payload.delivererEmail || null,
+        delivererPhone: payload.delivererPhone || null,
+        note: payload.note || null,
+        createdBy: payload.createdBy,
+        createdAt: new Date().toISOString(),
+      },
+    })
+
+    // Increment the reply count on the courier and update custody
+    try {
+      const courierService = new CourierService(this.databaseId, this.bucketId)
+      const courier = await courierService.get(payload.courierId)
+      await appwrite.databases.updateDocument({
+        databaseId: this.databaseId,
+        collectionId: Collections.COURIERS,
+        documentId: payload.courierId,
+        data: {
+          replyCount: (courier.replyCount || 0) + 1,
+          requiresPickup: true,
+          currentCustody: CourierCustodyState.SENDER,
+          custodyUserId: payload.createdBy,
+          custodyDeptId: null,
+        },
       })
-      fileId = uploadedFile.$id
+    } catch (err) {
+      // Ignore failure to increment reply count, but log it
+      console.error('Failed to increment reply count for courier', payload.courierId, err)
+    }
+
+    // Add CC users as assignments on the parent courier
+    if (payload.ccUserIds && payload.ccUserIds.length > 0) {
+      try {
+        const courierService = new CourierService(this.databaseId, this.bucketId)
+        await courierService.createAssignments(
+          payload.courierId,
+          payload.ccUserIds,
+          'user',
+          payload.createdBy
+        )
+      } catch (ccError) {
+        console.error('Failed to create CC assignments for courier', payload.courierId, ccError)
+      }
+    }
+
+    return await this.mapDocument(doc)
+  }
+
+  /**
+   * Helper to resolve a user ID to their profile name and avatar URL.
+   */
+  private async resolveUserCreator(userId: string, userCache?: Map<string, any>) {
+    if (!userId) return null
+    if (userCache?.has(userId)) {
+      return userCache.get(userId)
     }
 
     try {
-      const doc = await appwrite.databases.createDocument({
-        databaseId: this.databaseId,
-        collectionId: this.collectionId,
-        documentId: ID.unique(),
-        data: {
-          ...payload,
-          fileId: fileId || null,
-          createdAt: new Date().toISOString(),
-        },
-      })
+      const user = await appwrite.users.get({ userId })
+      const avatarFileId = user.prefs?.avatarFileId
+      const avatarUrl = avatarFileId
+        ? `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${avatarFileId}/preview?project=${appwriteConfig.projectId}`
+        : null
 
-      // Increment the reply count on the courier
-      try {
-        const courierService = new CourierService(this.databaseId, this.bucketId)
-        const courier = await courierService.get(payload.courierId)
-        await appwrite.databases.updateDocument({
-          databaseId: this.databaseId,
-          collectionId: Collections.COURIERS,
-          documentId: payload.courierId,
-          data: {
-            replyCount: (courier.replyCount || 0) + 1,
-          },
-        })
-      } catch (err) {
-        // Ignore failure to increment reply count, but log it
-        console.error('Failed to increment reply count for courier', payload.courierId, err)
+      const result = {
+        id: userId,
+        name: user.name || user.email || 'Unknown User',
+        avatarUrl,
       }
-
-      return this.mapDocument(doc)
-    } catch (error) {
-      if (fileId) {
-        await appwrite.storage.deleteFile({
-          bucketId: this.bucketId,
-          fileId,
-        })
+      userCache?.set(userId, result)
+      return result
+    } catch {
+      const result = {
+        id: userId,
+        name: 'Unknown User',
+        avatarUrl: null,
       }
-      throw error
+      userCache?.set(userId, result)
+      return result
     }
-  }
-
-  /**
-   * Update a courier reply by ID.
-   */
-  async update(replyId: string, payload: UpdateCourierReplyPayload) {
-    const doc = await appwrite.databases.updateDocument({
-      databaseId: this.databaseId,
-      collectionId: this.collectionId,
-      documentId: replyId,
-      data: payload,
-    })
-
-    return this.mapDocument(doc)
   }
 
   /**
    * Helper to map an Appwrite document to our domain model.
    */
-  private mapDocument(doc: any) {
-    const fileUrl = doc.fileId
-      ? `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${doc.fileId}/view?project=${appwriteConfig.projectId}`
-      : null
+  private async mapDocument(doc: any, userCache?: Map<string, any>) {
+    const fileUrls =
+      doc.fileIds && doc.fileIds.length > 0
+        ? doc.fileIds.map(
+            (fileId: string) =>
+              `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${fileId}/view?project=${appwriteConfig.projectId}`
+          )
+        : []
+
+    const createdBy = await this.resolveUserCreator(doc.createdBy, userCache)
 
     return {
       id: doc.$id,
       courierId: doc.courierId,
-      content: doc.content,
-      fileUrl,
-      fileId: doc.fileId || null,
-      createdBy: doc.createdBy,
+      subject: doc.subject || null,
+      emittedAt: doc.emittedAt || null,
+      fileIds: doc.fileIds || [],
+      fileUrls,
+      delivererName: doc.delivererName || null,
+      delivererEmail: doc.delivererEmail || null,
+      delivererPhone: doc.delivererPhone || null,
+      note: doc.note || null,
+      createdBy,
       createdAt: doc.createdAt,
-      documentStatus: doc.documentStatus,
     }
   }
 }
