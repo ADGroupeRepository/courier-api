@@ -1,4 +1,4 @@
-import { type Client, Models } from 'node-appwrite'
+import type { Client, Models } from 'node-appwrite'
 
 declare module '@adonisjs/core/http' {
   interface HttpContext {
