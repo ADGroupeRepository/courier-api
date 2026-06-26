@@ -1,10 +1,10 @@
 import { Collections } from '#modules/_registry/collection_ids'
 import {
+  CourierCustodyState,
   CourierStatus,
   CourierStructureType,
   CourierType,
   CourierUrgency,
-  DocumentStatus,
 } from '#modules/courier/courier_enums'
 import { Permission, Role } from 'node-appwrite'
 import { type ModuleDefinition } from '../types.js'
@@ -70,6 +70,21 @@ export const courierModule: ModuleDefinition = {
         { key: 'requiresPickup', type: 'boolean', required: false, default: false },
         { key: 'pickedUpAt', type: 'datetime', required: false },
         { key: 'pickedUpBy', type: 'string', size: 36, required: false },
+        {
+          key: 'currentCustody',
+          type: 'enum',
+          elements: Object.values(CourierCustodyState),
+          required: false,
+          default: CourierCustodyState.COURIER_SERVICE,
+        },
+        { key: 'custodyUserId', type: 'string', size: 36, required: false },
+        { key: 'custodyDeptId', type: 'string', size: 36, required: false },
+        { key: 'signedProofFileId', type: 'string', size: 36, required: false },
+        { key: 'dispatchedAt', type: 'datetime', required: false },
+        { key: 'dispatchedBy', type: 'string', size: 36, required: false },
+        { key: 'receivedAt', type: 'datetime', required: false },
+        { key: 'receivedBy', type: 'string', size: 36, required: false },
+        { key: 'handlerUserId', type: 'string', size: 36, required: false },
         { key: 'replyCount', type: 'integer', required: true, default: 0 },
       ],
       indexes: [
@@ -81,6 +96,7 @@ export const courierModule: ModuleDefinition = {
         { key: 'archived_idx', type: 'key', attributes: ['isArchived'] },
         { key: 'favorite_idx', type: 'key', attributes: ['isFavorite'] },
         { key: 'deleted_idx', type: 'key', attributes: ['isDeleted'] },
+        { key: 'custody_idx', type: 'key', attributes: ['currentCustody'] },
       ],
     },
     {
@@ -153,17 +169,18 @@ export const courierModule: ModuleDefinition = {
       ],
       attributes: [
         { key: 'courierId', type: 'string', size: 36, required: true },
-        { key: 'content', type: 'string', size: 10000, required: true },
+        { key: 'subject', type: 'string', size: 255, required: false },
+        { key: 'content', type: 'string', size: 10000, required: false },
+        { key: 'notes', type: 'string', size: 2000, required: false },
         { key: 'fileId', type: 'string', size: 36, required: false },
+        { key: 'emittedAt', type: 'datetime', required: false },
+        { key: 'fileIds', type: 'string', size: 36, required: false, array: true },
+        { key: 'delivererName', type: 'string', size: 255, required: false },
+        { key: 'delivererEmail', type: 'string', size: 255, required: false },
+        { key: 'delivererPhone', type: 'string', size: 255, required: false },
+        { key: 'note', type: 'string', size: 2000, required: false },
         { key: 'createdBy', type: 'string', size: 36, required: true },
         { key: 'createdAt', type: 'datetime', required: true, default: new Date() },
-        {
-          key: 'documentStatus',
-          type: 'enum',
-          elements: Object.values(DocumentStatus),
-          required: true,
-          default: DocumentStatus.DRAFT,
-        },
       ],
       indexes: [
         { key: 'courier_idx', type: 'key', attributes: ['courierId'] },

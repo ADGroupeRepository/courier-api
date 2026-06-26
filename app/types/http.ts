@@ -1,4 +1,4 @@
-import { type Client } from 'node-appwrite'
+import type { Client, Models } from 'node-appwrite'
 
 declare module '@adonisjs/core/http' {
   interface HttpContext {
@@ -30,5 +30,30 @@ declare module '@adonisjs/core/http' {
      * The raw JWT token used for authentication.
      */
     token?: string
+
+    /**
+     * The current organization membership of the authenticated user.
+     */
+    orgMembership?: Models.Membership
+
+    /**
+     * The roles of the user within the current organization.
+     */
+    orgRoles?: string[]
+
+    /**
+     * True if the user is an admin or owner of the organization.
+     */
+    isOrgAdmin?: boolean
+
+    /**
+     * True if the user is the owner of the organization.
+     */
+    isOrgOwner?: boolean
+
+    /**
+     * True if the user has the 'secretariat' role.
+     */
+    isOrgSecretariat?: boolean
   }
 }

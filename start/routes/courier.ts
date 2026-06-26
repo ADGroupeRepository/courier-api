@@ -16,6 +16,9 @@ router
     router.delete('couriers/:id', [CourierController, 'destroy'])
     router.delete('couriers/:id/force', [CourierController, 'forceDestroy'])
     router.post('couriers/:id/restore', [CourierController, 'restore'])
+    router.post('couriers/:id/pickup', [CourierController, 'pickup'])
+    router.post('couriers/:id/handover', [CourierController, 'handover'])
+    router.post('couriers/:id/dispatch', [CourierController, 'dispatch'])
 
     // Courier Chat Messages
     router.get('couriers/:id/messages', [CourierChatController, 'index'])
@@ -24,9 +27,9 @@ router
     // Courier Replies
     router.get('couriers/:id/replies', [CourierRepliesController, 'index'])
     router.post('couriers/:id/replies', [CourierRepliesController, 'store'])
-    router.patch('couriers/:id/replies/:replyId', [CourierRepliesController, 'update'])
   })
   .prefix('/api/v1/organisations/:orgId')
   .use(middleware.auth())
   .use(middleware.verified())
+  .use(middleware.orgAuth())
   .use(middleware.moduleGuard('courier'))

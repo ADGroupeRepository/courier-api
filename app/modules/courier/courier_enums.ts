@@ -18,15 +18,17 @@ export enum CourierType {
   INTERNAL = 'internal',
 }
 
+export enum CourierCustodyState {
+  COURIER_SERVICE = 'courier_service',
+  SENDER = 'sender',
+  RECIPIENT = 'recipient',
+  DISPATCHED = 'dispatched',
+}
+
 export enum CourierStructureType {
   PERSONNE = 'personne',
   ENTREPRISE_PRIVEE = 'entreprise_privee',
   ORGANISATION_PUBLIQUE = 'organisation_publique',
   ONG = 'ONG',
   AUTRE = 'autre',
-}
-
-export enum DocumentStatus {
-  DRAFT = 'draft',
-  FINALIZED = 'finalized',
 }

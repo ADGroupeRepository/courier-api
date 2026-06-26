@@ -299,7 +299,7 @@ paths:
         '201':
           description: Created
 
-  /organisations/{orgId}/members/{memberId}:
+  /organisations/{orgId}/members/{userId}:
     get:
       summary: Voir un membre
       operationId: getMember
@@ -308,7 +308,7 @@ paths:
           in: path
           required: true
           type: string
-        - name: memberId
+        - name: userId
           in: path
           required: true
           type: string
@@ -323,7 +323,7 @@ paths:
           in: path
           required: true
           type: string
-        - name: memberId
+        - name: userId
           in: path
           required: true
           type: string
@@ -338,7 +338,7 @@ paths:
           in: path
           required: true
           type: string
-        - name: memberId
+        - name: userId
           in: path
           required: true
           type: string
@@ -812,6 +812,95 @@ paths:
           in: path
           required: true
           type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Courier'
+              message: { type: string }
+
+  /organisations/{orgId}/couriers/{id}/pickup:
+    post:
+      summary: Enregistrer la collecte physique d'un courrier (Register courier pickup)
+      operationId: pickupCourier
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Courier'
+              message: { type: string }
+
+  /organisations/{orgId}/couriers/{id}/handover:
+    post:
+      summary: Enregistrer la remise physique d'un courrier (Register courier handover)
+      operationId: handoverCourier
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              recipientUserId:
+                type: string
+              recipientDeptId:
+                type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Courier'
+              message: { type: string }
+
+  /organisations/{orgId}/couriers/{id}/dispatch:
+    post:
+      summary: Enregistrer l'expédition externe d'un courrier (Register courier dispatch)
+      operationId: dispatchCourier
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - signedProofFileId
+            properties:
+              signedProofFileId:
+                type: string
       responses:
         '200':
           description: Success
@@ -1424,6 +1513,23 @@ definitions:
       isArchived: { type: boolean }
       isDeleted: { type: boolean }
       replyCount: { type: integer }
+      currentCustody: { type: string, enum: [courier_service, sender, recipient, dispatched] }
+      custodyUserId: { type: string }
+      custodyDeptId: { type: string }
+      requiresPickup: { type: boolean }
+      pickedUpAt: { type: string }
+      pickedUpBy: { type: string }
+      signedProofFileId: { type: string }
+      dispatchedAt: { type: string }
+      dispatchedBy: { type: string }
+      receivedBy: { type: string }
+      handlerUserId: { type: string }
+      handler:
+        type: object
+        properties:
+          id: { type: string }
+          name: { type: string }
+          avatarUrl: { type: string }
       createdAt: { type: string }
       updatedAt: { type: string }
 

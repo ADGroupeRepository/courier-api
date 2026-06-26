@@ -1,6 +1,11 @@
 import appwriteConfig from '#config/appwrite'
 import { Collections } from '#modules/_registry/collection_ids'
-import { type CourierUrgency, CourierStatus, CourierType } from '#modules/courier/courier_enums'
+import {
+  type CourierUrgency,
+  CourierStatus,
+  CourierType,
+  CourierCustodyState,
+} from '#modules/courier/courier_enums'
 import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
 import appwrite from '#services/appwrite_service'
 import logger from '@adonisjs/core/services/logger'
@@ -43,6 +48,15 @@ export interface UpdateCourierPayload {
   status?: CourierStatus
   isFavorite?: boolean
   isArchived?: boolean
+  currentCustody?: CourierCustodyState
+  custodyUserId?: string | null
+  custodyDeptId?: string | null
+  requiresPickup?: boolean
+  signedProofFileId?: string | null
+  dispatchedAt?: string | null
+  dispatchedBy?: string | null
+  receivedBy?: string | null
+  handlerUserId?: string | null
 }
 
 // ── Service ───────────────────────────────────────────────────────────
@@ -378,7 +392,13 @@ export default class CourierService {
           fileIds: fileIds.length > 0 ? fileIds : undefined,
         }),
         replyCount: 0,
-        status: payload.type === CourierType.INCOMING ? CourierStatus.PENDING : CourierStatus.SENT,
+        status: CourierStatus.PENDING,
+        currentCustody:
+          payload.type === CourierType.INCOMING
+            ? CourierCustodyState.COURIER_SERVICE
+            : CourierCustodyState.SENDER,
+        requiresPickup: payload.type !== CourierType.INCOMING,
+        custodyUserId: payload.type !== CourierType.INCOMING ? payload.createdBy : undefined,
         isFavorite: false,
         isArchived: false,
         isDeleted: false,
@@ -407,6 +427,86 @@ export default class CourierService {
     const data: Record<string, any> = { ...payload }
     if (payload.status === CourierStatus.COMPLETED) {
       data.isArchived = true
+    }
+
+    const doc = await appwrite.databases.updateDocument({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      documentId: courierId,
+      data,
+    })
+
+    return this.mapDocumentWithAssignments(doc)
+  }
+
+  /**
+   * Register physical pickup of a courier/reply by the courier service (secretariat).
+   */
+  async pickup(courierId: string, userId: string) {
+    const data: Record<string, any> = {
+      requiresPickup: false,
+      currentCustody: CourierCustodyState.COURIER_SERVICE,
+      pickedUpAt: new Date().toISOString(),
+      pickedUpBy: userId,
+      custodyUserId: userId,
+      custodyDeptId: null,
+    }
+
+    const doc = await appwrite.databases.updateDocument({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      documentId: courierId,
+      data,
+    })
+
+    return this.mapDocumentWithAssignments(doc)
+  }
+
+  /**
+   * Hand over a courier physically to a recipient user or department.
+   */
+  async handover(courierId: string, recipientUserId?: string, recipientDeptId?: string) {
+    const data: Record<string, any> = {
+      currentCustody: CourierCustodyState.RECIPIENT,
+      status: CourierStatus.RECEIVED,
+      receivedAt: new Date().toISOString(),
+      custodyUserId: recipientUserId || null,
+      custodyDeptId: recipientDeptId || null,
+    }
+
+    if (recipientUserId) {
+      data.receivedBy = recipientUserId
+    }
+
+    const doc = await appwrite.databases.updateDocument({
+      databaseId: this.databaseId,
+      collectionId: this.collectionId,
+      documentId: courierId,
+      data,
+    })
+
+    return this.mapDocumentWithAssignments(doc)
+  }
+
+  /**
+   * Dispatch an outgoing courier externally.
+   */
+  async dispatch(courierId: string, userId: string, signedProofFileId: string) {
+    // Verify existence of the file in Appwrite Storage
+    try {
+      await appwrite.storage.getFile({ bucketId: this.bucketId, fileId: signedProofFileId })
+    } catch (err: any) {
+      throw new Error(`Signed proof file with ID '${signedProofFileId}' was not found in storage.`)
+    }
+
+    const data: Record<string, any> = {
+      currentCustody: CourierCustodyState.DISPATCHED,
+      status: CourierStatus.SENT,
+      dispatchedAt: new Date().toISOString(),
+      dispatchedBy: userId,
+      custodyUserId: null,
+      custodyDeptId: null,
+      signedProofFileId,
     }
 
     const doc = await appwrite.databases.updateDocument({
@@ -689,6 +789,9 @@ export default class CourierService {
       assignments.map((assignment) => this.enrichAssignment(assignment))
     )
     const createdBy = await this.resolveUserCreator(doc.createdBy, userCache)
+    const handler = doc.handlerUserId
+      ? await this.resolveUserCreator(doc.handlerUserId, userCache)
+      : null
 
     return {
       id: doc.$id,
@@ -703,11 +806,23 @@ export default class CourierService {
       assignments: enrichedAssignments,
       fileUrls,
       createdBy,
+      handler,
+      handlerUserId: doc.handlerUserId || null,
       status: doc.status,
       isFavorite: doc.isFavorite ?? false,
       isArchived: doc.isArchived ?? false,
       isDeleted: doc.isDeleted ?? false,
       replyCount: doc.replyCount ?? 0,
+      currentCustody: doc.currentCustody || null,
+      custodyUserId: doc.custodyUserId || null,
+      custodyDeptId: doc.custodyDeptId || null,
+      requiresPickup: doc.requiresPickup ?? false,
+      pickedUpAt: doc.pickedUpAt || null,
+      pickedUpBy: doc.pickedUpBy || null,
+      signedProofFileId: doc.signedProofFileId || null,
+      dispatchedAt: doc.dispatchedAt || null,
+      dispatchedBy: doc.dispatchedBy || null,
+      receivedBy: doc.receivedBy || null,
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
     }

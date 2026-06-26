@@ -38,7 +38,7 @@ export default class MembersController {
    */
   async show({ request, response }: HttpContext) {
     const orgId = request.param('orgId')
-    const membershipId = request.param('memberId')
+    const membershipId = request.param('userId')
     const service = new OrganisationService()
     const member = await service.getMember(orgId, membershipId)
 
@@ -46,30 +46,27 @@ export default class MembersController {
   }
 
   /**
-   * Helper to retrieve the requesting user's membership in the organisation.
-   * Returns the membership object if found, or null otherwise.
+   * Helper to resolve a membership by membership ID or user ID.
    */
-  private async getUserMembership(user: any, orgId: string) {
+  private async resolveTargetMembership(orgId: string, memberIdOrUserId: string) {
     try {
+      return await appwrite.teams.getMembership({ teamId: orgId, membershipId: memberIdOrUserId })
+    } catch (error: any) {
+      if (error.code !== 404) {
+        throw error
+      }
+
       const memberships = await appwrite.teams.listMemberships({
         teamId: orgId,
-        queries: [Query.equal('userId', user?.$id || '')],
+        queries: [Query.equal('userId', memberIdOrUserId)],
       })
 
-      if (memberships.total === 0) return null
-      return memberships.memberships[0] ?? null
-    } catch {
-      return null
-    }
-  }
+      if (memberships.total === 0) {
+        throw error
+      }
 
-  /**
-   * Helper to verify if the requesting user is an owner or admin of the organisation.
-   */
-  private async checkAdminAccess(user: any, orgId: string): Promise<boolean> {
-    const membership = await this.getUserMembership(user, orgId)
-    if (!membership) return false
-    return membership.roles?.some((r: string) => ['owner', 'admin'].includes(r)) ?? false
+      return memberships.memberships[0]
+    }
   }
 
   /**
@@ -77,11 +74,10 @@ export default class MembersController {
    * Add a new member to the organisation by email address.
    * Using the admin API key means the membership is confirmed instantly.
    */
-  async store({ request, response, user }: HttpContext) {
+  async store({ request, response, isOrgAdmin }: HttpContext) {
     const orgId = request.param('orgId')
 
-    const isAdmin = await this.checkAdminAccess(user, orgId)
-    if (!isAdmin) {
+    if (!isOrgAdmin) {
       return response.forbidden({
         message: 'Only organisation owners or admins can add members.',
       })
@@ -112,7 +108,7 @@ export default class MembersController {
     )
     const selectedDepartmentIds = departmentAssignments.map((assignment) => assignment.departmentId)
 
-    if (role !== 'admin' && departmentAssignments.length === 0) {
+    if (role !== 'admin' && role !== 'secretariat' && departmentAssignments.length === 0) {
       return response.badRequest({
         message: 'At least one department must be provided for non-admin members.',
       })
@@ -136,6 +132,15 @@ export default class MembersController {
 
     const service = new OrganisationService()
     const membership = await service.addMember(orgId, email, [role], name)
+
+    if (role === 'secretariat') {
+      try {
+        await service.ensureCourierDepartmentAndSecretariatMembers(orgId)
+      } catch (err: any) {
+        // Log error but do not fail the request
+        console.error('Failed to auto-assign secretariat member to Courier Service department', err)
+      }
+    }
 
     if (departmentAssignments.length > 0) {
       try {
@@ -178,16 +183,11 @@ export default class MembersController {
    * PATCH /api/v1/organisations/:orgId/members/:memberId
    * Update a member's roles within the organisation.
    */
-  async update({ request, response, user }: HttpContext) {
+  async update({ request, response, isOrgAdmin, isOrgOwner }: HttpContext) {
     const orgId = request.param('orgId')
-    const membershipId = request.param('memberId')
+    const membershipId = request.param('userId')
 
-    // Fetch the requester's membership to determine their privileges
-    const requesterMembership = await this.getUserMembership(user, orgId)
-    const requesterRoles: string[] = requesterMembership?.roles ?? []
-    const requesterIsAdmin = requesterRoles.some((r) => ['owner', 'admin'].includes(r))
-
-    if (!requesterIsAdmin) {
+    if (!isOrgAdmin) {
       return response.forbidden({
         message: 'Only organisation owners or admins can update members.',
       })
@@ -199,16 +199,12 @@ export default class MembersController {
     let updatedMembership: any = null
 
     // Fetch the target member's current membership
-    const membership = await appwrite.teams.getMembership({
-      teamId: orgId,
-      membershipId,
-    })
+    const membership = await this.resolveTargetMembership(orgId, membershipId)
 
     const targetIsOwner = membership.roles?.includes('owner') ?? false
-    const requesterIsOwner = requesterRoles.includes('owner')
 
     // Block non-owners from modifying an owner's membership
-    if (targetIsOwner && !requesterIsOwner) {
+    if (targetIsOwner && !isOrgOwner) {
       return response.forbidden({
         message: "Only organisation owners can modify another owner's membership.",
       })
@@ -220,7 +216,18 @@ export default class MembersController {
       const newRoles = targetIsOwner ? ['owner', role] : [role]
       // Deduplicate in case role === 'owner'
       const uniqueRoles = [...new Set(newRoles)]
-      updatedMembership = await service.updateMember(orgId, membershipId, uniqueRoles)
+      updatedMembership = await service.updateMember(orgId, membership.$id, uniqueRoles)
+
+      if (uniqueRoles.includes('secretariat')) {
+        try {
+          await service.ensureCourierDepartmentAndSecretariatMembers(orgId)
+        } catch (err: any) {
+          console.error(
+            'Failed to auto-assign secretariat member to Courier Service department',
+            err
+          )
+        }
+      }
     }
 
     // 2. If name is provided, update the Appwrite user display name
@@ -233,7 +240,7 @@ export default class MembersController {
       const membersService = await MembersService.forOrg(orgId)
       await membersService.updateDepartmentAssignments({
         userId: membership.userId,
-        membershipId,
+        membershipId: membership.$id,
         departments,
         jobTitle,
       })
@@ -254,22 +261,18 @@ export default class MembersController {
    * DELETE /api/v1/organisations/:orgId/members/:memberId
    * Remove a member from the organisation.
    */
-  async destroy({ request, response, user }: HttpContext) {
+  async destroy({ request, response, isOrgAdmin }: HttpContext) {
     const orgId = request.param('orgId')
-    const membershipId = request.param('memberId')
+    const membershipId = request.param('userId')
 
-    const isAdmin = await this.checkAdminAccess(user, orgId)
-    if (!isAdmin) {
+    if (!isOrgAdmin) {
       return response.forbidden({
         message: 'Only organisation owners or admins can remove members.',
       })
     }
 
     // Fetch the target member and block removal of owners
-    const targetMembership = await appwrite.teams.getMembership({
-      teamId: orgId,
-      membershipId,
-    })
+    const targetMembership = await this.resolveTargetMembership(orgId, membershipId)
 
     if (targetMembership.roles?.includes('owner')) {
       return response.forbidden({
@@ -278,7 +281,7 @@ export default class MembersController {
     }
 
     const service = new OrganisationService()
-    await service.removeMember(orgId, membershipId)
+    await service.removeMember(orgId, targetMembership.$id)
 
     return response.noContent()
   }

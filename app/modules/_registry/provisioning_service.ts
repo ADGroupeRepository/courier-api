@@ -1,6 +1,7 @@
 import appwrite from '#services/appwrite_service'
 import { MODULE_REGISTRY } from './module_registry.js'
 import logger from '@adonisjs/core/services/logger'
+import OrganisationService from '#modules/organisations/organisation_service'
 
 export default class ModuleProvisioningService {
   /**
@@ -169,6 +170,18 @@ export default class ModuleProvisioningService {
         teamId: orgId,
         prefs: { ...prefs, modules: activeModules },
       })
+    }
+
+    if (moduleName === 'courier') {
+      try {
+        const orgService = new OrganisationService()
+        await orgService.ensureCourierDepartmentAndSecretariatMembers(orgId)
+      } catch (err: any) {
+        logger.error(
+          { orgId, err: err.message },
+          '[ModuleProvisioning] Failed to setup courier department & secretariat members'
+        )
+      }
     }
 
     logger.info({ orgId, moduleName }, '[ModuleProvisioning] Module activated successfully.')
