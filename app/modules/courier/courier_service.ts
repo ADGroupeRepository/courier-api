@@ -673,7 +673,11 @@ export default class CourierService {
     }
   }
 
-  private async mapDocument(doc: any, assignments: CourierAssignment[], userCache?: Map<string, any>) {
+  private async mapDocument(
+    doc: any,
+    assignments: CourierAssignment[],
+    userCache?: Map<string, any>
+  ) {
     const fileIds = Array.isArray(doc.fileIds) ? doc.fileIds.filter(Boolean) : []
     const fileUrls = fileIds.map(
       (id: string) =>
