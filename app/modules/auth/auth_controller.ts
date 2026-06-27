@@ -5,6 +5,7 @@ import {
   requestPasswordResetValidator,
   signupValidator,
   updateProfileValidator,
+  registerPushTokenValidator,
 } from '#modules/auth/auth_validator'
 import MembersService from '#modules/directory/members_service'
 import OrganisationService from '#modules/organisations/organisation_service'
@@ -213,5 +214,24 @@ export default class AuthController {
     const authService = new AuthService()
     const result = await authService.confirmPasswordReset(email, otp, password)
     return response.ok({ message: 'Password reset successfully', data: result })
+  }
+
+  /**
+   * POST /api/v1/auth/push-token
+   * Register a new device/push token target for the authenticated user.
+   */
+  async registerPushToken({ request, user, response }: HttpContext) {
+    const payload = await request.validateUsing(registerPushTokenValidator)
+    const notificationServiceModule = await import('#services/notification_service')
+    const notificationService = notificationServiceModule.default
+
+    await notificationService.registerPushToken(user!.$id, {
+      token: payload.token,
+      providerType: payload.providerType || 'push',
+      providerId: payload.providerId,
+      name: payload.name,
+    })
+
+    return response.ok({ message: 'Push token registered successfully' })
   }
 }

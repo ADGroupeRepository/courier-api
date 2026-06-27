@@ -21,6 +21,7 @@ router
     // Protected
     router.get('/profile', [AuthController, 'profile']).use(middleware.auth())
     router.patch('/profile', [AuthController, 'updateProfile']).use(middleware.auth())
+    router.post('/push-token', [AuthController, 'registerPushToken']).use(middleware.auth())
 
     // Protected email verification flows
     router

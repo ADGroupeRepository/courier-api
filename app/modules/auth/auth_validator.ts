@@ -52,3 +52,15 @@ export const updateProfileValidator = vine.create(
     signature: vine.file({ size: '5mb', extnames: ['jpg', 'png', 'jpeg', 'webp'] }).optional(),
   })
 )
+
+/**
+ * Validator for registering a push/messaging target device token.
+ */
+export const registerPushTokenValidator = vine.create(
+  vine.object({
+    token: vine.string().minLength(1).trim(),
+    providerType: vine.enum(['push', 'email', 'sms']).optional(),
+    providerId: vine.string().trim().optional(),
+    name: vine.string().trim().optional(),
+  })
+)

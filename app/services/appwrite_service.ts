@@ -1,4 +1,4 @@
-import { Client, Users, Teams, Databases, Storage, Account } from 'node-appwrite'
+import { Client, Users, Teams, Databases, Storage, Account, Messaging } from 'node-appwrite'
 import appwriteConfig from '#config/appwrite'
 
 /**
@@ -46,6 +46,11 @@ class AppwriteService {
   /** Admin-scoped Storage service (requires API key). */
   get storage() {
     return new Storage(this.adminClient)
+  }
+
+  /** Admin-scoped Messaging service (requires API key). */
+  get messaging() {
+    return new Messaging(this.adminClient)
   }
 
   /**
