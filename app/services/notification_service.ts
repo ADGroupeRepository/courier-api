@@ -1,6 +1,7 @@
 import logger from '@adonisjs/core/services/logger'
 import appwrite from '#services/appwrite_service'
 import { Query, ID, Permission, Role } from 'node-appwrite'
+import type { MessagingProviderType } from 'node-appwrite'
 import MembersService from '#modules/directory/members_service'
 import { Collections } from '#modules/_registry/collection_ids'
 import EmailService from '#services/email_service'
@@ -120,6 +121,12 @@ export default class NotificationService {
       body: bodyText,
       link: `/couriers/${courierId}`,
     })
+
+    // Send Push Notification
+    await this.sendPushNotification([assigneeId], subject, bodyText, {
+      courierId,
+      link: `/couriers/${courierId}`,
+    })
   }
 
   /**
@@ -230,6 +237,11 @@ export default class NotificationService {
             body: bodyText,
             link: `/couriers/${courierId}`,
           })
+
+          await this.sendPushNotification([recipientId], subject, bodyText, {
+            courierId,
+            link: `/couriers/${courierId}`,
+          })
         }
       }
     } catch (err: any) {
@@ -275,6 +287,83 @@ export default class NotificationService {
       body: bodyText,
       link: `/couriers/${courierId}`,
     })
+
+    await this.sendPushNotification([recipientId], subject, bodyText, {
+      courierId,
+      link: `/couriers/${courierId}`,
+    })
+  }
+
+  /**
+   * Registers a push token for a user.
+   * Optimizes by checking if the token is already registered to prevent duplicates.
+   */
+  static async registerPushToken(
+    userId: string,
+    payload: {
+      token: string
+      providerType: 'push' | 'email' | 'sms'
+      providerId?: string
+      name?: string
+    }
+  ): Promise<void> {
+    try {
+      // Check if token already exists for the user to optimize and prevent duplicates
+      const targets = await appwrite.users.listTargets({
+        userId,
+        queries: [Query.equal('identifier', payload.token)],
+      })
+
+      if (targets.total > 0) {
+        logger.info({ userId, token: payload.token }, 'Push token already registered for this user')
+        return
+      }
+
+      // Create the target
+      await appwrite.users.createTarget({
+        userId,
+        targetId: ID.unique(),
+        providerType: payload.providerType as MessagingProviderType,
+        identifier: payload.token,
+        providerId: payload.providerId || undefined,
+        name: payload.name || 'Device Push Target',
+      })
+      logger.info(
+        { userId, providerType: payload.providerType },
+        'Push token registered successfully'
+      )
+    } catch (err: any) {
+      logger.error({ err, userId, payload }, 'Failed to register push token in Appwrite')
+      throw err
+    }
+  }
+
+  /**
+   * Send a push notification to specific users.
+   */
+  static async sendPushNotification(
+    userIds: string[],
+    title: string,
+    body: string,
+    data: Record<string, string> = {}
+  ): Promise<void> {
+    try {
+      const activeUserIds = userIds.filter((id) => id && id.trim() !== '')
+      if (activeUserIds.length === 0) return
+
+      await appwrite.messaging.createPush({
+        messageId: ID.unique(),
+        title,
+        body,
+        topics: [],
+        users: activeUserIds,
+        targets: [],
+        data,
+      })
+      logger.info({ userIds: activeUserIds, title }, 'Push Notification sent successfully')
+    } catch (err: any) {
+      logger.error({ err, userIds, title }, 'Failed to send push notification')
+    }
   }
 }
 
