@@ -764,7 +764,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"handlerUserId\": \"{{memberUserId}}\"\n}"
+              "raw": "{\n  \"handlerUserId\": \"{{memberUserId}}\",\n  \"urgency\": \"urgent\",\n  \"instruction\": \"Veuillez traiter ce courrier dans les plus brefs délais et faire un retour.\"\n}"
             },
             "description": "Permet d'affecter un utilisateur en tant que responsable du traitement d'un courrier (Imputation). Seuls les administrateurs, les membres du secrétariat, le créateur du courrier ou les entités assignées (utilisateurs/départements) disposent des droits nécessaires pour effectuer cette affectation.",
             "url": {
@@ -3662,7 +3662,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"handlerUserId\": \"{{userId}}\"\n}"
+              "raw": "{\n  \"handlerUserId\": \"{{userId}}\",\n  \"urgency\": \"urgent\",\n  \"instruction\": \"Veuillez traiter ce courrier dans les plus brefs délais et faire un retour.\"\n}"
             },
             "description": "Permet d'affecter un utilisateur en tant que responsable du traitement d'un courrier (Imputation). Seuls les administrateurs, les membres du secrétariat, le créateur du courrier ou les entités assignées (utilisateurs/départements) disposent des droits nécessaires.",
             "url": {

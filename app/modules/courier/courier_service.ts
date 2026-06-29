@@ -57,6 +57,7 @@ export interface UpdateCourierPayload {
   dispatchedBy?: string | null
   receivedBy?: string | null
   handlerUserId?: string | null
+  instruction?: string | null
 }
 
 // ── Service ───────────────────────────────────────────────────────────
@@ -1018,6 +1019,7 @@ export default class CourierService {
       createdBy,
       handler,
       handlerUserId: doc.handlerUserId || null,
+      instruction: doc.instruction || null,
       status: doc.status,
       isFavorite: doc.isFavorite ?? false,
       isArchived: doc.isArchived ?? false,

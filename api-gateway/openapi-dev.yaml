@@ -934,6 +934,12 @@ paths:
             properties:
               handlerUserId:
                 type: string
+              urgency:
+                type: string
+                enum: [normal, urgent, very_urgent]
+              instruction:
+                type: string
+                maxLength: 2000
       responses:
         '200':
           description: Success

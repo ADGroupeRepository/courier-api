@@ -130,6 +130,70 @@ export default class NotificationService {
   }
 
   /**
+   * Notify a user about a new courier imputation/handler designation.
+   */
+  static async notifyCourierImputation(
+    orgId: string,
+    courierId: string,
+    assigneeEmail: string,
+    assigneeId: string
+  ): Promise<void> {
+    const subject = `Responsable assigné au courrier`
+    const bodyText = `Vous avez été désigné comme responsable du traitement du courrier ${courierId}. Veuillez l'examiner dans votre tableau de bord.`
+
+    // Send Email
+    await this.sendEmail({
+      to: assigneeEmail,
+      subject,
+      html: buildEmailHtml(
+        subject,
+        `<p style="margin:0 0 16px">Vous avez été désigné comme responsable du traitement d'un courrier.</p>
+        <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+          <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+        </table>
+        <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour l'examiner et le traiter.</p>`,
+        'Voir le courrier'
+      ),
+      text: bodyText,
+    })
+
+    // Send In-App Notification
+    await this.sendInAppNotification(orgId, {
+      userId: assigneeId,
+      title: 'Responsable assigné au courrier',
+      body: bodyText,
+      link: `/couriers/${courierId}`,
+    })
+
+    // Send Push Notification
+    await this.sendPushNotification([assigneeId], subject, bodyText, {
+      courierId,
+      link: `/couriers/${courierId}`,
+    })
+  }
+
+  /**
+   * Notify a user that they have been designated as handler/imputer.
+   */
+  static async notifyImputation(
+    orgId: string,
+    courierId: string,
+    handlerUserId: string
+  ): Promise<void> {
+    try {
+      const email = await this.getEmailByUserId(orgId, handlerUserId)
+      if (email) {
+        await this.notifyCourierImputation(orgId, courierId, email, handlerUserId)
+      }
+    } catch (err: any) {
+      logger.error(
+        { err, orgId, courierId, handlerUserId },
+        'Failed to send courier imputation notifications'
+      )
+    }
+  }
+
+  /**
    * Notify assignee (user or department members) about a new courier assignment.
    */
   static async notifyAssignment(
