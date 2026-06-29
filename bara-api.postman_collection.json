@@ -3908,16 +3908,8 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{contactId}}/couriers",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "organisations",
-                "{{orgId}}",
-                "contacts",
-                "{{contactId}}",
-                "couriers"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "contacts", "{{contactId}}", "couriers"]
             },
             "description": "Récupère la liste simplifiée de tous les courriers associés à ce contact externe (expéditeur ou destinataire)."
           },
