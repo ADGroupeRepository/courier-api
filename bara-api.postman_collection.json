@@ -4221,6 +4221,90 @@
             "description": "Permet aux membres du secrétariat ou aux administrateurs d'enregistrer l'expédition externe d'un courrier sortant."
           },
           "response": []
+        },
+        {
+          "name": "Affecter un responsable au courrier (Imputer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"handlerUserId\": \"{{userId}}\"\n}"
+            },
+            "description": "Permet d'affecter un utilisateur en tant que responsable du traitement d'un courrier (Imputation). Seuls les administrateurs, les membres du secrétariat, le créateur du courrier ou les entités assignées (utilisateurs/départements) disposent des droits nécessaires.",
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/impute",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "impute"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lister les activités d'un courrier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "activities"
+              ]
+            },
+            "description": "Permet de récupérer l'historique complet d'activité (logs d'audit) d'un courrier spécifique. Tout utilisateur ayant accès au courrier peut consulter son historique."
+          },
+          "response": []
         }
       ]
     },
