@@ -5,8 +5,6 @@ import {
   createExternalContactValidator,
   updateExternalContactValidator,
 } from '#modules/external_contacts/external_contact_validator'
-import appwrite from '#services/appwrite_service'
-import { Query } from 'node-appwrite'
 
 export default class ExternalContactsController {
   private readonly missingCollectionMessage =
@@ -26,25 +24,7 @@ export default class ExternalContactsController {
     })
   }
 
-  /**
-   * Helper to get user roles in an organisation.
-   */
-  private async getUserContext(user: any, orgId: string) {
-    const memberships = await appwrite.teams.listMemberships({
-      teamId: orgId,
-      queries: [Query.equal('userId', user?.$id || '')],
-    })
 
-    if (memberships.total === 0) {
-      throw new Error('User is not a member of this organisation')
-    }
-
-    const membership = memberships.memberships[0]
-    const roles = membership?.roles || []
-    const canManage = roles.some((r) => ['owner', 'admin'].includes(r))
-
-    return { roles, canManage }
-  }
 
   /**
    * GET /api/v1/organisations/:orgId/contacts
@@ -172,13 +152,12 @@ export default class ExternalContactsController {
   /**
    * DELETE /api/v1/organisations/:orgId/contacts/:id
    */
-  async destroy({ user, params, response }: HttpContext) {
-    try {
-      const { canManage } = await this.getUserContext(user, params.orgId)
-      if (!canManage) {
-        return response.forbidden({ message: 'Only admins can delete contacts' })
-      }
+  async destroy({ params, response, isOrgAdmin, isOrgSecretariat }: HttpContext) {
+    if (!isOrgAdmin && !isOrgSecretariat) {
+      return response.forbidden({ message: 'Only admins or secretariat can delete contacts' })
+    }
 
+    try {
       const service = await ExternalContactService.forOrg(params.orgId)
       await service.delete(params.id)
       return response.ok({ message: 'Contact deleted successfully' })

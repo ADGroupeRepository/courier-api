@@ -46,9 +46,15 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/signup",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "signup"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Enregistre un nouveau compte utilisateur propriétaire sur Bara. Cette requête initie le flux complet en créant l'utilisateur principal qui servira de Manager ou de Propriétaire de l'organisation."
           }
         },
         {
@@ -84,9 +90,16 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "email"]
-            }
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "email"
+              ]
+            },
+            "description": "Se connecte au serveur d'authentification Appwrite avec l'adresse e-mail et le mot de passe du propriétaire afin d'initier la session active."
           }
         },
         {
@@ -122,9 +135,15 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/jwts",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "jwts"]
-            }
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "jwts"
+              ]
+            },
+            "description": "Génère un jeton Web JSON (JWT) sécurisé pour le propriétaire depuis le client Appwrite. Ce JWT est requis pour authentifier les appels subséquents sur les routes protégées de l'API Bara."
           }
         },
         {
@@ -159,9 +178,14 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations",
-              "host": ["{{base_url}}"],
-              "path": ["organisations"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations"
+              ]
+            },
+            "description": "Crée une nouvelle organisation isolée multi-locataire (Tenant). Cette opération crée l'équipe Appwrite correspondante, alloue une base de données de locataire isolée ainsi qu'un espace de stockage de documents (Bucket)."
           }
         },
         {
@@ -192,9 +216,15 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/signup",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "signup"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Enregistre le compte utilisateur d'un membre collaborateur (User B) sur la plateforme d'authentification Bara avant son invitation formelle dans l'organisation."
           }
         },
         {
@@ -230,9 +260,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/members",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members"
+              ]
+            },
+            "description": "Envoie une invitation pour associer le membre (User B) à l'organisation avec un rôle spécifique. Cette requête crée la relation d'adhésion au niveau d'Appwrite Teams."
           }
         },
         {
@@ -267,9 +304,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/departments",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "departments"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "departments"
+              ]
+            },
+            "description": "Ajoute un département fonctionnel (par exemple, le Support Client) au sein de la base isolée de l'organisation pour organiser les membres et filtrer la visibilité des courriers."
           }
         },
         {
@@ -292,12 +336,19 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/departments/assign",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "departments", "assign"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "departments",
+                "assign"
+              ]
+            },
+            "description": "Associe un membre d'organisation existant à un département avec un rôle interne (manager ou member) et un titre de poste."
           }
         },
-
         {
           "name": "8.5. Créer un Contact Externe",
           "event": [
@@ -333,9 +384,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "contacts"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts"
+              ]
+            },
+            "description": "Enregistre un correspondant externe (personne physique ou structure) dans le carnet d'adresses de l'organisation pour servir d'expéditeur ou de destinataire officiel de courriers."
           }
         },
         {
@@ -376,9 +434,17 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/upload-url",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "upload-url"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "upload-url"
+              ]
+            },
+            "description": "Génère une cible de téléchargement sécurisée et temporaire (avec un ID unique de fichier et une URL expirant au bout de 15 minutes) dans le Bucket privé de l'organisation."
           }
         },
         {
@@ -426,8 +492,11 @@
             },
             "url": {
               "raw": "{{scenarioCourierUploadUrl}}",
-              "host": ["{{scenarioCourierUploadUrl}}"]
-            }
+              "host": [
+                "{{scenarioCourierUploadUrl}}"
+              ]
+            },
+            "description": "Effectue le téléchargement direct du document physique (simulé par un fichier factice) directement vers le stockage d'Appwrite en utilisant le JWT du propriétaire."
           }
         },
         {
@@ -507,9 +576,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
+            },
+            "description": "Enregistre un courrier entrant ou sortant et l'assigne à un membre spécifique de l'organisation. L'auteur doit disposer du rôle administrateur ou secrétariat pour les courriers entrants."
           }
         },
         {
@@ -584,9 +660,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
+            },
+            "description": "Enregistre un courrier et l'associe à tout un département. Tous les membres du département ciblé hériteront de la visibilité sur ce courrier."
           }
         },
         {
@@ -620,9 +703,16 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "email"]
-            }
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "email"
+              ]
+            },
+            "description": "Permet au membre collaborateur (User B) de s'authentifier auprès de son session Appwrite pour commencer ses activités d'équipe."
           }
         },
         {
@@ -658,9 +748,15 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/jwts",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "jwts"]
-            }
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "jwts"
+              ]
+            },
+            "description": "Génère le JWT du membre collaborateur (User B) pour qu'il puisse appeler les endpoints protégés avec ses propres privilèges."
           }
         },
         {
@@ -686,9 +782,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
+            },
+            "description": "Permet au membre de lister les courriers de son organisation. Le contrôleur filtre automatiquement les résultats pour ne renvoyer que les courriers qui lui sont assignés, ceux de son département ou ceux qu'il a créés."
           }
         },
         {
@@ -711,8 +814,66 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}"
+              ]
+            },
+            "description": "Permet au membre assigné de mettre à jour les métadonnées ou le statut d'un courrier (par exemple le marquer comme complété)."
+          }
+        },
+        {
+          "name": "14.5. Affecter un responsable au courrier (Imputer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Le responsable a été correctement assigné', function () {",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "    pm.expect(jsonData.data.handlerUserId).to.equal(pm.collectionVariables.get('memberUserId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_member}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"handlerUserId\": \"{{memberUserId}}\"\n}"
+            },
+            "description": "Permet d'affecter un utilisateur en tant que responsable du traitement d'un courrier (Imputation). Seuls les administrateurs, les membres du secrétariat, le créateur du courrier ou les entités assignées (utilisateurs/départements) disposent des droits nécessaires pour effectuer cette affectation.",
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}/impute",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}",
+                "impute"
+              ]
             }
           }
         },
@@ -739,9 +900,17 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}"
+              ]
+            },
+            "description": "Valide la sécurité du système en tentant de supprimer un courrier avec le jeton d'un simple membre. Cette requête doit échouer avec un code 403 Forbidden car seuls les administrateurs ou le créateur peuvent supprimer un courrier."
           }
         },
         {
@@ -772,9 +941,15 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/signup",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "signup"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Crée le compte d'un troisième utilisateur (User C) afin de valider les règles de cloisonnement et d'isolation des informations."
           }
         },
         {
@@ -808,9 +983,16 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "email"]
-            }
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "email"
+              ]
+            },
+            "description": "Initie la session Appwrite pour le membre non assigné (User C) afin de préparer son JWT."
           }
         },
         {
@@ -846,9 +1028,15 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/jwts",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "jwts"]
-            }
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "jwts"
+              ]
+            },
+            "description": "Génère le JWT du membre non assigné (User C) pour exécuter des requêtes tests sous sa perspective."
           }
         },
         {
@@ -882,9 +1070,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/members",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members"
+              ]
+            },
+            "description": "Associe le membre non assigné (User C) à l'organisation sans lui assigner aucun courrier ni département actif."
           }
         },
         {
@@ -914,9 +1109,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
+            },
+            "description": "Valide les règles de cloisonnement : le membre non assigné (User C) appelle la liste des courriers et doit recevoir une liste vide (0 élément), car il n'est ni créateur, ni assigné, ni membre d'un département assigné."
           }
         },
         {
@@ -950,9 +1152,17 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}"
+              ]
+            },
+            "description": "Tente de modifier un courrier depuis le jeton de User C. Doit renvoyer un code 403 car cet utilisateur n'a aucun droit de traitement sur ce courrier."
           }
         },
         {
@@ -980,9 +1190,17 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}"
+              ]
+            },
+            "description": "Supprime proprement le courrier test créé pour libérer les ressources de la base de données isolée."
           }
         },
         {
@@ -1010,9 +1228,17 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{scenarioContactId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "contacts", "{{scenarioContactId}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts",
+                "{{scenarioContactId}}"
+              ]
+            },
+            "description": "Supprime le contact factice créé pour le scénario du carnet d'adresses externe."
           }
         },
         {
@@ -1040,9 +1266,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}"
+              ]
+            },
+            "description": "Supprime complètement l'organisation et toutes ses ressources (base de données, bucket) afin de nettoyer les traces des tests d'intégration."
           }
         }
       ]
@@ -1054,8 +1286,12 @@
         "header": [],
         "url": {
           "raw": "{{base_url}}/",
-          "host": ["{{base_url}}"],
-          "path": [""]
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            ""
+          ]
         },
         "description": "Vérifie l'état de santé du serveur."
       },
@@ -1090,8 +1326,12 @@
             ],
             "url": {
               "raw": "{{base_url}}/plans",
-              "host": ["{{base_url}}"],
-              "path": ["plans"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "plans"
+              ]
             },
             "description": "Affiche la liste des plans actifs disponibles pour inscription."
           },
@@ -1109,8 +1349,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/plans/{{planId}}",
-              "host": ["{{base_url}}"],
-              "path": ["plans", "{{planId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "plans",
+                "{{planId}}"
+              ]
             },
             "description": "Affiche les détails complets d'un plan spécifique."
           },
@@ -1138,8 +1383,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/signup",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "signup"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
             },
             "description": "Permet de créer un nouvel utilisateur."
           },
@@ -1178,8 +1428,14 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "email"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "email"
+              ]
             },
             "description": "Authentifie l'utilisateur directement auprès d'Appwrite et crée une session active."
           },
@@ -1218,8 +1474,13 @@
             },
             "url": {
               "raw": "{{appwrite_endpoint}}/account/jwts",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "jwts"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "jwts"
+              ]
             },
             "description": "Génère un token JWT client-side temporaire pour signer les requêtes vers l'API Bara."
           },
@@ -1256,8 +1517,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/auth/profile",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "profile"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
             },
             "description": "Récupère les informations de l'utilisateur actuellement connecté (id, name, email, phone, avatarUrl), y compris la liste de ses organisations avec une structure à plat simplifiée contenant : les rôles du membre ('roles'), le statut de l'abonnement ('subscriptionStatus': 'none'|'pending'|'active'|'grace_period'|'expired'), si l'abonnement est actif ('hasActiveSubscription'), si le membre possède une licence active ('hasValidLicense'), le nom du plan ('planName'), le slug du plan ('planSlug'), la date d'expiration de l'abonnement ('expiresAt') et les jours restants ('daysRemaining')."
           },
@@ -1288,8 +1554,14 @@
             ],
             "url": {
               "raw": "{{appwrite_endpoint}}/account/sessions/current",
-              "host": ["{{appwrite_endpoint}}"],
-              "path": ["account", "sessions", "current"]
+              "host": [
+                "{{appwrite_endpoint}}"
+              ],
+              "path": [
+                "account",
+                "sessions",
+                "current"
+              ]
             },
             "description": "Déconnecte l'utilisateur en supprimant sa session active sur Appwrite."
           },
@@ -1345,8 +1617,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/profile",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "profile"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
             },
             "description": "Met à jour les informations de profil de l'utilisateur (nom, téléphone, avatar, signature)."
           },
@@ -1368,8 +1645,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/forgot-password",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "forgot-password"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
             },
             "description": "Demande l'envoi d'un e-mail de réinitialisation du mot de passe pour l'adresse e-mail fournie."
           },
@@ -1391,8 +1673,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/forgot-password",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "forgot-password"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
             },
             "description": "Confirme la réinitialisation du mot de passe avec l'identifiant utilisateur, le code secret reçu par e-mail et le nouveau mot de passe."
           },
@@ -1418,8 +1705,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/verify-email",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "verify-email"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify-email"
+              ]
             },
             "description": "Demande l'envoi d'un e-mail contenant un lien de vérification de l'adresse e-mail pour l'utilisateur connecté."
           },
@@ -1445,8 +1737,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/verify-email",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "verify-email"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify-email"
+              ]
             },
             "description": "Confirme la vérification de l'adresse e-mail avec l'identifiant de l'utilisateur et le code secret reçu."
           },
@@ -1470,8 +1767,12 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations",
-              "host": ["{{base_url}}"],
-              "path": ["organisations"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations"
+              ]
             },
             "description": "Affiche la liste des organisations auxquelles l'utilisateur appartient avec leurs informations de base (id, name, membersCount, logoUrl, createdAt, updatedAt)."
           },
@@ -1510,8 +1811,12 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations",
-              "host": ["{{base_url}}"],
-              "path": ["organisations"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations"
+              ]
             },
             "description": "Crée une nouvelle organisation et définit l'utilisateur comme propriétaire."
           },
@@ -1552,8 +1857,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}"
+              ]
             },
             "description": "Affiche les détails d'une organisation spécifique."
           },
@@ -1592,8 +1902,13 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}"
+              ]
             },
             "description": "Met à jour les informations de l'organisation."
           },
@@ -1624,8 +1939,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}"
+              ]
             },
             "description": "Supprime une organisation (nécessite des droits d'administration)."
           },
@@ -1666,8 +1986,14 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/logo",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "logo"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "logo"
+              ]
             },
             "description": "Met à jour le logo de l'organisation."
           },
@@ -1685,8 +2011,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/subscription",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "subscription"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "subscription"
+              ]
             },
             "description": "Affiche les détails de la souscription de l'organisation (statut calculé: 'active', 'grace_period', 'expired', 'pending', 'rejected' ou 'none') ainsi que la consommation des ressources et sièges de licence."
           },
@@ -1712,8 +2044,14 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/subscription",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "subscription"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "subscription"
+              ]
             },
             "description": "Permet à l'owner de l'organisation de s'abonner à un plan. La souscription est créée à l'état en attente ('status': 'pending', 'isActive': false) et doit être approuvée par un administrateur pour être active."
           },
@@ -1750,8 +2088,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/licenses",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "licenses"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "licenses"
+              ]
             },
             "description": "Lister tous les sièges (licences) assignés aux membres."
           },
@@ -1777,8 +2121,15 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/licenses/assign",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "licenses", "assign"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "licenses",
+                "assign"
+              ]
             },
             "description": "Assigne une licence de siège à un membre spécifique."
           },
@@ -1804,8 +2155,15 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/licenses/revoke",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "licenses", "revoke"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "licenses",
+                "revoke"
+              ]
             },
             "description": "Révoque une licence de siège d'un membre spécifique."
           },
@@ -1829,8 +2187,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/members",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members"
+              ]
             },
             "description": "Affiche tous les membres d'une organisation donnée."
           },
@@ -1869,8 +2233,14 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/members",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members"
+              ]
             },
             "description": "Ajoute un nouvel utilisateur ou invite un utilisateur existant à rejoindre l'organisation."
           },
@@ -1908,8 +2278,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/members/{{userId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members", "{{userId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members",
+                "{{userId}}"
+              ]
             },
             "description": "Récupère les détails d'un membre spécifique au sein de l'organisation."
           },
@@ -1948,8 +2325,15 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/members/{{userId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members", "{{userId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members",
+                "{{userId}}"
+              ]
             },
             "description": "Met à jour les rôles attribués à un membre spécifique."
           },
@@ -1980,8 +2364,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/members/{{userId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "members", "{{userId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "members",
+                "{{userId}}"
+              ]
             },
             "description": "Supprime un utilisateur de l'organisation."
           },
@@ -2018,8 +2409,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/modules",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "modules"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "modules"
+              ]
             },
             "description": "Récupère la liste des modules actuellement activés pour l'organisation."
           },
@@ -2045,8 +2442,14 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/modules",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "modules"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "modules"
+              ]
             },
             "description": "Active un nouveau module pour l'organisation et provisionne les ressources nécessaires."
           },
@@ -2064,8 +2467,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/modules/directory",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "modules", "directory"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "modules",
+                "directory"
+              ]
             },
             "description": "Désactive un module pour l'organisation (les données sont conservées)."
           },
@@ -2089,8 +2499,12 @@
             ],
             "url": {
               "raw": "{{base_url}}/modules",
-              "host": ["{{base_url}}"],
-              "path": ["modules"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "modules"
+              ]
             },
             "description": "Affiche tous les modules publiés et disponibles à l'activation."
           },
@@ -2122,8 +2536,13 @@
             },
             "url": {
               "raw": "{{base_url}}/admin/marketplace",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "marketplace"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "marketplace"
+              ]
             },
             "description": "Publie un module du code vers le marketplace."
           },
@@ -2141,8 +2560,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/admin/marketplace/directory",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "marketplace", "directory"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "marketplace",
+                "directory"
+              ]
             },
             "description": "Retire un module du marketplace."
           },
@@ -2160,8 +2585,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/admin/plans",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "plans"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans"
+              ]
             },
             "description": "Affiche tous les plans."
           },
@@ -2187,8 +2617,13 @@
             },
             "url": {
               "raw": "{{base_url}}/admin/plans",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "plans"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans"
+              ]
             },
             "description": "Crée un nouveau plan de tarification."
           },
@@ -2214,8 +2649,14 @@
             },
             "url": {
               "raw": "{{base_url}}/admin/plans/{{planId}}",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "plans", "{{planId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans",
+                "{{planId}}"
+              ]
             },
             "description": "Met à jour un plan existant."
           },
@@ -2233,8 +2674,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/admin/plans/{{planId}}",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "plans", "{{planId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans",
+                "{{planId}}"
+              ]
             },
             "description": "Supprime un plan existant."
           },
@@ -2252,8 +2699,13 @@
             ],
             "url": {
               "raw": "{{base_url}}/admin/subscriptions",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "subscriptions"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions"
+              ]
             },
             "description": "Affiche tous les abonnements émis."
           },
@@ -2279,8 +2731,13 @@
             },
             "url": {
               "raw": "{{base_url}}/admin/subscriptions",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "subscriptions"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions"
+              ]
             },
             "description": "Émet un abonnement manuel pour une organisation."
           },
@@ -2306,8 +2763,14 @@
             },
             "url": {
               "raw": "{{base_url}}/admin/subscriptions/{{subscriptionId}}",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "subscriptions", "{{subscriptionId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions",
+                "{{subscriptionId}}"
+              ]
             },
             "description": "Modifie les détails ou le statut ('pending', 'active', 'rejected') d'un abonnement."
           },
@@ -2333,8 +2796,14 @@
             },
             "url": {
               "raw": "{{base_url}}/admin/subscriptions/{{subscriptionId}}",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "subscriptions", "{{subscriptionId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions",
+                "{{subscriptionId}}"
+              ]
             },
             "description": "Approuve un abonnement en attente en le passant à l'état actif, ce qui provisionne automatiquement le premier siège de licence pour l'organisation."
           },
@@ -2360,8 +2829,14 @@
             },
             "url": {
               "raw": "{{base_url}}/admin/subscriptions/{{subscriptionId}}",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "subscriptions", "{{subscriptionId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "subscriptions",
+                "{{subscriptionId}}"
+              ]
             },
             "description": "Rejette un abonnement, interdisant toute opération ultérieure pour l'organisation."
           },
@@ -2379,8 +2854,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/admin/plans/{{planId}}/usage",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "plans", "{{planId}}", "usage"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "plans",
+                "{{planId}}",
+                "usage"
+              ]
             },
             "description": "Permet de voir le nombre de souscriptions actives/émises pour un plan donné."
           },
@@ -2421,8 +2903,14 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/departments",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "departments"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments"
+                  ]
                 },
                 "description": "Affiche tous les départements d'une organisation donnée."
               },
@@ -2448,8 +2936,14 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/departments",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "departments"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments"
+                  ]
                 },
                 "description": "Crée un nouveau département dans l'organisation."
               },
@@ -2488,8 +2982,15 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "departments", "{{deptId}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
                 },
                 "description": "Récupère les détails d'un département spécifique."
               },
@@ -2515,8 +3016,15 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "departments", "{{deptId}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
                 },
                 "description": "Met à jour les informations d'un département."
               },
@@ -2534,8 +3042,15 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/departments/{{deptId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "departments", "{{deptId}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}"
+                  ]
                 },
                 "description": "Supprime un département de l'organisation."
               },
@@ -2567,8 +3082,15 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/departments/assign",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "departments", "assign"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "assign"
+                  ]
                 },
                 "description": "Assigne un membre de l'organisation à un département spécifique."
               },
@@ -2586,8 +3108,16 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/departments/{{deptId}}/members",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "departments", "{{deptId}}", "members"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "departments",
+                    "{{deptId}}",
+                    "members"
+                  ]
                 },
                 "description": "Récupère la liste des membres affectés à un département."
               },
@@ -2605,8 +3135,15 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/profiles/{{profileId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "profiles", "{{profileId}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "profiles",
+                    "{{profileId}}"
+                  ]
                 },
                 "description": "Supprime le profil d'un membre (le retire de son département)."
               },
@@ -2630,8 +3167,15 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/notifications/read-all",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "notifications", "read-all"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "notifications",
+                    "read-all"
+                  ]
                 },
                 "description": "Marque toutes les notifications non lues de l'utilisateur comme lues."
               },
@@ -2649,7 +3193,9 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/notifications/{{notificationId}}/read",
-                  "host": ["{{base_url}}"],
+                  "host": [
+                    "{{base_url}}"
+                  ],
                   "path": [
                     "organisations",
                     "{{orgId}}",
@@ -2682,8 +3228,14 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/notifications",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "notifications"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "notifications"
+                  ]
                 },
                 "description": "Supprime plusieurs notifications spécifiées par leurs IDs."
               },
@@ -2701,8 +3253,15 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/organisations/{{orgId}}/notifications/{{notificationId}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["organisations", "{{orgId}}", "notifications", "{{notificationId}}"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "organisations",
+                    "{{orgId}}",
+                    "notifications",
+                    "{{notificationId}}"
+                  ]
                 },
                 "description": "Supprime une notification spécifique."
               },
@@ -2728,8 +3287,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             },
             "description": "Affiche tous les courriers d'une organisation."
           },
@@ -2768,8 +3333,15 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/upload-url",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "upload-url"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "upload-url"
+              ]
             },
             "description": "Prépare un ou plusieurs targets d'upload direct pour déposer des documents associés à un courrier."
           },
@@ -2891,8 +3463,14 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             },
             "description": "Enregistre un nouveau courrier dans le système avec le fichier téléversé lié."
           },
@@ -2981,8 +3559,14 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers"
+              ]
             },
             "description": "Enregistre un nouveau courrier sortant."
           },
@@ -3013,8 +3597,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}"
+              ]
             },
             "description": "Affiche les informations complètes d'un courrier spécifique par son identifiant."
           },
@@ -3053,8 +3644,15 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}"
+              ]
             },
             "description": "Permet de modifier les métadonnées d'un courrier (sujet, urgence, assignation, etc.)."
           },
@@ -3085,8 +3683,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}"
+              ]
             },
             "description": "Déplace le courrier dans la corbeille (panier)."
           },
@@ -3117,8 +3722,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/force",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "force"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "force"
+              ]
             },
             "description": "Supprime définitivement un courrier."
           },
@@ -3149,8 +3762,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/restore",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "restore"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "restore"
+              ]
             },
             "description": "Restaure un courrier depuis la corbeille."
           },
@@ -3185,8 +3806,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/messages",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "messages"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "messages"
+              ]
             },
             "description": "Récupère l'historique du chat interne pour ce courrier."
           },
@@ -3236,8 +3865,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/messages",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "messages"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "messages"
+              ]
             },
             "description": "Envoie un message de chat avec option de fichier attaché pour ce courrier."
           },
@@ -3272,8 +3909,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/replies",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "replies"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "replies"
+              ]
             },
             "description": "Récupère les réponses officielles associées à ce courrier."
           },
@@ -3349,8 +3994,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}/replies",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}", "replies"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}",
+                "replies"
+              ]
             },
             "description": "Initie une réponse officielle pour ce courrier (form-data)."
           },
@@ -3393,7 +4046,9 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/replies/{{replyId}}",
-              "host": ["{{base_url}}"],
+              "host": [
+                "{{base_url}}"
+              ],
               "path": [
                 "organisations",
                 "{{orgId}}",
@@ -3440,8 +4095,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/pickup",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "pickup"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "pickup"
+              ]
             },
             "description": "Permet aux membres du secrétariat ou aux administrateurs d'enregistrer la collecte physique d'un courrier."
           },
@@ -3467,8 +4130,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/handover",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "handover"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "handover"
+              ]
             },
             "description": "Permet d'enregistrer la remise physique d'un courrier à un destinataire (utilisateur ou département)."
           },
@@ -3494,8 +4165,16 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/dispatch",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "dispatch"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId}}",
+                "dispatch"
+              ]
             },
             "description": "Permet aux membres du secrétariat ou aux administrateurs d'enregistrer l'expédition externe d'un courrier sortant."
           },
@@ -3519,8 +4198,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts?type=personne",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "contacts"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts"
+              ],
               "query": [
                 {
                   "key": "type",
@@ -3586,8 +4271,14 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "contacts"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts"
+              ]
             }
           },
           "response": []
@@ -3612,8 +4303,15 @@
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{contactId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts",
+                "{{contactId}}"
+              ]
             }
           },
           "response": [],
@@ -3643,8 +4341,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{contactId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts",
+                "{{contactId}}"
+              ]
             }
           },
           "response": [],
@@ -3674,8 +4379,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{contactId}}",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "contacts", "{{contactId}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "contacts",
+                "{{contactId}}"
+              ]
             },
             "description": "Récupère les détails d'un contact externe par son identifiant unique."
           },

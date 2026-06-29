@@ -248,11 +248,76 @@ export default class CourierService {
         collectionId: this.collectionId,
         queries: baseQueries,
       })
+
+      // Fetch user states for these couriers to compute isNew/isOpened
+      const userStatesMap = new Map<string, any>()
+      if (result.documents.length > 0) {
+        try {
+          const statesResult = await appwrite.databases.listDocuments({
+            databaseId: this.databaseId,
+            collectionId: Collections.COURIER_USER_STATES,
+            queries: [
+              Query.equal('userId', options.userId),
+              Query.equal('courierId', result.documents.map((d: any) => d.$id)),
+              Query.limit(100),
+            ],
+          })
+          for (const doc of statesResult.documents) {
+            userStatesMap.set(doc.courierId, doc)
+          }
+        } catch (err) {
+          logger.warn({ err, userId: options.userId }, 'Failed to fetch user states for list')
+        }
+      }
+
+      const documents = await Promise.all(
+        result.documents.map((doc) => {
+          const state = userStatesMap.get(doc.$id)
+          const isNew = state ? !state.isListed : true
+          const isOpened = state ? state.isOpened : false
+          return this.mapDocumentWithAssignments(doc, userCache, isNew, isOpened)
+        })
+      )
+
+      // Background update states: mark as listed so they aren't new next time
+      if (result.documents.length > 0) {
+        const updateOrCreateStates = async () => {
+          for (const doc of result.documents) {
+            const state = userStatesMap.get(doc.$id)
+            try {
+              if (!state) {
+                await appwrite.databases.createDocument({
+                  databaseId: this.databaseId,
+                  collectionId: Collections.COURIER_USER_STATES,
+                  documentId: ID.unique(),
+                  data: {
+                    courierId: doc.$id,
+                    userId: options.userId,
+                    isOpened: false,
+                    isListed: true,
+                  },
+                })
+              } else if (!state.isListed) {
+                await appwrite.databases.updateDocument({
+                  databaseId: this.databaseId,
+                  collectionId: Collections.COURIER_USER_STATES,
+                  documentId: state.$id,
+                  data: {
+                    isListed: true,
+                  },
+                })
+              }
+            } catch (err) {
+              logger.warn({ err, courierId: doc.$id }, 'Failed to background update courier state')
+            }
+          }
+        }
+        updateOrCreateStates().catch((err) => logger.error({ err }, 'Error in background states update'))
+      }
+
       return {
         total: result.total,
-        documents: await Promise.all(
-          result.documents.map((doc) => this.mapDocumentWithAssignments(doc, userCache))
-        ),
+        documents,
       }
     }
 
@@ -299,11 +364,75 @@ export default class CourierService {
       queries: baseQueries,
     })
 
+    // Fetch user states for these couriers to compute isNew/isOpened
+    const userStatesMap = new Map<string, any>()
+    if (result.documents.length > 0) {
+      try {
+        const statesResult = await appwrite.databases.listDocuments({
+          databaseId: this.databaseId,
+          collectionId: Collections.COURIER_USER_STATES,
+          queries: [
+            Query.equal('userId', options.userId),
+            Query.equal('courierId', result.documents.map((d: any) => d.$id)),
+            Query.limit(100),
+          ],
+        })
+        for (const doc of statesResult.documents) {
+          userStatesMap.set(doc.courierId, doc)
+        }
+      } catch (err) {
+        logger.warn({ err, userId: options.userId }, 'Failed to fetch user states for list')
+      }
+    }
+
+    const documents = await Promise.all(
+      result.documents.map((doc) => {
+        const state = userStatesMap.get(doc.$id)
+        const isNew = state ? !state.isListed : true
+        const isOpened = state ? state.isOpened : false
+        return this.mapDocumentWithAssignments(doc, userCache, isNew, isOpened)
+      })
+    )
+
+    // Background update states: mark as listed so they aren't new next time
+    if (result.documents.length > 0) {
+      const updateOrCreateStates = async () => {
+        for (const doc of result.documents) {
+          const state = userStatesMap.get(doc.$id)
+          try {
+            if (!state) {
+              await appwrite.databases.createDocument({
+                databaseId: this.databaseId,
+                collectionId: Collections.COURIER_USER_STATES,
+                documentId: ID.unique(),
+                data: {
+                  courierId: doc.$id,
+                  userId: options.userId,
+                  isOpened: false,
+                  isListed: true,
+                },
+              })
+            } else if (!state.isListed) {
+              await appwrite.databases.updateDocument({
+                databaseId: this.databaseId,
+                collectionId: Collections.COURIER_USER_STATES,
+                documentId: state.$id,
+                data: {
+                  isListed: true,
+                },
+              })
+            }
+          } catch (err) {
+            logger.warn({ err, courierId: doc.$id }, 'Failed to background update courier state')
+          }
+        }
+      }
+      updateOrCreateStates().catch((err) => logger.error({ err }, 'Error in background states update'))
+    }
+
     return {
       total: result.total,
-      documents: await Promise.all(
-        result.documents.map((doc) => this.mapDocumentWithAssignments(doc, userCache))
-      ),
+      documents,
     }
   }
 
@@ -312,14 +441,68 @@ export default class CourierService {
    * @param courierId - The ID of the courier to retrieve.
    * @returns The mapped courier document with assignments.
    */
-  async get(courierId: string) {
+  async get(courierId: string, currentUserId?: string) {
     const doc = await appwrite.databases.getDocument({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
       documentId: courierId,
     })
 
-    return this.mapDocumentWithAssignments(doc)
+    let isNew = false
+    let isOpened = false
+
+    if (currentUserId) {
+      try {
+        const result = await appwrite.databases.listDocuments({
+          databaseId: this.databaseId,
+          collectionId: Collections.COURIER_USER_STATES,
+          queries: [
+            Query.equal('courierId', courierId),
+            Query.equal('userId', currentUserId),
+            Query.limit(1),
+          ],
+        })
+
+        if (result.total > 0) {
+          const state = result.documents[0]
+          isNew = !state.isListed
+          isOpened = true // It is being opened now
+
+          // Update state to opened and listed if not already
+          if (!state.isOpened || !state.isListed) {
+            await appwrite.databases.updateDocument({
+              databaseId: this.databaseId,
+              collectionId: Collections.COURIER_USER_STATES,
+              documentId: state.$id,
+              data: {
+                isOpened: true,
+                isListed: true,
+              },
+            })
+          }
+        } else {
+          isNew = true
+          isOpened = true
+
+          // Create new opened state
+          await appwrite.databases.createDocument({
+            databaseId: this.databaseId,
+            collectionId: Collections.COURIER_USER_STATES,
+            documentId: ID.unique(),
+            data: {
+              courierId,
+              userId: currentUserId,
+              isOpened: true,
+              isListed: true,
+            },
+          })
+        }
+      } catch (err) {
+        logger.error({ err, courierId, currentUserId }, 'Failed to manage user state in get')
+      }
+    }
+
+    return this.mapDocumentWithAssignments(doc, undefined, isNew, isOpened)
   }
 
   /**
@@ -607,9 +790,14 @@ export default class CourierService {
   /**
    * Map document and fetch its assignments in one call.
    */
-  private async mapDocumentWithAssignments(doc: any, userCache?: Map<string, any>) {
+  private async mapDocumentWithAssignments(
+    doc: any,
+    userCache?: Map<string, any>,
+    isNew: boolean = false,
+    isOpened: boolean = false
+  ) {
     const assignments = await this.getAssignments(doc.$id)
-    return this.mapDocument(doc, assignments, userCache)
+    return this.mapDocument(doc, assignments, userCache, isNew, isOpened)
   }
 
   /**
@@ -754,15 +942,21 @@ export default class CourierService {
     if (assignment.entityType === 'user') {
       try {
         const user = await appwrite.users.get({ userId: assignment.entityId })
+        const avatarFileId = user.prefs?.avatarFileId
+        const avatarUrl = avatarFileId
+          ? `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${avatarFileId}/preview?project=${appwriteConfig.projectId}`
+          : null
         return {
           ...assignment,
           entityName: entityName ?? user?.name ?? user?.email ?? null,
           entityEmail: user?.email ?? null,
+          avatarUrl,
         }
       } catch {
         return {
           ...assignment,
           entityName: entityName ?? null,
+          avatarUrl: null,
         }
       }
     }
@@ -770,13 +964,16 @@ export default class CourierService {
     return {
       ...assignment,
       entityName: entityName ?? null,
+      avatarUrl: null,
     }
   }
 
   private async mapDocument(
     doc: any,
     assignments: CourierAssignment[],
-    userCache?: Map<string, any>
+    userCache?: Map<string, any>,
+    isNew: boolean = false,
+    isOpened: boolean = false
   ) {
     const fileIds = Array.isArray(doc.fileIds) ? doc.fileIds.filter(Boolean) : []
     const fileUrls = fileIds.map(
@@ -825,6 +1022,8 @@ export default class CourierService {
       receivedBy: doc.receivedBy || null,
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
+      isNew,
+      isOpened,
     }
   }
 
@@ -849,5 +1048,84 @@ export default class CourierService {
 
   private omitUndefined<T extends Record<string, any>>(data: T) {
     return Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined))
+  }
+
+  /**
+   * Log an activity for a courier in the database.
+   */
+  async logActivity(
+    courierId: string,
+    action:
+      | 'created'
+      | 'updated'
+      | 'assigned'
+      | 'picked_up'
+      | 'handed_over'
+      | 'dispatched'
+      | 'status_changed'
+      | 'archived'
+      | 'restored'
+      | 'deleted'
+      | 'replied'
+      | 'handler_assigned',
+    performedBy: string,
+    details?: string
+  ) {
+    try {
+      await appwrite.databases.createDocument({
+        databaseId: this.databaseId,
+        collectionId: Collections.COURIER_ACTIVITIES,
+        documentId: ID.unique(),
+        data: {
+          courierId,
+          action,
+          performedBy,
+          details: details || null,
+          createdAt: new Date().toISOString(),
+        },
+      })
+    } catch (err: any) {
+      logger.error({ err, courierId, action }, 'Failed to log courier activity')
+    }
+  }
+
+  /**
+   * List all activities for a specific courier.
+   */
+  async listActivities(courierId: string, options: { limit?: number; page?: number } = {}) {
+    const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
+    const page = Math.max(options.page ?? 1, 1)
+    const offset = (page - 1) * limit
+
+    const result = await appwrite.databases.listDocuments({
+      databaseId: this.databaseId,
+      collectionId: Collections.COURIER_ACTIVITIES,
+      queries: [
+        Query.equal('courierId', courierId),
+        Query.orderDesc('createdAt'),
+        Query.limit(limit),
+        Query.offset(offset),
+      ],
+    })
+
+    const userCache = new Map<string, any>()
+    const documents = await Promise.all(
+      result.documents.map(async (doc: any) => {
+        const performer = await this.resolveUserCreator(doc.performedBy, userCache)
+        return {
+          id: doc.$id,
+          courierId: doc.courierId,
+          action: doc.action,
+          performedBy: performer,
+          details: doc.details || null,
+          createdAt: doc.createdAt,
+        }
+      })
+    )
+
+    return {
+      total: result.total,
+      documents,
+    }
   }
 }

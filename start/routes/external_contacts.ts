@@ -17,4 +17,5 @@ router
   .prefix('/api/v1/organisations/:orgId')
   .use(middleware.auth())
   .use(middleware.verified())
+  .use(middleware.orgAuth())
   .use(middleware.moduleGuard('courier'))

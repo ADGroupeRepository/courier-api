@@ -135,15 +135,25 @@ export default class ModuleGuardMiddleware {
           }
         }
 
-        // Add module to the team preferences
-        const updatedModules = [...freshActive, moduleName]
-        await appwrite.teams.updatePrefs({
-          teamId: orgId,
-          prefs: {
-            ...freshPrefs,
-            modules: updatedModules,
-          },
-        })
+        // Provision the actual Appwrite collections, attributes and indexes
+        try {
+          const { default: ModuleProvisioningService } = await import(
+            '#modules/_registry/provisioning_service'
+          )
+          const provisioningService = new ModuleProvisioningService()
+          await provisioningService.activate(orgId, moduleName)
+        } catch (provisionError: any) {
+          ctx.logger.error(
+            { err: provisionError, orgId, moduleName },
+            '[ModuleGuard] Failed to provision module collections'
+          )
+          return {
+            success: false,
+            status: 500,
+            message: `Module "${moduleName}" could not be activated. Provisioning failed.`,
+            code: 'PROVISIONING_FAILED',
+          }
+        }
 
         return { success: true }
       })

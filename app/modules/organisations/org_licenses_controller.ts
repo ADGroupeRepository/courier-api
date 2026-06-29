@@ -39,8 +39,13 @@ export default class OrgLicensesController {
    * POST /api/v1/organisations/:orgId/licenses/assign
    * Assign a seat license to a user.
    */
-  async assign({ request, response, user }: HttpContext) {
+  async assign({ request, response, user, isOrgAdmin }: HttpContext) {
     const orgId = request.param('orgId')
+
+    if (!isOrgAdmin) {
+      return response.forbidden({ message: 'Only organisation admins can manage licenses.' })
+    }
+
     const payload = await request.validateUsing(assignLicenseValidator)
 
     if (!user) {
@@ -59,8 +64,13 @@ export default class OrgLicensesController {
    * POST /api/v1/organisations/:orgId/licenses/revoke
    * Revoke a seat license from a user.
    */
-  async revoke({ request, response }: HttpContext) {
+  async revoke({ request, response, isOrgAdmin }: HttpContext) {
     const orgId = request.param('orgId')
+
+    if (!isOrgAdmin) {
+      return response.forbidden({ message: 'Only organisation admins can manage licenses.' })
+    }
+
     const payload = await request.validateUsing(assignLicenseValidator)
 
     try {

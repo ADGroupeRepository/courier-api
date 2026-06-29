@@ -13,6 +13,72 @@ export default class ModuleProvisioningService {
   }
 
   /**
+   * Helper to create a single attribute on a collection based on its type definition.
+   */
+  private async createAttribute(databaseId: string, collectionId: string, attr: any) {
+    switch (attr.type) {
+      case 'string':
+        return appwrite.databases.createStringAttribute({
+          databaseId,
+          collectionId,
+          key: attr.key,
+          size: attr.size || 255,
+          required: attr.required,
+          array: attr.array,
+        })
+      case 'integer':
+        return appwrite.databases.createIntegerAttribute({
+          databaseId,
+          collectionId,
+          key: attr.key,
+          required: attr.required,
+          array: attr.array,
+        })
+      case 'boolean':
+        return appwrite.databases.createBooleanAttribute({
+          databaseId,
+          collectionId,
+          key: attr.key,
+          required: attr.required,
+          array: attr.array,
+        })
+      case 'enum':
+        return appwrite.databases.createEnumAttribute({
+          databaseId,
+          collectionId,
+          key: attr.key,
+          elements: attr.elements || [],
+          required: attr.required,
+          array: attr.array,
+        })
+      case 'datetime':
+        return appwrite.databases.createDatetimeAttribute({
+          databaseId,
+          collectionId,
+          key: attr.key,
+          required: attr.required,
+          array: attr.array,
+        })
+      case 'double':
+        return appwrite.databases.createFloatAttribute({
+          databaseId,
+          collectionId,
+          key: attr.key,
+          required: attr.required,
+          array: attr.array,
+        })
+      case 'email':
+        return appwrite.databases.createEmailAttribute({
+          databaseId,
+          collectionId,
+          key: attr.key,
+          required: attr.required,
+          array: attr.array,
+        })
+    }
+  }
+
+  /**
    * Activate a module for an organisation.
    * Creates collections, attributes, and indexes if they do not exist.
    */
@@ -31,134 +97,73 @@ export default class ModuleProvisioningService {
 
     logger.info({ orgId, moduleName }, '[ModuleProvisioning] Activating module...')
 
-    // 2. Process each collection in the module
+    // 2. Filter collections that need provisioning (skip existing ones)
+    const collectionsToProvision: typeof moduleDef.collections = []
+
     for (const collDef of moduleDef.collections) {
-      console.log(`[ModuleProvisioning] Processing collection: ${collDef.id}.`)
       try {
-        // Try getting the table to see if it already exists
-        await appwrite.databases.getCollection({
-          databaseId,
-          collectionId: collDef.id,
-        })
+        await appwrite.databases.getCollection({ databaseId, collectionId: collDef.id })
         logger.info(
           { orgId, collectionId: collDef.id },
-          '[ModuleProvisioning] Collection already exists, skipping creation.'
+          '[ModuleProvisioning] Collection already exists, skipping.'
         )
-        // Note: For a production-ready system, you might want to diff columns here
-        // and create any missing ones, but we skip for simplicity if it already exists.
-        continue
       } catch (error: any) {
-        if (error.code !== 404) {
-          throw error
-        }
+        if (error.code !== 404) throw error
+        collectionsToProvision.push(collDef)
       }
+    }
 
-      // 3. Create table
+    if (collectionsToProvision.length > 0) {
+      // Phase A: Create all collections in parallel
       logger.info(
-        { orgId, collectionId: collDef.id },
-        '[ModuleProvisioning] Creating collection...'
+        { orgId, count: collectionsToProvision.length },
+        '[ModuleProvisioning] Creating collections in parallel...'
       )
-      await appwrite.databases.createCollection({
-        databaseId,
-        collectionId: collDef.id,
-        name: collDef.name,
-        permissions: collDef.permissions(orgId),
-        documentSecurity: collDef.documentSecurity,
-      })
+      await Promise.all(
+        collectionsToProvision.map((collDef) =>
+          appwrite.databases.createCollection({
+            databaseId,
+            collectionId: collDef.id,
+            name: collDef.name,
+            permissions: collDef.permissions(orgId),
+            documentSecurity: collDef.documentSecurity,
+          })
+        )
+      )
 
-      // 4. Create columns
-      for (const attr of collDef.attributes) {
-        switch (attr.type) {
-          case 'string':
-            await appwrite.databases.createStringAttribute({
-              databaseId,
-              collectionId: collDef.id,
-              key: attr.key,
-              size: attr.size || 255,
-              required: attr.required,
-              array: attr.array,
-            })
-            break
-          case 'integer':
-            await appwrite.databases.createIntegerAttribute({
-              databaseId,
-              collectionId: collDef.id,
-              key: attr.key,
-              required: attr.required,
-              array: attr.array,
-            })
-            break
-          case 'boolean':
-            await appwrite.databases.createBooleanAttribute({
-              databaseId,
-              collectionId: collDef.id,
-              key: attr.key,
-              required: attr.required,
-              array: attr.array,
-            })
-            break
-          case 'enum':
-            await appwrite.databases.createEnumAttribute({
-              databaseId,
-              collectionId: collDef.id,
-              key: attr.key,
-              elements: attr.elements || [],
-              required: attr.required,
-              array: attr.array,
-            })
-            break
-          case 'datetime':
-            await appwrite.databases.createDatetimeAttribute({
-              databaseId,
-              collectionId: collDef.id,
-              key: attr.key,
-              required: attr.required,
-              array: attr.array,
-            })
-            break
-          case 'double':
-            await appwrite.databases.createFloatAttribute({
-              databaseId,
-              collectionId: collDef.id,
-              key: attr.key,
-              required: attr.required,
-              array: attr.array,
-            })
-            break
-          case 'email':
-            await appwrite.databases.createEmailAttribute({
-              databaseId,
-              collectionId: collDef.id,
-              key: attr.key,
-              required: attr.required,
-              array: attr.array,
-            })
-            break
-          // Add other types as needed
-        }
-      }
+      // Phase B: Create all attributes in parallel
+      logger.info({ orgId }, '[ModuleProvisioning] Creating attributes in parallel...')
+      await Promise.all(
+        collectionsToProvision.flatMap((collDef) =>
+          collDef.attributes.map((attr) => this.createAttribute(databaseId, collDef.id, attr))
+        )
+      )
 
-      // Appwrite processes columns asynchronously.
-      // We must wait for them to become 'available' before creating indexes.
-      // A safe delay is usually 2-3 seconds for a few columns.
-      if (collDef.indexes.length > 0) {
+      // Phase C: Single wait for Appwrite to process all attributes
+      const hasIndexes = collectionsToProvision.some((c) => c.indexes.length > 0)
+      if (hasIndexes) {
         logger.info(
-          { orgId, collectionId: collDef.id },
+          { orgId },
           '[ModuleProvisioning] Waiting for attributes to be ready before creating indexes...'
         )
         await this.sleep(3000)
 
-        // 5. Create indexes
-        for (const idx of collDef.indexes) {
-          await appwrite.databases.createIndex({
-            databaseId,
-            collectionId: collDef.id,
-            key: idx.key,
-            type: idx.type as any,
-            attributes: idx.attributes,
-            orders: idx.orders?.map((o: string) => o.toLowerCase() as any),
-          })
-        }
+        // Phase D: Create all indexes in parallel
+        logger.info({ orgId }, '[ModuleProvisioning] Creating indexes in parallel...')
+        await Promise.all(
+          collectionsToProvision.flatMap((collDef) =>
+            collDef.indexes.map((idx) =>
+              appwrite.databases.createIndex({
+                databaseId,
+                collectionId: collDef.id,
+                key: idx.key,
+                type: idx.type as any,
+                attributes: idx.attributes,
+                orders: idx.orders?.map((o: string) => o.toLowerCase() as any),
+              })
+            )
+          )
+        )
       }
     }
 
