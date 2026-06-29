@@ -878,6 +878,48 @@
           }
         },
         {
+          "name": "14.6. Lister les activités d'un courrier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Retourne une liste d\\'activités', function () {",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "    pm.expect(jsonData.total).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_member}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "organisations",
+                "{{orgId}}",
+                "couriers",
+                "{{courierId_user}}",
+                "activities"
+              ]
+            },
+            "description": "Permet de récupérer l'historique complet d'activité (logs d'audit) d'un courrier spécifique. Tout utilisateur ayant accès au courrier peut consulter son historique d'activités."
+          }
+        },
+        {
           "name": "15. Supprimer Courrier (Permission Membre) - 403",
           "event": [
             {
