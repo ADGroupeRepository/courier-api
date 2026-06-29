@@ -911,6 +911,75 @@ paths:
                 $ref: '#/definitions/Courier'
               message: { type: string }
 
+  /organisations/{orgId}/couriers/{id}/impute:
+    post:
+      summary: Assigner un responsable à un courrier (Assign handler/imputer)
+      operationId: imputeCourier
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - handlerUserId
+            properties:
+              handlerUserId:
+                type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Courier'
+              message: { type: string }
+
+  /organisations/{orgId}/couriers/{id}/activities:
+    get:
+      summary: Obtenir l'historique d'activité d'un courrier (List courier activities)
+      operationId: listCourierActivities
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: limit
+          in: query
+          required: false
+          type: integer
+        - name: page
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              total: { type: integer }
+              limit: { type: integer }
+              page: { type: integer }
+              lastPage: { type: integer }
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/CourierActivity'
+
   /organisations/{orgId}/couriers/{id}/messages:
     get:
       summary: Lister les messages de chat d'un courrier (List courier chat messages)
@@ -1532,6 +1601,39 @@ definitions:
           avatarUrl: { type: string }
       createdAt: { type: string }
       updatedAt: { type: string }
+
+  CourierActivity:
+    type: object
+    properties:
+      id: { type: string }
+      courierId: { type: string }
+      action:
+        {
+          type: string,
+          enum:
+            [
+              created,
+              updated,
+              assigned,
+              picked_up,
+              handed_over,
+              dispatched,
+              status_changed,
+              archived,
+              restored,
+              deleted,
+              replied,
+              handler_assigned,
+            ],
+        }
+      performedBy:
+        type: object
+        properties:
+          id: { type: string }
+          name: { type: string }
+          avatarUrl: { type: string }
+      details: { type: string }
+      createdAt: { type: string }
 
   Plan:
     type: object

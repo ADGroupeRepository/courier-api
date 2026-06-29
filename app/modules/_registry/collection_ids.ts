@@ -16,6 +16,8 @@ export const Collections = {
   COURIER_ASSIGNMENTS: 'courier_assignments',
   COURIER_REPLIES: 'courier_replies',
   COURIER_MESSAGES: 'courier_messages',
+  COURIER_ACTIVITIES: 'courier_activities',
+  COURIER_USER_STATES: 'courier_user_states',
 
   // Courier module (external contacts address book)
   EXTERNAL_CONTACTS: 'external_contacts',

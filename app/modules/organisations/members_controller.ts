@@ -19,9 +19,20 @@ export default class MembersController {
     const orgId = request.param('orgId')
     const limit = request.input('limit') ? Number.parseInt(request.input('limit'), 10) : 25
     const page = request.input('page') ? Number.parseInt(request.input('page'), 10) : 1
+    const search = request.input('search') as string | undefined
+    const role = request.input('role') as string | undefined
+    const hasLicense = request.input('hasLicense') as string | undefined
+    const departmentId = request.input('departmentId') as string | undefined
 
     const service = new OrganisationService()
-    const { documents, total } = await service.listMembers(orgId, { limit, page })
+    const { documents, total } = await service.listMembers(orgId, {
+      limit,
+      page,
+      search,
+      role,
+      hasLicense: hasLicense !== undefined ? hasLicense === 'true' : undefined,
+      departmentId,
+    })
 
     return response.ok({
       total,
@@ -44,29 +55,19 @@ export default class MembersController {
 
     return response.ok({ data: member })
   }
+  private async resolveTargetMembership(orgId: string, userId: string) {
+    const memberships = await appwrite.teams.listMemberships({
+      teamId: orgId,
+      queries: [Query.equal('userId', userId)],
+    })
 
-  /**
-   * Helper to resolve a membership by membership ID or user ID.
-   */
-  private async resolveTargetMembership(orgId: string, memberIdOrUserId: string) {
-    try {
-      return await appwrite.teams.getMembership({ teamId: orgId, membershipId: memberIdOrUserId })
-    } catch (error: any) {
-      if (error.code !== 404) {
-        throw error
-      }
-
-      const memberships = await appwrite.teams.listMemberships({
-        teamId: orgId,
-        queries: [Query.equal('userId', memberIdOrUserId)],
-      })
-
-      if (memberships.total === 0) {
-        throw error
-      }
-
-      return memberships.memberships[0]
+    if (memberships.total === 0) {
+      const err = new Error('Member not found')
+      ;(err as any).code = 404
+      throw err
     }
+
+    return memberships.memberships[0]
   }
 
   /**

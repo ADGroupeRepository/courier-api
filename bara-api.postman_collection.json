@@ -48,7 +48,8 @@
               "raw": "{{base_url}}/auth/signup",
               "host": ["{{base_url}}"],
               "path": ["auth", "signup"]
-            }
+            },
+            "description": "Enregistre un nouveau compte utilisateur propriétaire sur Bara. Cette requête initie le flux complet en créant l'utilisateur principal qui servira de Manager ou de Propriétaire de l'organisation."
           }
         },
         {
@@ -86,7 +87,8 @@
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
               "host": ["{{appwrite_endpoint}}"],
               "path": ["account", "sessions", "email"]
-            }
+            },
+            "description": "Se connecte au serveur d'authentification Appwrite avec l'adresse e-mail et le mot de passe du propriétaire afin d'initier la session active."
           }
         },
         {
@@ -124,7 +126,8 @@
               "raw": "{{appwrite_endpoint}}/account/jwts",
               "host": ["{{appwrite_endpoint}}"],
               "path": ["account", "jwts"]
-            }
+            },
+            "description": "Génère un jeton Web JSON (JWT) sécurisé pour le propriétaire depuis le client Appwrite. Ce JWT est requis pour authentifier les appels subséquents sur les routes protégées de l'API Bara."
           }
         },
         {
@@ -161,7 +164,8 @@
               "raw": "{{base_url}}/organisations",
               "host": ["{{base_url}}"],
               "path": ["organisations"]
-            }
+            },
+            "description": "Crée une nouvelle organisation isolée multi-locataire (Tenant). Cette opération crée l'équipe Appwrite correspondante, alloue une base de données de locataire isolée ainsi qu'un espace de stockage de documents (Bucket)."
           }
         },
         {
@@ -194,7 +198,8 @@
               "raw": "{{base_url}}/auth/signup",
               "host": ["{{base_url}}"],
               "path": ["auth", "signup"]
-            }
+            },
+            "description": "Enregistre le compte utilisateur d'un membre collaborateur (User B) sur la plateforme d'authentification Bara avant son invitation formelle dans l'organisation."
           }
         },
         {
@@ -232,7 +237,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/members",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "members"]
-            }
+            },
+            "description": "Envoie une invitation pour associer le membre (User B) à l'organisation avec un rôle spécifique. Cette requête crée la relation d'adhésion au niveau d'Appwrite Teams."
           }
         },
         {
@@ -269,7 +275,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/departments",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "departments"]
-            }
+            },
+            "description": "Ajoute un département fonctionnel (par exemple, le Support Client) au sein de la base isolée de l'organisation pour organiser les membres et filtrer la visibilité des courriers."
           }
         },
         {
@@ -294,10 +301,10 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/departments/assign",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "departments", "assign"]
-            }
+            },
+            "description": "Associe un membre d'organisation existant à un département avec un rôle interne (manager ou member) et un titre de poste."
           }
         },
-
         {
           "name": "8.5. Créer un Contact Externe",
           "event": [
@@ -335,7 +342,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "contacts"]
-            }
+            },
+            "description": "Enregistre un correspondant externe (personne physique ou structure) dans le carnet d'adresses de l'organisation pour servir d'expéditeur ou de destinataire officiel de courriers."
           }
         },
         {
@@ -378,7 +386,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/upload-url",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers", "upload-url"]
-            }
+            },
+            "description": "Génère une cible de téléchargement sécurisée et temporaire (avec un ID unique de fichier et une URL expirant au bout de 15 minutes) dans le Bucket privé de l'organisation."
           }
         },
         {
@@ -427,7 +436,8 @@
             "url": {
               "raw": "{{scenarioCourierUploadUrl}}",
               "host": ["{{scenarioCourierUploadUrl}}"]
-            }
+            },
+            "description": "Effectue le téléchargement direct du document physique (simulé par un fichier factice) directement vers le stockage d'Appwrite en utilisant le JWT du propriétaire."
           }
         },
         {
@@ -509,7 +519,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers"]
-            }
+            },
+            "description": "Enregistre un courrier entrant ou sortant et l'assigne à un membre spécifique de l'organisation. L'auteur doit disposer du rôle administrateur ou secrétariat pour les courriers entrants."
           }
         },
         {
@@ -586,7 +597,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers"]
-            }
+            },
+            "description": "Enregistre un courrier et l'associe à tout un département. Tous les membres du département ciblé hériteront de la visibilité sur ce courrier."
           }
         },
         {
@@ -622,7 +634,8 @@
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
               "host": ["{{appwrite_endpoint}}"],
               "path": ["account", "sessions", "email"]
-            }
+            },
+            "description": "Permet au membre collaborateur (User B) de s'authentifier auprès de son session Appwrite pour commencer ses activités d'équipe."
           }
         },
         {
@@ -660,7 +673,8 @@
               "raw": "{{appwrite_endpoint}}/account/jwts",
               "host": ["{{appwrite_endpoint}}"],
               "path": ["account", "jwts"]
-            }
+            },
+            "description": "Génère le JWT du membre collaborateur (User B) pour qu'il puisse appeler les endpoints protégés avec ses propres privilèges."
           }
         },
         {
@@ -688,7 +702,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers"]
-            }
+            },
+            "description": "Permet au membre de lister les courriers de son organisation. Le contrôleur filtre automatiquement les résultats pour ne renvoyer que les courriers qui lui sont assignés, ceux de son département ou ceux qu'il a créés."
           }
         },
         {
@@ -713,7 +728,84 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
+            },
+            "description": "Permet au membre assigné de mettre à jour les métadonnées ou le statut d'un courrier (par exemple le marquer comme complété)."
+          }
+        },
+        {
+          "name": "14.5. Affecter un responsable au courrier (Imputer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Le responsable a été correctement assigné', function () {",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "    pm.expect(jsonData.data.handlerUserId).to.equal(pm.collectionVariables.get('memberUserId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
             }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_member}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"handlerUserId\": \"{{memberUserId}}\"\n}"
+            },
+            "description": "Permet d'affecter un utilisateur en tant que responsable du traitement d'un courrier (Imputation). Seuls les administrateurs, les membres du secrétariat, le créateur du courrier ou les entités assignées (utilisateurs/départements) disposent des droits nécessaires pour effectuer cette affectation.",
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}/impute",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}", "impute"]
+            }
+          }
+        },
+        {
+          "name": "14.6. Lister les activités d'un courrier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Retourne une liste d\\'activités', function () {",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "    pm.expect(jsonData.total).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_member}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}/activities",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}", "activities"]
+            },
+            "description": "Permet de récupérer l'historique complet d'activité (logs d'audit) d'un courrier spécifique. Tout utilisateur ayant accès au courrier peut consulter son historique d'activités."
           }
         },
         {
@@ -741,7 +833,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
-            }
+            },
+            "description": "Valide la sécurité du système en tentant de supprimer un courrier avec le jeton d'un simple membre. Cette requête doit échouer avec un code 403 Forbidden car seuls les administrateurs ou le créateur peuvent supprimer un courrier."
           }
         },
         {
@@ -774,7 +867,8 @@
               "raw": "{{base_url}}/auth/signup",
               "host": ["{{base_url}}"],
               "path": ["auth", "signup"]
-            }
+            },
+            "description": "Crée le compte d'un troisième utilisateur (User C) afin de valider les règles de cloisonnement et d'isolation des informations."
           }
         },
         {
@@ -810,7 +904,8 @@
               "raw": "{{appwrite_endpoint}}/account/sessions/email",
               "host": ["{{appwrite_endpoint}}"],
               "path": ["account", "sessions", "email"]
-            }
+            },
+            "description": "Initie la session Appwrite pour le membre non assigné (User C) afin de préparer son JWT."
           }
         },
         {
@@ -848,7 +943,8 @@
               "raw": "{{appwrite_endpoint}}/account/jwts",
               "host": ["{{appwrite_endpoint}}"],
               "path": ["account", "jwts"]
-            }
+            },
+            "description": "Génère le JWT du membre non assigné (User C) pour exécuter des requêtes tests sous sa perspective."
           }
         },
         {
@@ -884,7 +980,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/members",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "members"]
-            }
+            },
+            "description": "Associe le membre non assigné (User C) à l'organisation sans lui assigner aucun courrier ni département actif."
           }
         },
         {
@@ -916,7 +1013,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers"]
-            }
+            },
+            "description": "Valide les règles de cloisonnement : le membre non assigné (User C) appelle la liste des courriers et doit recevoir une liste vide (0 élément), car il n'est ni créateur, ni assigné, ni membre d'un département assigné."
           }
         },
         {
@@ -952,7 +1050,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
-            }
+            },
+            "description": "Tente de modifier un courrier depuis le jeton de User C. Doit renvoyer un code 403 car cet utilisateur n'a aucun droit de traitement sur ce courrier."
           }
         },
         {
@@ -982,7 +1081,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId_user}}",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "couriers", "{{courierId_user}}"]
-            }
+            },
+            "description": "Supprime proprement le courrier test créé pour libérer les ressources de la base de données isolée."
           }
         },
         {
@@ -1012,7 +1112,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}/contacts/{{scenarioContactId}}",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}", "contacts", "{{scenarioContactId}}"]
-            }
+            },
+            "description": "Supprime le contact factice créé pour le scénario du carnet d'adresses externe."
           }
         },
         {
@@ -1042,7 +1143,8 @@
               "raw": "{{base_url}}/organisations/{{orgId}}",
               "host": ["{{base_url}}"],
               "path": ["organisations", "{{orgId}}"]
-            }
+            },
+            "description": "Supprime complètement l'organisation et toutes ses ressources (base de données, bucket) afin de nettoyer les traces des tests d'intégration."
           }
         }
       ]
@@ -2727,11 +2829,43 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers?type=incoming&archived=false&favorite=false&deleted=false&limit=25&page=1",
               "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers"]
+              "path": ["organisations", "{{orgId}}", "couriers"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "incoming",
+                  "description": "Type de courrier (incoming ou outgoing)"
+                },
+                {
+                  "key": "archived",
+                  "value": "false",
+                  "description": "Filtrer par statut archivé (true ou false)"
+                },
+                {
+                  "key": "favorite",
+                  "value": "false",
+                  "description": "Filtrer par statut favori (true ou false)"
+                },
+                {
+                  "key": "deleted",
+                  "value": "false",
+                  "description": "Filtrer par statut supprimé/corbeille (true ou false)"
+                },
+                {
+                  "key": "limit",
+                  "value": "25",
+                  "description": "Nombre maximal d'éléments par page"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Numéro de la page à retourner"
+                }
+              ]
             },
-            "description": "Affiche tous les courriers d'une organisation."
+            "description": "Affiche tous les courriers d'une organisation avec des options de filtrage avancées par type, favoris, archives, corbeille et pagination."
           },
           "response": [],
           "event": [
@@ -3049,7 +3183,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"subject\": \"Sujet de courrier modifié\",\n  \"urgency\": \"urgent\",\n  \"emittedAt\": \"2026-06-22T18:25:39Z\"\n}"
+              "raw": "{\n  \"subject\": \"Sujet de courrier modifié\",\n  \"urgency\": \"urgent\",\n  \"isFavorite\": true,\n  \"isArchived\": false,\n  \"emittedAt\": \"2026-06-22T18:25:39Z\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
@@ -3498,6 +3632,74 @@
               "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "dispatch"]
             },
             "description": "Permet aux membres du secrétariat ou aux administrateurs d'enregistrer l'expédition externe d'un courrier sortant."
+          },
+          "response": []
+        },
+        {
+          "name": "Affecter un responsable au courrier (Imputer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"handlerUserId\": \"{{userId}}\"\n}"
+            },
+            "description": "Permet d'affecter un utilisateur en tant que responsable du traitement d'un courrier (Imputation). Seuls les administrateurs, les membres du secrétariat, le créateur du courrier ou les entités assignées (utilisateurs/départements) disposent des droits nécessaires.",
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/impute",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "impute"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lister les activités d'un courrier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/activities",
+              "host": ["{{base_url}}"],
+              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "activities"]
+            },
+            "description": "Permet de récupérer l'historique complet d'activité (logs d'audit) d'un courrier spécifique. Tout utilisateur ayant accès au courrier peut consulter son historique."
           },
           "response": []
         }

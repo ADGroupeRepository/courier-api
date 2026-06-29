@@ -68,6 +68,20 @@ export default class CourierRepliesController {
         createdBy: userId,
       })
 
+      // Log activity
+      try {
+        const { default: CourierService } = await import('#modules/courier/courier_service')
+        const courierService = await CourierService.forOrg(orgId)
+        await courierService.logActivity(
+          courierId,
+          'replied',
+          userId,
+          `Réponse ajoutée: ${payload.subject}`
+        )
+      } catch (logError) {
+        // Non-blocking log error
+      }
+
       emitter.emit(CourierReplySent, new CourierReplySent(orgId, courierId, userId))
 
       return response.created(reply)

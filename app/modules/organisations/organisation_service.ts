@@ -440,15 +440,55 @@ export default class OrganisationService {
    * @param options - Pagination options.
    * @returns A paginated list of members with their roles and status.
    */
-  async listMembers(teamId: string, options: { limit?: number; page?: number } = {}) {
+  async listMembers(
+    teamId: string,
+    options: {
+      limit?: number
+      page?: number
+      search?: string
+      role?: string
+      hasLicense?: boolean
+      departmentId?: string
+    } = {}
+  ) {
     const limit = Math.min(Math.max(options.limit ?? 25, 1), 100)
     const page = Math.max(options.page ?? 1, 1)
     const offset = (page - 1) * limit
 
+    const queries: any[] = [Query.limit(limit), Query.offset(offset)]
+
+    // Filter by role
+    if (options.role) {
+      queries.push(Query.contains('roles', [options.role]))
+    }
+
+    // Filter by search (userName)
+    if (options.search) {
+      queries.push(Query.search('userName', options.search))
+    }
+
     const result = await appwrite.teams.listMemberships({
       teamId,
-      queries: [Query.limit(limit), Query.offset(offset)],
+      queries,
     })
+
+    // Pre-filter by departmentId if requested
+    let departmentUserIds: Set<string> | null = null
+    if (options.departmentId) {
+      try {
+        const membersService = await MembersService.forOrg(teamId)
+        const deptMembers = await membersService.listByDepartment(options.departmentId, {
+          limit: 5000,
+        })
+        departmentUserIds = new Set(deptMembers.documents.map((doc: any) => doc.userId))
+      } catch (error: any) {
+        logger.warn(
+          { teamId, departmentId: options.departmentId, error: error?.message },
+          '[OrgService] Failed to load department members for filter'
+        )
+        departmentUserIds = new Set()
+      }
+    }
 
     // Fetch active licenses in the organisation
     let activeLicenseUserIds: string[] = []
@@ -466,8 +506,22 @@ export default class OrganisationService {
       )
     }
 
+    // Apply post-filters (departmentId, hasLicense) before mapping
+    let filteredMemberships = result.memberships
+
+    if (departmentUserIds !== null) {
+      filteredMemberships = filteredMemberships.filter((m) => departmentUserIds!.has(m.userId))
+    }
+
+    if (options.hasLicense !== undefined) {
+      filteredMemberships = filteredMemberships.filter((m) => {
+        const userHasLicense = activeLicenseUserIds.includes(m.userId)
+        return options.hasLicense ? userHasLicense : !userHasLicense
+      })
+    }
+
     const documents = await Promise.all(
-      result.memberships.map(async (m) => {
+      filteredMemberships.map(async (m) => {
         let departments: Array<{ id: string; name: string; role: 'manager' | 'member' }> = []
         let avatarUrl: string | null = null
 
@@ -508,37 +562,27 @@ export default class OrganisationService {
     )
 
     return {
-      total: result.total,
+      total:
+        departmentUserIds !== null || options.hasLicense !== undefined
+          ? filteredMemberships.length
+          : result.total,
       documents,
     }
   }
 
-  /**
-   * Get details of a single member in the organisation.
-   * @param teamId - The ID of the organisation (team).
-   * @param memberId - The ID of the membership record, or the user ID for compatibility.
-   */
-  async getMember(teamId: string, memberId: string) {
-    let m: any
+  async getMember(teamId: string, userId: string) {
+    const memberships = await appwrite.teams.listMemberships({
+      teamId,
+      queries: [Query.equal('userId', userId)],
+    })
 
-    try {
-      m = await appwrite.teams.getMembership({ teamId, membershipId: memberId })
-    } catch (error: any) {
-      if (error.type !== 'membership_not_found' && error.code !== 404) {
-        throw error
-      }
-
-      const memberships = await appwrite.teams.listMemberships({
-        teamId,
-        queries: [Query.equal('userId', memberId)],
-      })
-
-      if (memberships.total === 0) {
-        throw error
-      }
-
-      m = memberships.memberships[0]
+    if (memberships.total === 0) {
+      const err = new Error('Member not found')
+      ;(err as any).code = 404
+      throw err
     }
+
+    const m = memberships.memberships[0]
 
     let departments: Array<{ id: string; name: string; role: 'manager' | 'member' }> = []
     let avatarUrl: string | null = null
@@ -548,7 +592,7 @@ export default class OrganisationService {
       departments = await membersService.listDepartmentsForUser(m.userId)
     } catch (error: any) {
       logger.warn(
-        { teamId, memberId, userId: m.userId, error: error?.message },
+        { teamId, userId: m.userId, error: error?.message },
         '[OrgService] Failed to load member departments'
       )
     }
@@ -559,7 +603,7 @@ export default class OrganisationService {
       avatarUrl = avatarFileId ? OrganisationService.buildPreviewUrl(avatarFileId) : null
     } catch (error: any) {
       logger.warn(
-        { teamId, memberId, userId: m.userId, error: error?.message },
+        { teamId, userId: m.userId, error: error?.message },
         '[OrgService] Failed to load member avatar'
       )
     }

@@ -19,6 +19,8 @@ router
     router.post('couriers/:id/pickup', [CourierController, 'pickup'])
     router.post('couriers/:id/handover', [CourierController, 'handover'])
     router.post('couriers/:id/dispatch', [CourierController, 'dispatch'])
+    router.post('couriers/:id/impute', [CourierController, 'impute'])
+    router.get('couriers/:id/activities', [CourierController, 'activities'])
 
     // Courier Chat Messages
     router.get('couriers/:id/messages', [CourierChatController, 'index'])
