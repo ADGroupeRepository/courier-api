@@ -7,42 +7,6 @@ import CourierMessageSent from '#events/courier_message_sent'
 
 export default class CourierChatController {
   /**
-   * List chat messages for a courier
-   */
-  async index({ request, response, params }: HttpContext) {
-    const orgId = request.header('x-org-id')
-    if (!orgId) {
-      return response.badRequest({ message: 'Missing x-org-id header' })
-    }
-
-    const { id: courierId } = params
-    const qs = request.qs()
-
-    try {
-      const limit = qs.limit ? Number.parseInt(qs.limit, 10) : 50
-      const page = qs.page ? Number.parseInt(qs.page, 10) : 1
-      const service = await CourierChatService.forOrg(orgId)
-      const result = await service.list(courierId, {
-        limit,
-        page,
-      })
-
-      return response.ok({
-        total: result.total,
-        limit,
-        page,
-        lastPage: Math.ceil(result.total / limit),
-        data: result.documents,
-      })
-    } catch (error: any) {
-      return response.internalServerError({
-        message: 'Failed to fetch courier messages',
-        error: error.message,
-      })
-    }
-  }
-
-  /**
    * Add a new chat message to a courier
    */
   async store({ request, response, params }: HttpContext) {
