@@ -23,8 +23,8 @@ export const createCourierValidator = vine.create(
     delivererEmail: vine.string().email().optional(),
     delivererPhone: vine.string().maxLength(255).trim().optional(),
     correspondentId: vine.string().maxLength(36).trim().optional(),
-    targetType: vine.enum(['user', 'department']),
-    entityIds: vine.array(vine.string().maxLength(36).trim()).minLength(1).maxLength(50),
+    targetType: vine.enum(['user', 'department']).optional(),
+    entityIds: vine.array(vine.string().maxLength(36).trim()).minLength(1).maxLength(50).optional(),
     fileIds: vine.array(vine.string().maxLength(36).trim()).maxLength(20).optional(),
   })
 )

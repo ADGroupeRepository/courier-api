@@ -30,8 +30,8 @@ export interface CreateCourierPayload {
   delivererEmail?: string
   delivererPhone?: string
   correspondentId?: string
-  targetType: 'user' | 'department'
-  entityIds: string[]
+  targetType?: 'user' | 'department'
+  entityIds?: string[]
   createdBy: string
   fileIds?: string[]
 }
@@ -598,12 +598,15 @@ export default class CourierService {
       },
     })
 
-    const assignments = await this.createAssignments(
-      doc.$id,
-      payload.entityIds,
-      payload.targetType,
-      payload.createdBy
-    )
+    const assignments =
+      payload.entityIds && payload.targetType && payload.entityIds.length > 0
+        ? await this.createAssignments(
+            doc.$id,
+            payload.entityIds,
+            payload.targetType,
+            payload.createdBy
+          )
+        : []
 
     return this.mapDocument(doc, assignments)
   }
