@@ -137,9 +137,8 @@ export default class ModuleGuardMiddleware {
 
         // Provision the actual Appwrite collections, attributes and indexes
         try {
-          const { default: ModuleProvisioningService } = await import(
-            '#modules/_registry/provisioning_service'
-          )
+          const { default: ModuleProvisioningService } =
+            await import('#modules/_registry/provisioning_service')
           const provisioningService = new ModuleProvisioningService()
           await provisioningService.activate(orgId, moduleName)
         } catch (provisionError: any) {

@@ -24,8 +24,6 @@ export default class ExternalContactsController {
     })
   }
 
-
-
   /**
    * GET /api/v1/organisations/:orgId/contacts
    */

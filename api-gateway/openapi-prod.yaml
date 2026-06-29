@@ -1665,7 +1665,25 @@ definitions:
     properties:
       id: { type: string }
       courierId: { type: string }
-      action: { type: string, enum: [created, updated, assigned, picked_up, handed_over, dispatched, status_changed, archived, restored, deleted, replied, handler_assigned] }
+      action:
+        {
+          type: string,
+          enum:
+            [
+              created,
+              updated,
+              assigned,
+              picked_up,
+              handed_over,
+              dispatched,
+              status_changed,
+              archived,
+              restored,
+              deleted,
+              replied,
+              handler_assigned,
+            ],
+        }
       performedBy:
         type: object
         properties:

@@ -18,9 +18,9 @@ Use this skill as a fast reference to navigate and modify module systems in `bar
 
 ## 2. Directory Module (`directory`) [Core]
 
-*Manages organization members, department mapping, and profiles.*
+_Manages organization members, department mapping, and profiles._
 
-- **Database Collections**: 
+- **Database Collections**:
   - `departments` (Key: Collections.DEPARTMENTS)
   - `org_profiles` (Key: Collections.ORG_PROFILES)
   - `notifications` (Key: Collections.NOTIFICATIONS)
@@ -34,7 +34,7 @@ Use this skill as a fast reference to navigate and modify module systems in `bar
 
 ## 3. Courier Module (`courier`)
 
-*Manages internal, incoming, and outgoing couriers, handovers, and chats.*
+_Manages internal, incoming, and outgoing couriers, handovers, and chats._
 
 - **Database Collections**:
   - `couriers` (Key: Collections.COURIERS)
@@ -58,7 +58,7 @@ Use this skill as a fast reference to navigate and modify module systems in `bar
 
 ## 4. Plans & Subscriptions Module (`bara-platform` database)
 
-*System-wide licensing, plans, and tenant limits.*
+_System-wide licensing, plans, and tenant limits._
 
 - **Database Collections**:
   - `plans` (Key: Collections.PLANS)

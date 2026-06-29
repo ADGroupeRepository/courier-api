@@ -258,7 +258,10 @@ export default class CourierService {
             collectionId: Collections.COURIER_USER_STATES,
             queries: [
               Query.equal('userId', options.userId),
-              Query.equal('courierId', result.documents.map((d: any) => d.$id)),
+              Query.equal(
+                'courierId',
+                result.documents.map((d: any) => d.$id)
+              ),
               Query.limit(100),
             ],
           })
@@ -312,7 +315,9 @@ export default class CourierService {
             }
           }
         }
-        updateOrCreateStates().catch((err) => logger.error({ err }, 'Error in background states update'))
+        updateOrCreateStates().catch((err) =>
+          logger.error({ err }, 'Error in background states update')
+        )
       }
 
       return {
@@ -373,7 +378,10 @@ export default class CourierService {
           collectionId: Collections.COURIER_USER_STATES,
           queries: [
             Query.equal('userId', options.userId),
-            Query.equal('courierId', result.documents.map((d: any) => d.$id)),
+            Query.equal(
+              'courierId',
+              result.documents.map((d: any) => d.$id)
+            ),
             Query.limit(100),
           ],
         })
@@ -427,7 +435,9 @@ export default class CourierService {
           }
         }
       }
-      updateOrCreateStates().catch((err) => logger.error({ err }, 'Error in background states update'))
+      updateOrCreateStates().catch((err) =>
+        logger.error({ err }, 'Error in background states update')
+      )
     }
 
     return {

@@ -34,11 +34,15 @@ export default class ProvisionCourierActivities extends BaseCommand {
           continue
         }
 
-        this.logger.info(`Provisioning courier activities collection for ${team.name} (${team.$id})...`)
+        this.logger.info(
+          `Provisioning courier activities collection for ${team.name} (${team.$id})...`
+        )
         try {
           await provisioningService.activate(team.$id, 'courier')
           provisionedCount += 1
-          this.logger.success(`Successfully provisioned courier activities collections for: ${team.name}`)
+          this.logger.success(
+            `Successfully provisioned courier activities collections for: ${team.name}`
+          )
         } catch (orgError: any) {
           failedCount += 1
           this.logger.error(

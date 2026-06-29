@@ -240,9 +240,7 @@ export default class CourierController {
         detail = 'Courrier restauré'
       } else if (payload.isFavorite !== undefined) {
         action = 'updated'
-        detail = payload.isFavorite
-          ? 'Courrier ajouté aux favoris'
-          : 'Courrier retiré des favoris'
+        detail = payload.isFavorite ? 'Courrier ajouté aux favoris' : 'Courrier retiré des favoris'
       } else if (payload.status !== undefined) {
         action = 'status_changed'
         detail = `Statut modifié: ${payload.status}`
@@ -291,7 +289,12 @@ export default class CourierController {
       }
 
       const updatedCourier = await service.update(params.id, { handlerUserId })
-      await service.logActivity(params.id, 'handler_assigned', user?.$id || '', 'Responsable assigné')
+      await service.logActivity(
+        params.id,
+        'handler_assigned',
+        user?.$id || '',
+        'Responsable assigné'
+      )
       return response.ok({ data: updatedCourier, message: 'Responsable assigne avec succes' })
     } catch (error: any) {
       if (error.code === 404) return response.notFound({ message: 'Courier not found' })
@@ -318,7 +321,12 @@ export default class CourierController {
       }
 
       await service.softDelete(params.id)
-      await service.logActivity(params.id, 'deleted', user?.$id || '', 'Courrier supprimé (corbeille)')
+      await service.logActivity(
+        params.id,
+        'deleted',
+        user?.$id || '',
+        'Courrier supprimé (corbeille)'
+      )
       return response.ok({ message: 'Courier moved to bin' })
     } catch (error: any) {
       if (error.code === 404) return response.notFound({ message: 'Courier not found' })

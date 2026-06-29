@@ -562,9 +562,10 @@ export default class OrganisationService {
     )
 
     return {
-      total: departmentUserIds !== null || options.hasLicense !== undefined
-        ? filteredMemberships.length
-        : result.total,
+      total:
+        departmentUserIds !== null || options.hasLicense !== undefined
+          ? filteredMemberships.length
+          : result.total,
       documents,
     }
   }
