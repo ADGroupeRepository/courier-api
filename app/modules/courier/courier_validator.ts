@@ -105,3 +105,14 @@ export const createCourierMessageValidator = vine.create(
       .optional(),
   })
 )
+
+/**
+ * Validator for imputing a courier.
+ */
+export const imputeCourierValidator = vine.create(
+  vine.object({
+    handlerUserId: vine.string().maxLength(36).trim(),
+    urgency: vine.enum(CourierUrgency).optional(),
+    instruction: vine.string().maxLength(2000).trim().optional(),
+  })
+)

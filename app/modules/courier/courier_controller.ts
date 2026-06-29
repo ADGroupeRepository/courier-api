@@ -3,10 +3,12 @@ import CourierService from '#modules/courier/courier_service'
 import MembersService from '#modules/directory/members_service'
 import appwrite from '#services/appwrite_service'
 import { Query } from 'node-appwrite'
+import NotificationService from '#services/notification_service'
 import {
   createCourierUploadUrlValidator,
   createCourierValidator,
   updateCourierValidator,
+  imputeCourierValidator,
 } from '#modules/courier/courier_validator'
 import { type CourierType } from '#modules/courier/courier_enums'
 import { Collections } from '#modules/_registry/collection_ids'
@@ -272,13 +274,10 @@ export default class CourierController {
 
   /**
    * POST /api/v1/organisations/:orgId/couriers/:id/impute
-   * Assign a handler (imputer) to a courier.
+   * Assign a handler (imputer) to a courier with optional urgency and instruction.
    */
   async impute({ user, params, request, response, isOrgAdmin, isOrgSecretariat }: HttpContext) {
-    const handlerUserId = request.input('handlerUserId')
-    if (!handlerUserId) {
-      return response.badRequest({ message: 'handlerUserId is required' })
-    }
+    const payload = await request.validateUsing(imputeCourierValidator)
 
     try {
       const departmentId = await this.getDepartmentId(user?.$id || '', params.orgId)
@@ -300,13 +299,29 @@ export default class CourierController {
         return response.forbidden({ message: 'You do not have permission to impute this courier' })
       }
 
-      const updatedCourier = await service.update(params.id, { handlerUserId })
-      await service.logActivity(
-        params.id,
-        'handler_assigned',
-        user?.$id || '',
-        'Responsable assigné'
-      )
+      // Update courier with imputer details, urgency and instruction
+      const updateData: Record<string, any> = {
+        handlerUserId: payload.handlerUserId,
+      }
+      if (payload.urgency) {
+        updateData.urgency = payload.urgency
+      }
+      if (payload.instruction !== undefined) {
+        updateData.instruction = payload.instruction
+      }
+
+      const updatedCourier = await service.update(params.id, updateData)
+
+      // Log activity
+      let logDetail = 'Responsable assigné'
+      if (payload.instruction) {
+        logDetail += ` (Instruction: ${payload.instruction})`
+      }
+      await service.logActivity(params.id, 'handler_assigned', user?.$id || '', logDetail)
+
+      // Notify the assigned handler user
+      await NotificationService.notifyImputation(params.orgId, params.id, payload.handlerUserId)
+
       return response.ok({ data: updatedCourier, message: 'Responsable assigne avec succes' })
     } catch (error: any) {
       if (error.code === 404) return response.notFound({ message: 'Courier not found' })

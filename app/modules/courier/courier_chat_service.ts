@@ -1,8 +1,10 @@
 import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
-import { ID, Query } from 'node-appwrite'
+import { ID, Query, Permission, Role } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
 import { Collections } from '#modules/_registry/collection_ids'
+import logger from '@adonisjs/core/services/logger'
+import MembersService from '#modules/directory/members_service'
 
 export interface CreateCourierMessagePayload {
   courierId: string
@@ -16,14 +18,16 @@ export interface CreateCourierMessagePayload {
 export default class CourierChatService {
   private readonly databaseId: string
   private readonly bucketId: string
+  private readonly orgId: string
   private readonly collectionId = Collections.COURIER_MESSAGES
 
   /**
    * Initializes the CourierChatService with organization-specific resources.
    */
-  constructor(databaseId: string, bucketId: string) {
+  constructor(databaseId: string, bucketId: string, orgId: string) {
     this.databaseId = databaseId
     this.bucketId = bucketId
+    this.orgId = orgId
   }
 
   /**
@@ -34,32 +38,7 @@ export default class CourierChatService {
     if (!prefs.databaseId || !prefs.bucketId) {
       throw new Error(`Organisation ${orgId} does not have provisioned resources.`)
     }
-    return new CourierChatService(prefs.databaseId, prefs.bucketId)
-  }
-
-  /**
-   * List messages for a specific courier.
-   */
-  async list(courierId: string, options?: { limit?: number; page?: number }) {
-    const limit = Math.min(Math.max(options?.limit ?? 50, 1), 100)
-    const page = Math.max(options?.page ?? 1, 1)
-    const offset = (page - 1) * limit
-
-    const result = await appwrite.databases.listDocuments({
-      databaseId: this.databaseId,
-      collectionId: this.collectionId,
-      queries: [
-        Query.equal('courierId', courierId),
-        Query.orderAsc('createdAt'),
-        Query.limit(limit),
-        Query.offset(offset),
-      ],
-    })
-
-    return {
-      total: result.total,
-      documents: result.documents.map((doc) => this.mapDocument(doc)),
-    }
+    return new CourierChatService(prefs.databaseId, prefs.bucketId, orgId)
   }
 
   /**
@@ -82,6 +61,57 @@ export default class CourierChatService {
     }
 
     try {
+      // 1. Get the parent courier to resolve creator, handler, and assignments
+      const courierDoc = await appwrite.databases.getDocument({
+        databaseId: this.databaseId,
+        collectionId: Collections.COURIERS,
+        documentId: payload.courierId,
+      })
+
+      // Fetch all assignments for this courier
+      const assignmentsResult = await appwrite.databases.listDocuments({
+        databaseId: this.databaseId,
+        collectionId: Collections.COURIER_ASSIGNMENTS,
+        queries: [Query.equal('courierId', payload.courierId), Query.limit(100)],
+      })
+
+      const allowedUsers = new Set<string>()
+      if (courierDoc.createdBy) allowedUsers.add(courierDoc.createdBy)
+      if (courierDoc.handlerUserId) allowedUsers.add(courierDoc.handlerUserId)
+
+      for (const assignment of assignmentsResult.documents) {
+        if (assignment.entityType === 'user') {
+          allowedUsers.add(assignment.entityId)
+        } else if (assignment.entityType === 'department') {
+          try {
+            const membersService = await MembersService.forOrg(this.orgId)
+            const deptMembers = await membersService.listByDepartment(assignment.entityId)
+            for (const m of deptMembers.documents) {
+              allowedUsers.add(m.userId)
+            }
+          } catch (err) {
+            logger.warn(
+              { err, deptId: assignment.entityId },
+              'Failed to fetch department members for message permissions'
+            )
+          }
+        }
+      }
+
+      // Allow creator/handler/assignees to read/write, and admins/secretariat
+      const permissions: string[] = [
+        Permission.read(Role.team(this.orgId, 'admin')),
+        Permission.read(Role.team(this.orgId, 'secretariat')),
+        Permission.write(Role.team(this.orgId, 'admin')),
+        Permission.write(Role.team(this.orgId, 'secretariat')),
+      ]
+
+      for (const userId of allowedUsers) {
+        permissions.push(Permission.read(Role.user(userId)))
+        permissions.push(Permission.write(Role.user(userId)))
+      }
+
+      // 2. Create the message document in Appwrite
       const doc = await appwrite.databases.createDocument({
         databaseId: this.databaseId,
         collectionId: this.collectionId,
@@ -91,6 +121,7 @@ export default class CourierChatService {
           fileId: fileId || null,
           createdAt: new Date().toISOString(),
         },
+        permissions,
       })
 
       return this.mapDocument(doc)

@@ -23,7 +23,6 @@ router
     router.get('couriers/:id/activities', [CourierController, 'activities'])
 
     // Courier Chat Messages
-    router.get('couriers/:id/messages', [CourierChatController, 'index'])
     router.post('couriers/:id/messages', [CourierChatController, 'store'])
 
     // Courier Replies

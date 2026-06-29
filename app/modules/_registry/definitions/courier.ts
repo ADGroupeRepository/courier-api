@@ -85,6 +85,7 @@ export const courierModule: ModuleDefinition = {
         { key: 'receivedAt', type: 'datetime', required: false },
         { key: 'receivedBy', type: 'string', size: 36, required: false },
         { key: 'handlerUserId', type: 'string', size: 36, required: false },
+        { key: 'instruction', type: 'string', size: 2000, required: false },
         { key: 'replyCount', type: 'integer', required: true, default: 0 },
       ],
       indexes: [

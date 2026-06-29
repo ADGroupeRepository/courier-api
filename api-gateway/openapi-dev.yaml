@@ -934,6 +934,12 @@ paths:
             properties:
               handlerUserId:
                 type: string
+              urgency:
+                type: string
+                enum: [normal, urgent, very_urgent]
+              instruction:
+                type: string
+                maxLength: 2000
       responses:
         '200':
           description: Success
@@ -981,41 +987,6 @@ paths:
                   $ref: '#/definitions/CourierActivity'
 
   /organisations/{orgId}/couriers/{id}/messages:
-    get:
-      summary: Lister les messages de chat d'un courrier (List courier chat messages)
-      operationId: listCourierMessages
-      parameters:
-        - name: orgId
-          in: path
-          required: true
-          type: string
-        - name: id
-          in: path
-          required: true
-          type: string
-        - name: limit
-          in: query
-          required: false
-          type: integer
-        - name: offset
-          in: query
-          required: false
-          type: integer
-        - name: x-org-id
-          in: header
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Success
-          schema:
-            type: object
-            properties:
-              total: { type: integer }
-              documents:
-                type: array
-                items:
-                  $ref: '#/definitions/CourierMessage'
     post:
       summary: Envoyer un message de chat pour un courrier (Send courier chat message)
       operationId: createCourierMessage

@@ -764,7 +764,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"handlerUserId\": \"{{memberUserId}}\"\n}"
+              "raw": "{\n  \"handlerUserId\": \"{{memberUserId}}\",\n  \"urgency\": \"urgent\",\n  \"instruction\": \"Veuillez traiter ce courrier dans les plus brefs délais et faire un retour.\"\n}"
             },
             "description": "Permet d'affecter un utilisateur en tant que responsable du traitement d'un courrier (Imputation). Seuls les administrateurs, les membres du secrétariat, le créateur du courrier ou les entités assignées (utilisateurs/départements) disposent des droits nécessaires pour effectuer cette affectation.",
             "url": {
@@ -3304,42 +3304,6 @@
           ]
         },
         {
-          "name": "Lister les messages (Chat)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "x-org-id",
-                "value": "{{orgId}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}/messages",
-              "host": ["{{base_url}}"],
-              "path": ["organisations", "{{orgId}}", "couriers", "{{courierId}}", "messages"]
-            },
-            "description": "Récupère l'historique du chat interne pour ce courrier."
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Le statut doit être 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
           "name": "Envoyer un message (Chat)",
           "request": {
             "method": "POST",
@@ -3662,7 +3626,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"handlerUserId\": \"{{userId}}\"\n}"
+              "raw": "{\n  \"handlerUserId\": \"{{userId}}\",\n  \"urgency\": \"urgent\",\n  \"instruction\": \"Veuillez traiter ce courrier dans les plus brefs délais et faire un retour.\"\n}"
             },
             "description": "Permet d'affecter un utilisateur en tant que responsable du traitement d'un courrier (Imputation). Seuls les administrateurs, les membres du secrétariat, le créateur du courrier ou les entités assignées (utilisateurs/départements) disposent des droits nécessaires.",
             "url": {
