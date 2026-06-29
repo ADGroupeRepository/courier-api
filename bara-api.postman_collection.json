@@ -3328,7 +3328,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/organisations/{{orgId}}/couriers",
+              "raw": "{{base_url}}/organisations/{{orgId}}/couriers?type=incoming&archived=false&favorite=false&deleted=false&limit=25&page=1",
               "host": [
                 "{{base_url}}"
               ],
@@ -3336,9 +3336,41 @@
                 "organisations",
                 "{{orgId}}",
                 "couriers"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "incoming",
+                  "description": "Type de courrier (incoming ou outgoing)"
+                },
+                {
+                  "key": "archived",
+                  "value": "false",
+                  "description": "Filtrer par statut archivé (true ou false)"
+                },
+                {
+                  "key": "favorite",
+                  "value": "false",
+                  "description": "Filtrer par statut favori (true ou false)"
+                },
+                {
+                  "key": "deleted",
+                  "value": "false",
+                  "description": "Filtrer par statut supprimé/corbeille (true ou false)"
+                },
+                {
+                  "key": "limit",
+                  "value": "25",
+                  "description": "Nombre maximal d'éléments par page"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Numéro de la page à retourner"
+                }
               ]
             },
-            "description": "Affiche tous les courriers d'une organisation."
+            "description": "Affiche tous les courriers d'une organisation avec des options de filtrage avancées par type, favoris, archives, corbeille et pagination."
           },
           "response": [],
           "event": [
@@ -3682,7 +3714,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"subject\": \"Sujet de courrier modifié\",\n  \"urgency\": \"urgent\",\n  \"emittedAt\": \"2026-06-22T18:25:39Z\"\n}"
+              "raw": "{\n  \"subject\": \"Sujet de courrier modifié\",\n  \"urgency\": \"urgent\",\n  \"isFavorite\": true,\n  \"isArchived\": false,\n  \"emittedAt\": \"2026-06-22T18:25:39Z\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/organisations/{{orgId}}/couriers/{{courierId}}",
