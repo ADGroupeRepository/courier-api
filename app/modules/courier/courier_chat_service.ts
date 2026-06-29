@@ -124,17 +124,6 @@ export default class CourierChatService {
         permissions,
       })
 
-      // 3. Increment parent courier replyCount
-      const currentReplyCount = courierDoc.replyCount ?? 0
-      await appwrite.databases.updateDocument({
-        databaseId: this.databaseId,
-        collectionId: Collections.COURIERS,
-        documentId: payload.courierId,
-        data: {
-          replyCount: currentReplyCount + 1,
-        },
-      })
-
       return this.mapDocument(doc)
     } catch (error) {
       if (fileId) {
