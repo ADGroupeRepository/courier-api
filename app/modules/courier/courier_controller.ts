@@ -131,6 +131,18 @@ export default class CourierController {
             message: 'Only secretariat or administrators can register incoming couriers',
           })
         }
+
+        if (!payload.targetType || !payload.entityIds || payload.entityIds.length === 0) {
+          return response.badRequest({
+            errors: [
+              {
+                message: 'targetType and entityIds are required for incoming couriers',
+                field: 'targetType',
+                rule: 'required',
+              },
+            ],
+          })
+        }
       }
 
       const service = await CourierService.forOrg(params.orgId)
