@@ -2,9 +2,9 @@ import appwriteConfig from '#config/appwrite'
 import { Collections } from '#modules/_registry/collection_ids'
 import {
   type CourierUrgency,
+  CourierCustodyState,
   CourierStatus,
   CourierType,
-  CourierCustodyState,
 } from '#modules/courier/courier_enums'
 import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
 import appwrite from '#services/appwrite_service'
@@ -221,6 +221,7 @@ export default class CourierService {
     userId: string
     departmentId?: string
     canManage: boolean
+    isSecretariat?: boolean
     type?: CourierType
     archived?: boolean
     favorite?: boolean
@@ -359,11 +360,15 @@ export default class CourierService {
       ...new Set(assignmentResult.documents.map((doc: any) => doc.courierId)),
     ]
 
-    // Build OR query: assigned courier IDs OR created by user
+    // Build OR query: assigned courier IDs OR created by user OR (for secretariat: outgoing couriers)
     const orQueries: any[] = [Query.equal('createdBy', options.userId)]
 
     if (assignedCourierIds.length > 0) {
       orQueries.push(Query.equal('$id', assignedCourierIds))
+    }
+
+    if (options.isSecretariat) {
+      orQueries.push(Query.equal('type', CourierType.OUTGOING))
     }
 
     if (orQueries.length > 1) {
