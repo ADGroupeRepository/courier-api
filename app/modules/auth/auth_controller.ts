@@ -6,6 +6,8 @@ import {
   signupValidator,
   updateProfileValidator,
   registerPushTokenValidator,
+  verifyPasswordResetOtpValidator,
+  resetPasswordValidator,
 } from '#modules/auth/auth_validator'
 import MembersService from '#modules/directory/members_service'
 import OrganisationService from '#modules/organisations/organisation_service'
@@ -233,5 +235,33 @@ export default class AuthController {
     })
 
     return response.ok({ message: 'Push token registered successfully' })
+  }
+
+  /**
+   * POST /api/v1/auth/forgot-password/verify
+   * Verify password reset OTP and return a temporary token.
+   */
+  async verifyPasswordResetOtp({ request, response }: HttpContext) {
+    const { email, otp } = await request.validateUsing(verifyPasswordResetOtpValidator)
+    const authService = new AuthService()
+    const result = await authService.verifyPasswordResetOtp(email, otp)
+    return response.ok({
+      message: 'OTP verified successfully',
+      data: result,
+    })
+  }
+
+  /**
+   * POST /api/v1/auth/forgot-password/reset
+   * Reset user password using reset token and confirmed password.
+   */
+  async resetPassword({ request, response }: HttpContext) {
+    const { token, password } = await request.validateUsing(resetPasswordValidator)
+    const authService = new AuthService()
+    const result = await authService.resetPassword(token, password)
+    return response.ok({
+      message: 'Password reset successfully',
+      data: result,
+    })
   }
 }

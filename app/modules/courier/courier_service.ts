@@ -348,7 +348,10 @@ export default class CourierService {
     const assignmentResult = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,
       collectionId: this.assignmentsCollectionId,
-      queries: [Query.or(assignmentQueries), Query.limit(500)],
+      queries: [
+        assignmentQueries.length > 1 ? Query.or(assignmentQueries) : assignmentQueries[0],
+        Query.limit(500),
+      ],
     })
 
     const assignedCourierIds = [
@@ -362,7 +365,11 @@ export default class CourierService {
       orQueries.push(Query.equal('$id', assignedCourierIds))
     }
 
-    baseQueries.push(Query.or(orQueries))
+    if (orQueries.length > 1) {
+      baseQueries.push(Query.or(orQueries))
+    } else {
+      baseQueries.push(orQueries[0])
+    }
 
     const result = await appwrite.databases.listDocuments({
       databaseId: this.databaseId,

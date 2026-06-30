@@ -1501,6 +1501,52 @@
           "response": []
         },
         {
+          "name": "Vérifier l'OTP de réinitialisation du mot de passe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password/verify",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "forgot-password", "verify"]
+            },
+            "description": "Vérifie l'OTP à 6 chiffres envoyé par e-mail et retourne un jeton de réinitialisation temporaire."
+          },
+          "response": []
+        },
+        {
+          "name": "Réinitialiser le mot de passe via token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"some-uuid-token\",\n  \"password\": \"nouveauMotDePasse123!\",\n  \"password_confirmation\": \"nouveauMotDePasse123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password/reset",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "forgot-password", "reset"]
+            },
+            "description": "Réinitialise le mot de passe à l'aide d'un jeton de réinitialisation temporaire valide et d'un nouveau mot de passe confirmé."
+          },
+          "response": []
+        },
+        {
           "name": "Demander la vérification de l'email",
           "request": {
             "method": "POST",

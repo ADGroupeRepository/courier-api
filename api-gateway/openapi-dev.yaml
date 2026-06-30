@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Bara API - Development
   description: API Gateway Specification for Bara API (Development Environment)
-  version: 1.0.0
+  version: 1.0.1
 schemes:
   - https
 produces:
@@ -88,6 +88,74 @@ paths:
       responses:
         '200':
           description: Success
+
+  /auth/forgot-password/verify:
+    post:
+      summary: Vérifier l'OTP de réinitialisation du mot de passe (Verify password reset OTP)
+      operationId: verifyPasswordResetOtp
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - email
+              - otp
+            properties:
+              email:
+                type: string
+                format: email
+              otp:
+                type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /auth/forgot-password/reset:
+    post:
+      summary: Réinitialiser le mot de passe (Reset password)
+      operationId: resetPassword
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - token
+              - password
+              - password_confirmation
+            properties:
+              token:
+                type: string
+              password:
+                type: string
+              password_confirmation:
+                type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  reset:
+                    type: boolean
 
   /auth/verify-email:
     post:
