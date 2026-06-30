@@ -33,7 +33,7 @@ export default class CourierController {
    * GET /api/v1/organisations/:orgId/couriers
    * List all couriers for the organisation.
    */
-  async index({ user, params, request, response, isOrgAdmin }: HttpContext) {
+  async index({ user, params, request, response, isOrgAdmin, isOrgSecretariat }: HttpContext) {
     const orgId = params.orgId
     const type = request.input('type') as CourierType | undefined
     const archived = request.input('archived') as string | undefined
@@ -51,6 +51,7 @@ export default class CourierController {
         userId: user?.$id || '',
         departmentId,
         canManage: !!isOrgAdmin,
+        isSecretariat: !!isOrgSecretariat,
         type,
         archived: archived === 'true',
         favorite: favorite === 'true' ? true : undefined,
