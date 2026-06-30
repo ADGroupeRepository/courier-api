@@ -64,3 +64,23 @@ export const registerPushTokenValidator = vine.create(
     name: vine.string().trim().optional(),
   })
 )
+
+/**
+ * Validator for verifying password reset OTP.
+ */
+export const verifyPasswordResetOtpValidator = vine.create(
+  vine.object({
+    email: vine.string().email().normalizeEmail().trim(),
+    otp: vine.string().trim().minLength(6).maxLength(6),
+  })
+)
+
+/**
+ * Validator for updating the password.
+ */
+export const resetPasswordValidator = vine.create(
+  vine.object({
+    token: vine.string().trim(),
+    password: vine.string().minLength(8).maxLength(256).confirmed(),
+  })
+)

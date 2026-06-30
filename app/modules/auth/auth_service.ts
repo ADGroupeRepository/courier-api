@@ -1,5 +1,6 @@
 import appwriteConfig from '#config/appwrite'
 import appwrite from '#services/appwrite_service'
+import { randomUUID } from 'node:crypto'
 import CacheService from '#services/cache_service'
 import EmailService from '#services/email_service'
 import logger from '@adonisjs/core/services/logger'
@@ -349,6 +350,68 @@ export default class AuthService {
     await CacheService.delete(cacheKey)
 
     logger.info({ userId: user.$id }, 'Password reset successfully via OTP')
+
+    return { reset: true }
+  }
+
+  /**
+   * Verify password reset OTP and return a temporary reset token.
+   */
+  async verifyPasswordResetOtp(email: string, otp: string): Promise<{ token: string }> {
+    // Find user by email via Admin SDK
+    const usersResult = await appwrite.users.list({
+      queries: [Query.equal('email', email)],
+    })
+
+    if (usersResult.total === 0) {
+      const error = new Error('Code de réinitialisation invalide ou expiré.')
+      ;(error as any).status = 400
+      throw error
+    }
+
+    const user = usersResult.users[0]
+    const cacheKey = `pwd_reset:${user.$id}`
+    const cached = await CacheService.get<{ otp: string; email: string }>(cacheKey)
+
+    if (!cached || cached.otp !== otp) {
+      const error = new Error('Code de réinitialisation invalide ou expiré.')
+      ;(error as any).status = 400
+      throw error
+    }
+
+    // OTP matches, delete it to prevent reuse
+    await CacheService.delete(cacheKey)
+
+    // Generate a temporary reset token (UUID) valid for 10 minutes (600s)
+    const resetToken = randomUUID()
+    const tokenCacheKey = `pwd_reset_token:${resetToken}`
+    await CacheService.set(tokenCacheKey, { userId: user.$id }, 600)
+
+    logger.info({ userId: user.$id }, 'Password reset OTP verified, temporary token generated')
+
+    return { token: resetToken }
+  }
+
+  /**
+   * Reset the password using the temporary reset token.
+   */
+  async resetPassword(token: string, password: string): Promise<{ reset: boolean }> {
+    const tokenCacheKey = `pwd_reset_token:${token}`
+    const cached = await CacheService.get<{ userId: string }>(tokenCacheKey)
+
+    if (!cached) {
+      const error = new Error('Le jeton de réinitialisation est invalide ou expiré.')
+      ;(error as any).status = 400
+      throw error
+    }
+
+    // Update password via Admin SDK
+    await appwrite.users.updatePassword({ userId: cached.userId, password })
+
+    // Single-use: delete the reset token immediately
+    await CacheService.delete(tokenCacheKey)
+
+    logger.info({ userId: cached.userId }, 'Password reset successfully via temporary token')
 
     return { reset: true }
   }

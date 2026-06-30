@@ -17,6 +17,12 @@ router
     router
       .patch('/forgot-password', [AuthController, 'confirmPasswordReset'])
       .use(middleware.rateLimit({ max: 5, windowMs: 60_000 }))
+    router
+      .post('/forgot-password/verify', [AuthController, 'verifyPasswordResetOtp'])
+      .use(middleware.rateLimit({ max: 5, windowMs: 60_000 }))
+    router
+      .post('/forgot-password/reset', [AuthController, 'resetPassword'])
+      .use(middleware.rateLimit({ max: 5, windowMs: 60_000 }))
 
     // Protected
     router.get('/profile', [AuthController, 'profile']).use(middleware.auth())
