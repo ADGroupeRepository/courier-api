@@ -18,6 +18,7 @@ export interface CourierAssignment {
   entityType: 'user' | 'department'
   entityName?: string | null
   entityEmail?: string | null
+  avatarUrl?: string | null
 }
 
 export interface CreateCourierPayload {
@@ -954,11 +955,9 @@ export default class CourierService {
   }
 
   private async enrichAssignment(assignment: CourierAssignment) {
-    if (assignment.entityName) {
-      return assignment
-    }
-
-    const entityName = await this.resolveEntityName(assignment.entityId, assignment.entityType)
+    const entityName =
+      assignment.entityName ??
+      (await this.resolveEntityName(assignment.entityId, assignment.entityType))
 
     if (assignment.entityType === 'user') {
       try {
@@ -970,13 +969,14 @@ export default class CourierService {
         return {
           ...assignment,
           entityName: entityName ?? user?.name ?? user?.email ?? null,
-          entityEmail: user?.email ?? null,
+          entityEmail: assignment.entityEmail ?? user?.email ?? null,
           avatarUrl,
         }
       } catch {
         return {
           ...assignment,
           entityName: entityName ?? null,
+          entityEmail: assignment.entityEmail ?? null,
           avatarUrl: null,
         }
       }
@@ -985,6 +985,7 @@ export default class CourierService {
     return {
       ...assignment,
       entityName: entityName ?? null,
+      entityEmail: assignment.entityEmail ?? null,
       avatarUrl: null,
     }
   }
