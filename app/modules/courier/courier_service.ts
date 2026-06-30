@@ -2,9 +2,9 @@ import appwriteConfig from '#config/appwrite'
 import { Collections } from '#modules/_registry/collection_ids'
 import {
   type CourierUrgency,
+  CourierCustodyState,
   CourierStatus,
   CourierType,
-  CourierCustodyState,
 } from '#modules/courier/courier_enums'
 import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
 import appwrite from '#services/appwrite_service'
