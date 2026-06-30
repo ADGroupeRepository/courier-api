@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Bara API - Development
   description: API Gateway Specification for Bara API (Development Environment)
-  version: 1.0.0
+  version: 1.0.1
 schemes:
   - https
 produces:
