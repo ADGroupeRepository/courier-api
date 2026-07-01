@@ -269,6 +269,42 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/ProfileResponse'
+
+  /auth/push-token:
+    post:
+      summary: Enregistrer un token de notification (Register Push Token)
+      operationId: registerPushToken
+      security:
+        - BearerAuth: []
+      x-google-quota:
+        metricCosts:
+          'all-requests': 1
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - token
+            properties:
+              token:
+                type: string
+                description: Token FCM ou jeton de l'appareil.
+              providerType:
+                type: string
+                enum: [push, email, sms]
+                description: Type de fournisseur.
+              providerId:
+                type: string
+                description: Identifiant du fournisseur.
+              name:
+                type: string
+                description: Nom de l'appareil ou description.
+      responses:
+        '200':
+          description: Jeton enregistré avec succès.
+
   /organisations:
     get:
       summary: Lister les organisations
