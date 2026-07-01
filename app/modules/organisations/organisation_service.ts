@@ -717,19 +717,19 @@ export default class OrganisationService {
   }
 
   /**
-   * Automatically ensures a "Courier Service" department exists and maps secretariat members to it.
+   * Automatically ensures a "Service Courier" department exists and maps secretariat members to it.
    */
   async ensureCourierDepartmentAndSecretariatMembers(orgId: string) {
     const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
     const databaseId = prefs.databaseId
     if (!databaseId) return
 
-    // 1. Ensure "Courier Service" department exists
+    // 1. Ensure "Service Courier" department exists
     let courierDeptId: string | null = null
     const depts = await appwrite.databases.listDocuments({
       databaseId,
       collectionId: Collections.DEPARTMENTS,
-      queries: [Query.equal('name', 'Courier Service'), Query.limit(1)],
+      queries: [Query.equal('name', 'Service Courier'), Query.limit(1)],
     })
 
     if (depts.total > 0) {
@@ -740,7 +740,7 @@ export default class OrganisationService {
         collectionId: Collections.DEPARTMENTS,
         documentId: ID.unique(),
         data: {
-          name: 'Courier Service',
+          name: 'Service Courier',
           description: 'Department responsible for mail, courier pickup, and dispatching.',
           managerUserId: '',
         },
@@ -757,7 +757,7 @@ export default class OrganisationService {
       m.roles?.includes('secretariat')
     )
 
-    // 3. For each secretariat member, ensure they have a profile in the Courier Service department
+    // 3. For each secretariat member, ensure they have a profile in the Service Courier department
     for (const member of secretariatMembers) {
       const existingProfile = await appwrite.databases.listDocuments({
         databaseId: databaseId,

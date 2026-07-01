@@ -139,7 +139,7 @@ export default class MembersController {
         await service.ensureCourierDepartmentAndSecretariatMembers(orgId)
       } catch (err: any) {
         // Log error but do not fail the request
-        console.error('Failed to auto-assign secretariat member to Courier Service department', err)
+        console.error('Failed to auto-assign secretariat member to Service Courier department', err)
       }
     }
 
@@ -224,7 +224,7 @@ export default class MembersController {
           await service.ensureCourierDepartmentAndSecretariatMembers(orgId)
         } catch (err: any) {
           console.error(
-            'Failed to auto-assign secretariat member to Courier Service department',
+            'Failed to auto-assign secretariat member to Service Courier department',
             err
           )
         }

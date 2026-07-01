@@ -281,7 +281,7 @@ export default class CourierService {
           const state = userStatesMap.get(doc.$id)
           const isNew = state ? !state.isListed : true
           const isOpened = state ? state.isOpened : false
-          return this.mapDocumentWithAssignments(doc, userCache, isNew, isOpened)
+          return this.mapDocumentWithAssignments(doc, userCache, undefined, true, isNew, isOpened)
         })
       )
 
@@ -412,7 +412,7 @@ export default class CourierService {
         const state = userStatesMap.get(doc.$id)
         const isNew = state ? !state.isListed : true
         const isOpened = state ? state.isOpened : false
-        return this.mapDocumentWithAssignments(doc, userCache, isNew, isOpened)
+        return this.mapDocumentWithAssignments(doc, userCache, undefined, true, isNew, isOpened)
       })
     )
 
@@ -526,7 +526,7 @@ export default class CourierService {
       }
     }
 
-    return this.mapDocumentWithAssignments(doc, undefined, isNew, isOpened)
+    return this.mapDocumentWithAssignments(doc, undefined, currentUserId, false, isNew, isOpened)
   }
 
   /**
@@ -622,7 +622,7 @@ export default class CourierService {
           )
         : []
 
-    return this.mapDocument(doc, assignments)
+    return this.mapDocument(doc, assignments, undefined, false, true)
   }
 
   /**
@@ -632,7 +632,7 @@ export default class CourierService {
    * @param payload - The fields to update.
    * @returns The updated and mapped courier document.
    */
-  async update(courierId: string, payload: UpdateCourierPayload) {
+  async update(courierId: string, payload: UpdateCourierPayload, currentUserId?: string) {
     // Auto-archive when status is set to completed
     const data: Record<string, any> = { ...payload }
     if (payload.status === CourierStatus.COMPLETED) {
@@ -646,7 +646,7 @@ export default class CourierService {
       data,
     })
 
-    return this.mapDocumentWithAssignments(doc)
+    return this.mapDocumentWithAssignments(doc, undefined, currentUserId)
   }
 
   /**
@@ -675,7 +675,12 @@ export default class CourierService {
   /**
    * Hand over a courier physically to a recipient user or department.
    */
-  async handover(courierId: string, recipientUserId?: string, recipientDeptId?: string) {
+  async handover(
+    courierId: string,
+    recipientUserId?: string,
+    recipientDeptId?: string,
+    currentUserId?: string
+  ) {
     const data: Record<string, any> = {
       currentCustody: CourierCustodyState.RECIPIENT,
       status: CourierStatus.RECEIVED,
@@ -695,7 +700,7 @@ export default class CourierService {
       data,
     })
 
-    return this.mapDocumentWithAssignments(doc)
+    return this.mapDocumentWithAssignments(doc, undefined, currentUserId)
   }
 
   /**
@@ -726,7 +731,7 @@ export default class CourierService {
       data,
     })
 
-    return this.mapDocumentWithAssignments(doc)
+    return this.mapDocumentWithAssignments(doc, undefined, userId)
   }
 
   /**
@@ -755,14 +760,14 @@ export default class CourierService {
    * @param courierId - The ID of the courier to soft delete.
    * @returns The updated and mapped courier document.
    */
-  async softDelete(courierId: string) {
+  async softDelete(courierId: string, currentUserId?: string) {
     const doc = await appwrite.databases.updateDocument({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
       documentId: courierId,
       data: { isDeleted: true },
     })
-    return this.mapDocumentWithAssignments(doc)
+    return this.mapDocumentWithAssignments(doc, undefined, currentUserId)
   }
 
   /**
@@ -770,14 +775,14 @@ export default class CourierService {
    * @param courierId - The ID of the courier to restore.
    * @returns The updated and mapped courier document.
    */
-  async restore(courierId: string) {
+  async restore(courierId: string, currentUserId?: string) {
     const doc = await appwrite.databases.updateDocument({
       databaseId: this.databaseId,
       collectionId: this.collectionId,
       documentId: courierId,
       data: { isDeleted: false },
     })
-    return this.mapDocumentWithAssignments(doc)
+    return this.mapDocumentWithAssignments(doc, undefined, currentUserId)
   }
 
   /**
@@ -820,11 +825,44 @@ export default class CourierService {
   private async mapDocumentWithAssignments(
     doc: any,
     userCache?: Map<string, any>,
-    isNew: boolean = false,
-    isOpened: boolean = false
+    currentUserId?: string,
+    excludeFileUrls: boolean = false,
+    overrideIsNew?: boolean,
+    overrideIsOpened?: boolean
   ) {
     const assignments = await this.getAssignments(doc.$id)
-    return this.mapDocument(doc, assignments, userCache, isNew, isOpened)
+    let isNew = overrideIsNew !== undefined ? overrideIsNew : false
+    let isOpened = overrideIsOpened !== undefined ? overrideIsOpened : false
+
+    if (overrideIsNew === undefined && overrideIsOpened === undefined && currentUserId) {
+      try {
+        const result = await appwrite.databases.listDocuments({
+          databaseId: this.databaseId,
+          collectionId: Collections.COURIER_USER_STATES,
+          queries: [
+            Query.equal('courierId', doc.$id),
+            Query.equal('userId', currentUserId),
+            Query.limit(1),
+          ],
+        })
+
+        if (result.total > 0) {
+          const state = result.documents[0]
+          isNew = !state.isListed
+          isOpened = state.isOpened
+        } else {
+          isNew = true
+          isOpened = false
+        }
+      } catch (err) {
+        logger.warn(
+          { err, courierId: doc.$id, currentUserId },
+          'Failed to fetch user state for mapping'
+        )
+      }
+    }
+
+    return this.mapDocument(doc, assignments, userCache, isNew, isOpened, excludeFileUrls)
   }
 
   /**
@@ -1000,21 +1038,39 @@ export default class CourierService {
     assignments: CourierAssignment[],
     userCache?: Map<string, any>,
     isNew: boolean = false,
-    isOpened: boolean = false
+    isOpened: boolean = false,
+    excludeFileUrls: boolean = false
   ) {
     const fileIds = Array.isArray(doc.fileIds) ? doc.fileIds.filter(Boolean) : []
-    const fileUrls = fileIds.map(
-      (id: string) =>
-        `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${id}/view?project=${appwriteConfig.projectId}`
-    )
+    const fileUrls = excludeFileUrls
+      ? []
+      : fileIds.map(
+          (id: string) =>
+            `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${id}/view?project=${appwriteConfig.projectId}`
+        )
     const correspondent = await this.resolveCorrespondentDetails(doc)
     const deliverer = this.resolveDelivererDetails(doc)
     const enrichedAssignments = await Promise.all(
       assignments.map((assignment) => this.enrichAssignment(assignment))
     )
     const createdBy = await this.resolveUserCreator(doc.createdBy, userCache)
-    const handler = doc.handlerUserId
-      ? await this.resolveUserCreator(doc.handlerUserId, userCache)
+
+    // Handle multiple handlers or legacy single handler
+    const handlerUserIds: string[] = Array.isArray(doc.handlerUserId)
+      ? doc.handlerUserId.filter(Boolean)
+      : doc.handlerUserId
+        ? [doc.handlerUserId]
+        : []
+
+    const enrichedHandlers = await Promise.all(
+      handlerUserIds.map((id) => this.resolveUserCreator(id, userCache))
+    )
+    const handlers = enrichedHandlers.filter(Boolean)
+    const handler = handlers[0] || null
+    const handlerUserId = handlerUserIds[0] || null
+
+    const signedProofFileUrl = doc.signedProofFileId
+      ? `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${doc.signedProofFileId}/view?project=${appwriteConfig.projectId}`
       : null
 
     return {
@@ -1031,7 +1087,9 @@ export default class CourierService {
       fileUrls,
       createdBy,
       handler,
-      handlerUserId: doc.handlerUserId || null,
+      handlerUserId,
+      handlers,
+      handlerUserIds,
       instruction: doc.instruction || null,
       status: doc.status,
       isFavorite: doc.isFavorite ?? false,
@@ -1045,6 +1103,7 @@ export default class CourierService {
       pickedUpAt: doc.pickedUpAt || null,
       pickedUpBy: doc.pickedUpBy || null,
       signedProofFileId: doc.signedProofFileId || null,
+      signedProofFileUrl,
       dispatchedAt: doc.dispatchedAt || null,
       dispatchedBy: doc.dispatchedBy || null,
       receivedBy: doc.receivedBy || null,
@@ -1052,6 +1111,7 @@ export default class CourierService {
       updatedAt: doc.$updatedAt,
       isNew,
       isOpened,
+      isOpen: isOpened,
     }
   }
 
@@ -1095,7 +1155,8 @@ export default class CourierService {
       | 'restored'
       | 'deleted'
       | 'replied'
-      | 'handler_assigned',
+      | 'handler_assigned'
+      | 'handler_removed',
     performedBy: string,
     details?: string
   ) {

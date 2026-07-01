@@ -26,16 +26,26 @@ router
           .use(middleware.planGuard('limit:maxMembers'))
 
         // Seat Licenses
-        router.get('organisations/:orgId/licenses', [OrgLicensesController, 'index'])
-        router.post('organisations/:orgId/licenses/assign', [OrgLicensesController, 'assign'])
-        router.post('organisations/:orgId/licenses/revoke', [OrgLicensesController, 'revoke'])
+        router
+          .get('organisations/:orgId/licenses', [OrgLicensesController, 'index'])
+          .use(middleware.orgAuth())
+        router
+          .post('organisations/:orgId/licenses/assign', [OrgLicensesController, 'assign'])
+          .use(middleware.orgAuth())
+        router
+          .post('organisations/:orgId/licenses/revoke', [OrgLicensesController, 'revoke'])
+          .use(middleware.orgAuth())
 
         // Module Management (Active modules listing and deactivation)
-        router.get('organisations/:orgId/modules', [OrganisationModulesController, 'indexActive'])
-        router.delete('organisations/:orgId/modules/:module', [
-          OrganisationModulesController,
-          'deactivate',
-        ])
+        router
+          .get('organisations/:orgId/modules', [OrganisationModulesController, 'indexActive'])
+          .use(middleware.orgAuth())
+        router
+          .delete('organisations/:orgId/modules/:module', [
+            OrganisationModulesController,
+            'deactivate',
+          ])
+          .use(middleware.orgAuth())
 
         // Organisation update, and deactivation
         router

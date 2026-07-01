@@ -1455,6 +1455,33 @@
           "response": []
         },
         {
+          "name": "Enregistrer push token (Register Push Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"fcm_token_123456\",\n  \"providerType\": \"push\",\n  \"providerId\": \"fcm_provider_id\",\n  \"name\": \"Mon Appareil\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/push-token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "push-token"]
+            },
+            "description": "Enregistre ou met à jour le token de notification push de l'utilisateur."
+          },
+          "response": []
+        },
+        {
           "name": "Demander la réinitialisation du mot de passe",
           "request": {
             "method": "POST",

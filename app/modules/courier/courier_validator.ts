@@ -74,7 +74,7 @@ export const updateCourierValidator = vine.create(
     dispatchedAt: vine.string().nullable().optional(),
     dispatchedBy: vine.string().maxLength(36).trim().nullable().optional(),
     receivedBy: vine.string().maxLength(36).trim().nullable().optional(),
-    handlerUserId: vine.string().maxLength(36).trim().nullable().optional(),
+    handlerUserId: vine.any().nullable().optional(),
   })
 )
 
@@ -111,7 +111,7 @@ export const createCourierMessageValidator = vine.create(
  */
 export const imputeCourierValidator = vine.create(
   vine.object({
-    handlerUserId: vine.string().maxLength(36).trim(),
+    handlerUserId: vine.any().nullable().optional(),
     urgency: vine.enum(CourierUrgency).optional(),
     instruction: vine.string().maxLength(2000).trim().optional(),
   })

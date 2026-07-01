@@ -241,7 +241,7 @@ export default class CourierController {
         return response.forbidden({ message: 'You do not have permission to update this courier' })
       }
 
-      const updatedCourier = await service.update(params.id, payload)
+      const updatedCourier = await service.update(params.id, payload, user?.$id)
 
       // Log activity depending on payload changes
       let action: any = 'updated'
@@ -301,27 +301,50 @@ export default class CourierController {
       }
 
       // Update courier with imputer details, urgency and instruction
+      let handlerIds: string[] = []
+      if (payload.handlerUserId) {
+        if (Array.isArray(payload.handlerUserId)) {
+          handlerIds = payload.handlerUserId.filter(Boolean)
+        } else if (
+          typeof payload.handlerUserId === 'string' &&
+          payload.handlerUserId.trim() !== ''
+        ) {
+          handlerIds = [payload.handlerUserId.trim()]
+        }
+      }
+
       const updateData: Record<string, any> = {
-        handlerUserId: payload.handlerUserId,
+        handlerUserId: handlerIds.length > 0 ? handlerIds : null,
       }
       if (payload.urgency) {
         updateData.urgency = payload.urgency
       }
-      if (payload.instruction !== undefined) {
+      if (handlerIds.length === 0) {
+        updateData.instruction = null
+      } else if (payload.instruction !== undefined) {
         updateData.instruction = payload.instruction
       }
 
-      const updatedCourier = await service.update(params.id, updateData)
+      const updatedCourier = await service.update(params.id, updateData, user?.$id)
 
       // Log activity
-      let logDetail = 'Responsable assigné'
-      if (payload.instruction) {
+      let logDetail = handlerIds.length > 0 ? 'Responsable assigné' : 'Imputation retirée'
+      if (payload.instruction && handlerIds.length > 0) {
         logDetail += ` (Instruction: ${payload.instruction})`
       }
-      await service.logActivity(params.id, 'handler_assigned', user?.$id || '', logDetail)
+      await service.logActivity(
+        params.id,
+        handlerIds.length > 0 ? 'handler_assigned' : 'handler_removed',
+        user?.$id || '',
+        logDetail
+      )
 
-      // Notify the assigned handler user
-      await NotificationService.notifyImputation(params.orgId, params.id, payload.handlerUserId)
+      // Notify the assigned handler users
+      if (handlerIds.length > 0) {
+        for (const handlerId of handlerIds) {
+          await NotificationService.notifyImputation(params.orgId, params.id, handlerId)
+        }
+      }
 
       return response.ok({ data: updatedCourier, message: 'Responsable assigne avec succes' })
     } catch (error: any) {
@@ -348,7 +371,7 @@ export default class CourierController {
         })
       }
 
-      await service.softDelete(params.id)
+      await service.softDelete(params.id, user?.$id)
       await service.logActivity(
         params.id,
         'deleted',
@@ -386,7 +409,7 @@ export default class CourierController {
         return response.forbidden({ message: 'You do not have permission to restore this courier' })
       }
 
-      const restoredCourier = await service.restore(params.id)
+      const restoredCourier = await service.restore(params.id, user?.$id)
       await service.logActivity(params.id, 'restored', user?.$id || '', 'Courrier restauré')
       return response.ok({ data: restoredCourier, message: 'Courier restored successfully' })
     } catch (error: any) {
@@ -470,7 +493,7 @@ export default class CourierController {
       const recipientDeptId = request.input('recipientDeptId')
 
       const service = await CourierService.forOrg(params.orgId)
-      const courier = await service.handover(params.id, recipientUserId, recipientDeptId)
+      const courier = await service.handover(params.id, recipientUserId, recipientDeptId, user?.$id)
 
       await service.logActivity(
         params.id,
