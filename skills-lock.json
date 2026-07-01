@@ -24,6 +24,30 @@
       "sourceType": "github",
       "skillPath": "caveman-compress/SKILL.md",
       "computedHash": "4f3cad023d7153f247fa6d9fda7b39477ee9c0c08054b8740c9a9dd9ec26aed7"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "781bd6d3f9b19f8c9af6b53d8d0e4876d0183841b565db34ca7092ffa412d111"
+    },
+    "receiving-code-review": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/receiving-code-review/SKILL.md",
+      "computedHash": "3f56080356c62e4f74a183d7371686babc661e41a952dc67a97c2c76fe8a9329"
+    },
+    "requesting-code-review": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/requesting-code-review/SKILL.md",
+      "computedHash": "cde520e9118d7e6b74b5ab0123cff2f68d9c07bddb3f82c997753b6126600aed"
+    },
+    "self-improving-agent": {
+      "source": "charon-fan/agent-playbook",
+      "sourceType": "github",
+      "skillPath": "skills/self-improving-agent/SKILL.md",
+      "computedHash": "4d5f4b36af90b0339c089a679b43962cc79dc4ce5b9fdc9abaa060ddfefafa9a"
     }
   }
 }
