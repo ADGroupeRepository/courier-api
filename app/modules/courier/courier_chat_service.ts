@@ -111,6 +111,19 @@ export default class CourierChatService {
         permissions.push(Permission.write(Role.user(userId)))
       }
 
+      let senderName = 'Utilisateur'
+      let senderAvatarUrl: string | null = null
+      try {
+        const user = await appwrite.users.get({ userId: payload.createdBy })
+        senderName = user.name || user.email || 'Utilisateur'
+        senderAvatarUrl = user.prefs?.avatarUrl || null
+      } catch (err) {
+        logger.warn(
+          { err, userId: payload.createdBy },
+          'Failed to fetch sender profile for message'
+        )
+      }
+
       // 2. Create the message document in Appwrite
       const doc = await appwrite.databases.createDocument({
         databaseId: this.databaseId,
@@ -118,6 +131,8 @@ export default class CourierChatService {
         documentId: ID.unique(),
         data: {
           ...payload,
+          senderName,
+          senderAvatarUrl,
           fileId: fileId || null,
           createdAt: new Date().toISOString(),
         },
@@ -151,6 +166,8 @@ export default class CourierChatService {
       fileUrl,
       fileId: doc.fileId || null,
       createdBy: doc.createdBy,
+      senderName: doc.senderName || 'Utilisateur',
+      senderAvatarUrl: doc.senderAvatarUrl || null,
       createdAt: doc.createdAt,
     }
   }

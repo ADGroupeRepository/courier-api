@@ -203,6 +203,8 @@ export const courierModule: ModuleDefinition = {
         { key: 'content', type: 'string', size: 5000, required: true },
         { key: 'fileId', type: 'string', size: 36, required: false },
         { key: 'createdBy', type: 'string', size: 36, required: true },
+        { key: 'senderName', type: 'string', size: 255, required: false },
+        { key: 'senderAvatarUrl', type: 'string', size: 500, required: false },
         { key: 'createdAt', type: 'datetime', required: true, default: new Date() },
       ],
       indexes: [{ key: 'courier_idx', type: 'key', attributes: ['courierId'] }],

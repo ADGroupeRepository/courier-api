@@ -18,6 +18,8 @@ export interface NotificationPayload {
   title: string
   body: string
   link?: string
+  senderName?: string
+  senderAvatarUrl?: string
 }
 
 /**
@@ -71,6 +73,8 @@ export default class NotificationService {
           title: payload.title,
           body: payload.body,
           link: payload.link || null,
+          senderName: payload.senderName || null,
+          senderAvatarUrl: payload.senderAvatarUrl || null,
           isRead: false,
           createdAt: new Date().toISOString(),
         },
@@ -93,7 +97,9 @@ export default class NotificationService {
     orgId: string,
     courierId: string,
     assigneeEmail: string,
-    assigneeId: string
+    assigneeId: string,
+    senderName?: string,
+    senderAvatarUrl?: string
   ): Promise<void> {
     const subject = `New Courier Assignment`
     const bodyText = `You have been assigned to courier ${courierId}. Please review it in your dashboard.`
@@ -120,6 +126,8 @@ export default class NotificationService {
       title: 'New Courier Assignment',
       body: bodyText,
       link: `/couriers/${courierId}`,
+      senderName,
+      senderAvatarUrl,
     })
 
     // Send Push Notification
@@ -136,7 +144,9 @@ export default class NotificationService {
     orgId: string,
     courierId: string,
     assigneeEmail: string,
-    assigneeId: string
+    assigneeId: string,
+    senderName?: string,
+    senderAvatarUrl?: string
   ): Promise<void> {
     const subject = `Responsable assigné au courrier`
     const bodyText = `Vous avez été désigné comme responsable du traitement du courrier ${courierId}. Veuillez l'examiner dans votre tableau de bord.`
@@ -163,6 +173,8 @@ export default class NotificationService {
       title: 'Responsable assigné au courrier',
       body: bodyText,
       link: `/couriers/${courierId}`,
+      senderName,
+      senderAvatarUrl,
     })
 
     // Send Push Notification
@@ -183,7 +195,38 @@ export default class NotificationService {
     try {
       const email = await this.getEmailByUserId(orgId, handlerUserId)
       if (email) {
-        await this.notifyCourierImputation(orgId, courierId, email, handlerUserId)
+        const teamPrefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
+        if (!teamPrefs.databaseId) return
+
+        const courierDoc = await appwrite.databases.getDocument({
+          databaseId: teamPrefs.databaseId,
+          collectionId: Collections.COURIERS,
+          documentId: courierId,
+        })
+
+        let senderName: string | undefined
+        let senderAvatarUrl: string | undefined
+        if (courierDoc.createdBy) {
+          try {
+            const senderUser = await appwrite.users.get({ userId: courierDoc.createdBy })
+            senderName = senderUser.name || senderUser.email || 'Utilisateur'
+            senderAvatarUrl = senderUser.prefs?.avatarUrl || undefined
+          } catch (err) {
+            logger.warn(
+              { err, userId: courierDoc.createdBy },
+              'Failed to fetch sender profile for notification'
+            )
+          }
+        }
+
+        await this.notifyCourierImputation(
+          orgId,
+          courierId,
+          email,
+          handlerUserId,
+          senderName,
+          senderAvatarUrl
+        )
       }
     } catch (err: any) {
       logger.error(
@@ -203,10 +246,41 @@ export default class NotificationService {
     targetId: string
   ): Promise<void> {
     try {
+      const teamPrefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
+      if (!teamPrefs.databaseId) return
+
+      const courierDoc = await appwrite.databases.getDocument({
+        databaseId: teamPrefs.databaseId,
+        collectionId: Collections.COURIERS,
+        documentId: courierId,
+      })
+
+      let senderName: string | undefined
+      let senderAvatarUrl: string | undefined
+      if (courierDoc.createdBy) {
+        try {
+          const senderUser = await appwrite.users.get({ userId: courierDoc.createdBy })
+          senderName = senderUser.name || senderUser.email || 'Utilisateur'
+          senderAvatarUrl = senderUser.prefs?.avatarUrl || undefined
+        } catch (err) {
+          logger.warn(
+            { err, userId: courierDoc.createdBy },
+            'Failed to fetch sender profile for notification'
+          )
+        }
+      }
+
       if (targetType === 'user') {
         const email = await this.getEmailByUserId(orgId, targetId)
         if (email) {
-          await this.notifyCourierAssignment(orgId, courierId, email, targetId)
+          await this.notifyCourierAssignment(
+            orgId,
+            courierId,
+            email,
+            targetId,
+            senderName,
+            senderAvatarUrl
+          )
         }
       } else if (targetType === 'department') {
         const membersService = await MembersService.forOrg(orgId)
@@ -214,7 +288,14 @@ export default class NotificationService {
         for (const member of members) {
           const email = await this.getEmailByUserId(orgId, member.userId)
           if (email) {
-            await this.notifyCourierAssignment(orgId, courierId, email, member.userId)
+            await this.notifyCourierAssignment(
+              orgId,
+              courierId,
+              email,
+              member.userId,
+              senderName,
+              senderAvatarUrl
+            )
           }
         }
       }
@@ -272,6 +353,16 @@ export default class NotificationService {
         }
       }
 
+      let senderName: string | undefined
+      let senderAvatarUrl: string | undefined
+      try {
+        const senderUser = await appwrite.users.get({ userId: senderId })
+        senderName = senderUser.name || senderUser.email || 'Utilisateur'
+        senderAvatarUrl = senderUser.prefs?.avatarUrl || undefined
+      } catch (err) {
+        logger.warn({ err, senderId }, 'Failed to fetch sender profile for notification')
+      }
+
       // Send to all unique recipients
       for (const recipientId of recipients) {
         const email = await this.getEmailByUserId(orgId, recipientId)
@@ -300,6 +391,8 @@ export default class NotificationService {
             title: `New Courier ${label}`,
             body: bodyText,
             link: `/couriers/${courierId}`,
+            senderName,
+            senderAvatarUrl,
           })
 
           await this.sendPushNotification([recipientId], subject, bodyText, {
