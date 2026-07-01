@@ -826,7 +826,7 @@ export default class CourierService {
     doc: any,
     userCache?: Map<string, any>,
     currentUserId?: string,
-    excludeFileUrls: boolean = false,
+    isList: boolean = false,
     overrideIsNew?: boolean,
     overrideIsOpened?: boolean
   ) {
@@ -862,7 +862,7 @@ export default class CourierService {
       }
     }
 
-    return this.mapDocument(doc, assignments, userCache, isNew, isOpened, excludeFileUrls)
+    return this.mapDocument(doc, assignments, userCache, isNew, isOpened, isList)
   }
 
   /**
@@ -1039,10 +1039,10 @@ export default class CourierService {
     userCache?: Map<string, any>,
     isNew: boolean = false,
     isOpened: boolean = false,
-    excludeFileUrls: boolean = false
+    isList: boolean = false
   ) {
     const fileIds = Array.isArray(doc.fileIds) ? doc.fileIds.filter(Boolean) : []
-    const fileUrls = excludeFileUrls
+    const fileUrls = isList
       ? []
       : fileIds.map(
           (id: string) =>
@@ -1069,9 +1069,11 @@ export default class CourierService {
     const handler = handlers[0] || null
     const handlerUserId = handlerUserIds[0] || null
 
-    const signedProofFileUrl = doc.signedProofFileId
-      ? `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${doc.signedProofFileId}/view?project=${appwriteConfig.projectId}`
-      : null
+    const signedProofFileUrl = isList
+      ? null
+      : doc.signedProofFileId
+        ? `${appwriteConfig.endpoint}/storage/buckets/${this.bucketId}/files/${doc.signedProofFileId}/view?project=${appwriteConfig.projectId}`
+        : null
 
     return {
       id: doc.$id,
@@ -1084,34 +1086,38 @@ export default class CourierService {
       deliverer,
       targetType: doc.targetType || null,
       assignments: enrichedAssignments,
-      fileUrls,
       createdBy,
       handler,
       handlerUserId,
       handlers,
       handlerUserIds,
-      instruction: doc.instruction || null,
       status: doc.status,
       isFavorite: doc.isFavorite ?? false,
       isArchived: doc.isArchived ?? false,
       isDeleted: doc.isDeleted ?? false,
       replyCount: doc.replyCount ?? 0,
       currentCustody: doc.currentCustody || null,
-      custodyUserId: doc.custodyUserId || null,
-      custodyDeptId: doc.custodyDeptId || null,
-      requiresPickup: doc.requiresPickup ?? false,
-      pickedUpAt: doc.pickedUpAt || null,
-      pickedUpBy: doc.pickedUpBy || null,
-      signedProofFileId: doc.signedProofFileId || null,
-      signedProofFileUrl,
-      dispatchedAt: doc.dispatchedAt || null,
-      dispatchedBy: doc.dispatchedBy || null,
       receivedBy: doc.receivedBy || null,
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
       isNew,
       isOpened,
       isOpen: isOpened,
+      ...(isList
+        ? {}
+        : {
+            fileUrls,
+            instruction: doc.instruction || null,
+            custodyUserId: doc.custodyUserId || null,
+            custodyDeptId: doc.custodyDeptId || null,
+            requiresPickup: doc.requiresPickup ?? false,
+            pickedUpAt: doc.pickedUpAt || null,
+            pickedUpBy: doc.pickedUpBy || null,
+            signedProofFileId: doc.signedProofFileId || null,
+            signedProofFileUrl,
+            dispatchedAt: doc.dispatchedAt || null,
+            dispatchedBy: doc.dispatchedBy || null,
+          }),
     }
   }
 
