@@ -107,8 +107,10 @@ export default class CourierChatService {
       ]
 
       for (const userId of allowedUsers) {
-        permissions.push(Permission.read(Role.user(userId)))
-        permissions.push(Permission.write(Role.user(userId)))
+        if (userId && typeof userId === 'string' && userId.trim() !== '') {
+          permissions.push(Permission.read(Role.user(userId)))
+          permissions.push(Permission.write(Role.user(userId)))
+        }
       }
 
       let senderName = 'Utilisateur'

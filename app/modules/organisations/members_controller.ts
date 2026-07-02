@@ -97,7 +97,10 @@ export default class MembersController {
 
     const departmentAssignmentsById = new Map<string, 'manager' | 'member'>()
 
-    for (const department of departments ?? []) {
+    // Secretariat members are auto-assigned to the Courier Service department; ignore client-provided departments
+    const sourceDepartments = role === 'secretariat' ? [] : (departments ?? [])
+
+    for (const department of sourceDepartments) {
       departmentAssignmentsById.set(department.id, department.role ?? 'member')
     }
 
@@ -134,9 +137,11 @@ export default class MembersController {
     const service = new OrganisationService()
     const membership = await service.addMember(orgId, email, [role], name)
 
+    let autoAssignedDeptId: string | undefined
+
     if (role === 'secretariat') {
       try {
-        await service.ensureCourierDepartmentAndSecretariatMembers(orgId)
+        autoAssignedDeptId = await service.ensureCourierDepartmentAndSecretariatMembers(orgId)
       } catch (err: any) {
         // Log error but do not fail the request
         console.error('Failed to auto-assign secretariat member to Service Courier department', err)
@@ -171,11 +176,16 @@ export default class MembersController {
       }
     }
 
+    const finalDepartments =
+      role === 'secretariat' && autoAssignedDeptId
+        ? [{ departmentId: autoAssignedDeptId, departmentRole: 'member' }]
+        : departmentAssignments
+
     return response.created({
       message: 'Member added successfully',
       data: {
         ...membership,
-        departments: departmentAssignments,
+        departments: finalDepartments,
       },
     })
   }
@@ -236,13 +246,22 @@ export default class MembersController {
       await appwrite.users.updateName({ userId: membership.userId, name })
     }
 
-    // 3. If department assignments or job title are provided, update them
-    if (departments !== undefined || jobTitle !== undefined) {
+    // 3. If department assignments or job title are provided, update them (ignoring departments for secretariat)
+    const isSecretariat = (updatedMembership?.roles || membership.roles)?.includes('secretariat')
+    if (!isSecretariat && (departments !== undefined || jobTitle !== undefined)) {
       const membersService = await MembersService.forOrg(orgId)
       await membersService.updateDepartmentAssignments({
         userId: membership.userId,
         membershipId: membership.$id,
         departments,
+        jobTitle,
+      })
+    } else if (isSecretariat && jobTitle !== undefined) {
+      const membersService = await MembersService.forOrg(orgId)
+      await membersService.updateDepartmentAssignments({
+        userId: membership.userId,
+        membershipId: membership.$id,
+        departments: undefined,
         jobTitle,
       })
     }

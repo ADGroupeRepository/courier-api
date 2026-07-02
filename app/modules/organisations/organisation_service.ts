@@ -719,7 +719,7 @@ export default class OrganisationService {
   /**
    * Automatically ensures a "Service Courier" department exists and maps secretariat members to it.
    */
-  async ensureCourierDepartmentAndSecretariatMembers(orgId: string) {
+  async ensureCourierDepartmentAndSecretariatMembers(orgId: string): Promise<string | undefined> {
     const prefs = (await appwrite.teams.getPrefs({ teamId: orgId })) as any
     const databaseId = prefs.databaseId
     if (!databaseId) return
@@ -784,5 +784,7 @@ export default class OrganisationService {
         })
       }
     }
+
+    return courierDeptId || undefined
   }
 }

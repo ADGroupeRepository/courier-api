@@ -30,7 +30,11 @@ export const updateOrganisationValidator = vine.create(
  */
 export const addMemberValidator = vine.create(
   vine.object({
-    email: vine.string().email().normalizeEmail().trim(),
+    email: vine
+      .string()
+      .email()
+      .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false })
+      .trim(),
     role: vine.enum(['admin', 'user', 'secretariat']),
     name: vine.string(),
     departments: vine

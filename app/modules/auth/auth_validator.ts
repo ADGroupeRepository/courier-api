@@ -6,7 +6,11 @@ import vine from '@vinejs/vine'
 export const signupValidator = vine.create(
   vine.object({
     name: vine.string().minLength(1).maxLength(128).trim(),
-    email: vine.string().email().normalizeEmail().trim(),
+    email: vine
+      .string()
+      .email()
+      .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false })
+      .trim(),
     phone: vine.string().trim().optional(),
     password: vine.string().minLength(8).maxLength(256),
   })
@@ -27,7 +31,11 @@ export const confirmEmailVerificationValidator = vine.create(
  */
 export const requestPasswordResetValidator = vine.create(
   vine.object({
-    email: vine.string().email().normalizeEmail().trim(),
+    email: vine
+      .string()
+      .email()
+      .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false })
+      .trim(),
   })
 )
 
@@ -36,7 +44,11 @@ export const requestPasswordResetValidator = vine.create(
  */
 export const confirmPasswordResetValidator = vine.create(
   vine.object({
-    email: vine.string().email().normalizeEmail().trim(),
+    email: vine
+      .string()
+      .email()
+      .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false })
+      .trim(),
     otp: vine.string().trim().minLength(6).maxLength(6),
     password: vine.string().minLength(8).maxLength(256),
   })
@@ -70,7 +82,11 @@ export const registerPushTokenValidator = vine.create(
  */
 export const verifyPasswordResetOtpValidator = vine.create(
   vine.object({
-    email: vine.string().email().normalizeEmail().trim(),
+    email: vine
+      .string()
+      .email()
+      .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false })
+      .trim(),
     otp: vine.string().trim().minLength(6).maxLength(6),
   })
 )
