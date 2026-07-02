@@ -96,7 +96,7 @@ export default class NotificationService {
   static async notifyCourierAssignment(
     orgId: string,
     courierId: string,
-    assigneeEmail: string,
+    assigneeEmail: string | null | undefined,
     assigneeId: string,
     senderName?: string,
     senderAvatarUrl?: string
@@ -105,20 +105,26 @@ export default class NotificationService {
     const bodyText = `You have been assigned to courier ${courierId}. Please review it in your dashboard.`
 
     // Send Email
-    await this.sendEmail({
-      to: assigneeEmail,
-      subject,
-      html: buildEmailHtml(
-        subject,
-        `<p style="margin:0 0 16px">You have been assigned a new courier.</p>
-        <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
-          <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
-        </table>
-        <p style="margin:0 0 24px">Log in to your dashboard to review and action it.</p>`,
-        'View Courier'
-      ),
-      text: bodyText,
-    })
+    if (assigneeEmail) {
+      try {
+        await this.sendEmail({
+          to: assigneeEmail,
+          subject,
+          html: buildEmailHtml(
+            subject,
+            `<p style="margin:0 0 16px">You have been assigned a new courier.</p>
+            <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+              <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+            </table>
+            <p style="margin:0 0 24px">Log in to your dashboard to review and action it.</p>`,
+            'View Courier'
+          ),
+          text: bodyText,
+        })
+      } catch (err) {
+        logger.error({ err }, 'Failed to send email notification')
+      }
+    }
 
     // Send In-App Notification
     await this.sendInAppNotification(orgId, {
@@ -143,7 +149,7 @@ export default class NotificationService {
   static async notifyCourierImputation(
     orgId: string,
     courierId: string,
-    assigneeEmail: string,
+    assigneeEmail: string | null | undefined,
     assigneeId: string,
     senderName?: string,
     senderAvatarUrl?: string
@@ -152,20 +158,26 @@ export default class NotificationService {
     const bodyText = `Vous avez été désigné comme responsable du traitement du courrier ${courierId}. Veuillez l'examiner dans votre tableau de bord.`
 
     // Send Email
-    await this.sendEmail({
-      to: assigneeEmail,
-      subject,
-      html: buildEmailHtml(
-        subject,
-        `<p style="margin:0 0 16px">Vous avez été désigné comme responsable du traitement d'un courrier.</p>
-        <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
-          <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
-        </table>
-        <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour l'examiner et le traiter.</p>`,
-        'Voir le courrier'
-      ),
-      text: bodyText,
-    })
+    if (assigneeEmail) {
+      try {
+        await this.sendEmail({
+          to: assigneeEmail,
+          subject,
+          html: buildEmailHtml(
+            subject,
+            `<p style="margin:0 0 16px">Vous avez été désigné comme responsable du traitement d'un courrier.</p>
+            <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+              <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+            </table>
+            <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour l'examiner et le traiter.</p>`,
+            'Voir le courrier'
+          ),
+          text: bodyText,
+        })
+      } catch (err) {
+        logger.error({ err }, 'Failed to send email notification')
+      }
+    }
 
     // Send In-App Notification
     await this.sendInAppNotification(orgId, {
@@ -366,40 +378,44 @@ export default class NotificationService {
       // Send to all unique recipients
       for (const recipientId of recipients) {
         const email = await this.getEmailByUserId(orgId, recipientId)
+        const label = itemType === 'message' ? 'Message' : 'Reply'
+        const subject = `New Courier ${label}`
+        const bodyText = `A new ${itemType} was posted on courier ${courierId}.`
+
         if (email) {
-          const label = itemType === 'message' ? 'Message' : 'Reply'
-          const subject = `New Courier ${label}`
-          const bodyText = `A new ${itemType} was posted on courier ${courierId}.`
-
-          await this.sendEmail({
-            to: email,
-            subject,
-            html: buildEmailHtml(
+          try {
+            await this.sendEmail({
+              to: email,
               subject,
-              `<p style="margin:0 0 16px">A new <strong>${itemType}</strong> has been posted on a courier you are involved in.</p>
-              <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
-                <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
-              </table>
-              <p style="margin:0 0 24px">Log in to your dashboard to view and respond.</p>`,
-              `View ${label}`
-            ),
-            text: bodyText,
-          })
-
-          await this.sendInAppNotification(orgId, {
-            userId: recipientId,
-            title: `New Courier ${label}`,
-            body: bodyText,
-            link: `/couriers/${courierId}`,
-            senderName,
-            senderAvatarUrl,
-          })
-
-          await this.sendPushNotification([recipientId], subject, bodyText, {
-            courierId,
-            link: `/couriers/${courierId}`,
-          })
+              html: buildEmailHtml(
+                subject,
+                `<p style="margin:0 0 16px">A new <strong>${itemType}</strong> has been posted on a courier you are involved in.</p>
+                <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+                  <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+                </table>
+                <p style="margin:0 0 24px">Log in to your dashboard to view and respond.</p>`,
+                `View ${label}`
+              ),
+              text: bodyText,
+            })
+          } catch (err) {
+            logger.error({ err }, 'Failed to send email notification')
+          }
         }
+
+        await this.sendInAppNotification(orgId, {
+          userId: recipientId,
+          title: `New Courier ${label}`,
+          body: bodyText,
+          link: `/couriers/${courierId}`,
+          senderName,
+          senderAvatarUrl,
+        })
+
+        await this.sendPushNotification([recipientId], subject, bodyText, {
+          courierId,
+          link: `/couriers/${courierId}`,
+        })
       }
     } catch (err: any) {
       logger.error(

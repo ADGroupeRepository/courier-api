@@ -1101,7 +1101,7 @@ export default class CourierService {
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt,
       isNew,
-      isOpen: isOpened,
+      isOpened,
       ...(isList
         ? {}
         : {

@@ -9,25 +9,11 @@ export default class CourierChatController {
   /**
    * Add a new chat message to a courier
    */
-  async store({ request, response, params }: HttpContext) {
-    const orgId = request.header('x-org-id')
-    if (!orgId) {
-      return response.badRequest({ message: 'Missing x-org-id header' })
-    }
-
-    // Get the auth user from Appwrite using the bearer token
-    const token = request.header('Authorization')?.replace('Bearer ', '')
-    if (!token) {
-      return response.unauthorized({ message: 'Missing auth token' })
-    }
-
-    let userId: string
-    try {
-      const client = appwrite.createSessionClient(token)
-      const user = await client.account.get()
-      userId = user.$id
-    } catch (error) {
-      return response.unauthorized({ message: 'Invalid or expired token' })
+  async store({ request, response, params, user }: HttpContext) {
+    const orgId = params.orgId
+    const userId = user?.$id
+    if (!userId) {
+      return response.unauthorized({ message: 'Authentication required' })
     }
 
     const { id: courierId } = params

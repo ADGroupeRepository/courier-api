@@ -79,6 +79,16 @@ export default class ExternalContactsController {
     const type = request.input('type')
 
     try {
+      const contactService = await ExternalContactService.forOrg(params.orgId)
+      try {
+        await contactService.get(params.contactId)
+      } catch (contactError: any) {
+        if (contactError.code === 404) {
+          return response.notFound({ message: 'Contact not found' })
+        }
+        throw contactError
+      }
+
       const service = await CourierService.forOrg(params.orgId)
       const { documents, total } = await service.listByCorrespondent(params.contactId, {
         limit,
@@ -97,9 +107,6 @@ export default class ExternalContactsController {
     } catch (error: any) {
       if (this.isMissingExternalContactsCollection(error)) {
         return this.missingCollectionResponse(response)
-      }
-      if (error.code === 404) {
-        return response.notFound({ message: 'Contact not found' })
       }
       return response.internalServerError({ message: error.message })
     }

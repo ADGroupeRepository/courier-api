@@ -1337,6 +1337,50 @@ paths:
             properties:
               message: { type: string }
 
+  /organisations/{orgId}/contacts/{id}/couriers:
+    get:
+      summary: Lister les courriers d'un contact externe (List external contact couriers)
+      operationId: listExternalContactCouriers
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: limit
+          in: query
+          required: false
+          type: integer
+        - name: page
+          in: query
+          required: false
+          type: integer
+        - name: status
+          in: query
+          required: false
+          type: string
+        - name: type
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              total: { type: integer }
+              limit: { type: integer }
+              page: { type: integer }
+              lastPage: { type: integer }
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Courier'
+
   /plans:
     get:
       summary: Lister les plans actifs (List active plans)

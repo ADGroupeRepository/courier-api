@@ -29,3 +29,8 @@
 ## 5. Appwrite Storage Authentication
 
 - **Security Masking (404s)**: Appwrite Storage returns a `404 storage_file_not_found` error for authorization or permission failures instead of a `403` to prevent ID enumeration. Always ensure requests to download or view files include the necessary headers (`X-Appwrite-Project`, `X-Appwrite-JWT`) or active session cookies.
+
+## 6. Notification Resilience & Authentication Context
+
+- **Resilience in Async Notification Pipelines**: Gated downstream notifications (such as email delivery or push notifications) must always be decoupled from main database operations using local `try/catch` wrappers. A failure in email dispatch or push notification delivery must never prevent the creation of the in-app notification document or interrupt the parent business transaction.
+- **Utilize Middleware Context for Auth**: Always read user profiles from the pre-populated `HttpContext.user` context instead of manually re-authenticating the token via Appwrite SDK `account` clients.
