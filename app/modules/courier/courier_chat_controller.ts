@@ -1,7 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CourierChatService from '#modules/courier/courier_chat_service'
 import { createCourierMessageValidator } from '#modules/courier/courier_validator'
-import appwrite from '#services/appwrite_service'
 import emitter from '@adonisjs/core/services/emitter'
 import CourierMessageSent from '#events/courier_message_sent'
 
