@@ -112,6 +112,7 @@ export default class OrganisationService {
     return {
       id: team.$id,
       name: team.name,
+      databaseId: database.$id,
       description: description ?? null,
       address: address ?? null,
       rccm: rccm ?? null,
@@ -161,6 +162,7 @@ export default class OrganisationService {
         return {
           id: team.$id,
           name: team.name,
+          databaseId: prefs.databaseId ?? null,
           membersCount: team.total,
           logoUrl,
           createdAt: team.$createdAt,
@@ -186,6 +188,7 @@ export default class OrganisationService {
     return {
       id: team.$id,
       name: team.name,
+      databaseId: prefs.databaseId ?? null,
       membersCount: team.total,
       description: prefs.description ?? null,
       address: prefs.address ?? null,

@@ -110,6 +110,7 @@ export default class AuthController {
         return {
           id: org.id,
           name: org.name,
+          databaseId: org.databaseId,
           logoUrl: org.logoUrl,
           roles,
           departments,
