@@ -5,6 +5,7 @@ import { InputFile } from 'node-appwrite/file'
 import { Collections } from '#modules/_registry/collection_ids'
 import logger from '@adonisjs/core/services/logger'
 import MembersService from '#modules/directory/members_service'
+import AuthService from '#modules/auth/auth_service'
 
 export interface CreateCourierMessagePayload {
   courierId: string
@@ -118,7 +119,8 @@ export default class CourierChatService {
       try {
         const user = await appwrite.users.get({ userId: payload.createdBy })
         senderName = user.name || user.email || 'Utilisateur'
-        senderAvatarUrl = user.prefs?.avatarUrl || null
+        const avatarFileId = user.prefs?.avatarFileId
+        senderAvatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : null
       } catch (err) {
         logger.warn(
           { err, userId: payload.createdBy },

@@ -5,6 +5,7 @@ import type { MessagingProviderType } from 'node-appwrite'
 import MembersService from '#modules/directory/members_service'
 import { Collections } from '#modules/_registry/collection_ids'
 import EmailService from '#services/email_service'
+import AuthService from '#modules/auth/auth_service'
 
 export interface EmailPayload {
   to: string
@@ -222,7 +223,8 @@ export default class NotificationService {
           try {
             const senderUser = await appwrite.users.get({ userId: courierDoc.createdBy })
             senderName = senderUser.name || senderUser.email || 'Utilisateur'
-            senderAvatarUrl = senderUser.prefs?.avatarUrl || undefined
+            const avatarFileId = senderUser.prefs?.avatarFileId
+            senderAvatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : undefined
           } catch (err) {
             logger.warn(
               { err, userId: courierDoc.createdBy },
@@ -273,7 +275,8 @@ export default class NotificationService {
         try {
           const senderUser = await appwrite.users.get({ userId: courierDoc.createdBy })
           senderName = senderUser.name || senderUser.email || 'Utilisateur'
-          senderAvatarUrl = senderUser.prefs?.avatarUrl || undefined
+          const avatarFileId = senderUser.prefs?.avatarFileId
+          senderAvatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : undefined
         } catch (err) {
           logger.warn(
             { err, userId: courierDoc.createdBy },
@@ -370,7 +373,8 @@ export default class NotificationService {
       try {
         const senderUser = await appwrite.users.get({ userId: senderId })
         senderName = senderUser.name || senderUser.email || 'Utilisateur'
-        senderAvatarUrl = senderUser.prefs?.avatarUrl || undefined
+        const avatarFileId = senderUser.prefs?.avatarFileId
+        senderAvatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : undefined
       } catch (err) {
         logger.warn({ err, senderId }, 'Failed to fetch sender profile for notification')
       }
