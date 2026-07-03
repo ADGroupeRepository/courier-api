@@ -19,6 +19,7 @@ export interface CourierAssignment {
   entityName?: string | null
   entityEmail?: string | null
   avatarUrl?: string | null
+  createdAt?: string
 }
 
 export interface CreateCourierPayload {
@@ -163,6 +164,7 @@ export default class CourierService {
           entityType: doc.entityType,
           entityName: entityName ?? null,
           entityEmail: doc.entityEmail ?? null,
+          createdAt: doc.$createdAt,
         }
       })
     )
@@ -220,6 +222,7 @@ export default class CourierService {
   async list(options: {
     userId: string
     departmentId?: string
+    departmentJoinedAt?: string | null
     canManage: boolean
     isSecretariat?: boolean
     type?: CourierType
@@ -343,6 +346,9 @@ export default class CourierService {
         Query.and([
           Query.equal('entityId', options.departmentId),
           Query.equal('entityType', 'department'),
+          ...(options.departmentJoinedAt
+            ? [Query.greaterThanEqual('$createdAt', options.departmentJoinedAt)]
+            : []),
         ])
       )
     }

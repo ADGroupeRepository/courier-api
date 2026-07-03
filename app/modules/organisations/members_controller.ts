@@ -137,17 +137,6 @@ export default class MembersController {
     const service = new OrganisationService()
     const membership = await service.addMember(orgId, email, [role], name)
 
-    let autoAssignedDeptId: string | undefined
-
-    if (role === 'secretariat') {
-      try {
-        autoAssignedDeptId = await service.ensureCourierDepartmentAndSecretariatMembers(orgId)
-      } catch (err: any) {
-        // Log error but do not fail the request
-        console.error('Failed to auto-assign secretariat member to Service Courier department', err)
-      }
-    }
-
     if (departmentAssignments.length > 0) {
       try {
         const membersService = await MembersService.forOrg(orgId)
@@ -176,16 +165,11 @@ export default class MembersController {
       }
     }
 
-    const finalDepartments =
-      role === 'secretariat' && autoAssignedDeptId
-        ? [{ departmentId: autoAssignedDeptId, departmentRole: 'member' }]
-        : departmentAssignments
-
     return response.created({
       message: 'Member added successfully',
       data: {
         ...membership,
-        departments: finalDepartments,
+        departments: departmentAssignments,
       },
     })
   }
@@ -228,17 +212,6 @@ export default class MembersController {
       // Deduplicate in case role === 'owner'
       const uniqueRoles = [...new Set(newRoles)]
       updatedMembership = await service.updateMember(orgId, membership.$id, uniqueRoles)
-
-      if (uniqueRoles.includes('secretariat')) {
-        try {
-          await service.ensureCourierDepartmentAndSecretariatMembers(orgId)
-        } catch (err: any) {
-          console.error(
-            'Failed to auto-assign secretariat member to Service Courier department',
-            err
-          )
-        }
-      }
     }
 
     // 2. If name is provided, update the Appwrite user display name

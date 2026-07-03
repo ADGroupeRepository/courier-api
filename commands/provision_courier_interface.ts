@@ -3,7 +3,6 @@ import type { CommandOptions } from '@adonisjs/core/types/ace'
 import appwrite from '#services/appwrite_service'
 import { Collections } from '#modules/_registry/collection_ids'
 import { CourierCustodyState } from '#modules/courier/courier_enums'
-import OrganisationService from '#modules/organisations/organisation_service'
 
 export default class ProvisionCourierInterface extends BaseCommand {
   static readonly commandName = 'provision:courier-interface'
@@ -202,10 +201,6 @@ export default class ProvisionCourierInterface extends BaseCommand {
             'documentStatus',
             Collections.COURIER_REPLIES
           )
-
-          // 6. Ensure Courier Service department and secretariat member mappings exist
-          const orgService = new OrganisationService()
-          await orgService.ensureCourierDepartmentAndSecretariatMembers(team.$id)
 
           updatedCount += 1
           this.logger.success(`Updated courier interface for: ${team.name}`)

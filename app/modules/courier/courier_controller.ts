@@ -17,16 +17,20 @@ import CourierAssigned from '#events/courier_assigned'
 
 export default class CourierController {
   /**
-   * Helper to get user's department ID in an organisation.
+   * Helper to get user's department details in an organisation.
    */
-  private async getDepartmentId(userId: string, orgId: string) {
+  private async getDepartmentDetails(userId: string, orgId: string) {
     const memberService = await MembersService.forOrg(orgId)
     const profiles = await appwrite.databases.listDocuments({
       databaseId: memberService.databaseId,
       collectionId: Collections.ORG_PROFILES,
       queries: [Query.equal('userId', userId)],
     })
-    return profiles.documents[0]?.departmentId
+    const profile = profiles.documents[0]
+    return {
+      departmentId: profile?.departmentId || null,
+      joinedAt: profile?.$createdAt || null,
+    }
   }
 
   /**
@@ -43,13 +47,17 @@ export default class CourierController {
     const page = Number(request.input('page')) || 1
 
     try {
-      const departmentId = await this.getDepartmentId(user?.$id || '', orgId)
+      const { departmentId, joinedAt: departmentJoinedAt } = await this.getDepartmentDetails(
+        user?.$id || '',
+        orgId
+      )
 
       // List couriers with visibility rules
       const service = await CourierService.forOrg(orgId)
       const result = await service.list({
         userId: user?.$id || '',
-        departmentId,
+        departmentId: departmentId || undefined,
+        departmentJoinedAt,
         canManage: !!isOrgAdmin,
         isSecretariat: !!isOrgSecretariat,
         type,
@@ -78,7 +86,10 @@ export default class CourierController {
    */
   async show({ user, params, response, isOrgAdmin, isOrgSecretariat }: HttpContext) {
     try {
-      const departmentId = await this.getDepartmentId(user?.$id || '', params.orgId)
+      const { departmentId, joinedAt: departmentJoinedAt } = await this.getDepartmentDetails(
+        user?.$id || '',
+        params.orgId
+      )
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id, user?.$id)
 
@@ -87,9 +98,13 @@ export default class CourierController {
         (a) => a.entityId === user?.$id && a.entityType === 'user'
       )
       const isAssignedDept = departmentId
-        ? courier.assignments.some(
-            (a) => a.entityId === departmentId && a.entityType === 'department'
-          )
+        ? courier.assignments.some((a) => {
+            if (a.entityId !== departmentId || a.entityType !== 'department') return false
+            if (departmentJoinedAt && a.createdAt) {
+              return new Date(a.createdAt) >= new Date(departmentJoinedAt)
+            }
+            return true
+          })
         : false
       const isCreator = courier.createdBy?.id === user?.$id
 
@@ -222,7 +237,10 @@ export default class CourierController {
     const payload = await request.validateUsing(updateCourierValidator)
 
     try {
-      const departmentId = await this.getDepartmentId(user?.$id || '', params.orgId)
+      const { departmentId, joinedAt: departmentJoinedAt } = await this.getDepartmentDetails(
+        user?.$id || '',
+        params.orgId
+      )
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id, user?.$id)
 
@@ -231,9 +249,13 @@ export default class CourierController {
         (a) => a.entityId === user?.$id && a.entityType === 'user'
       )
       const isAssignedDept = departmentId
-        ? courier.assignments.some(
-            (a) => a.entityId === departmentId && a.entityType === 'department'
-          )
+        ? courier.assignments.some((a) => {
+            if (a.entityId !== departmentId || a.entityType !== 'department') return false
+            if (departmentJoinedAt && a.createdAt) {
+              return new Date(a.createdAt) >= new Date(departmentJoinedAt)
+            }
+            return true
+          })
         : false
       const isCreator = courier.createdBy?.id === user?.$id
 
@@ -281,7 +303,10 @@ export default class CourierController {
     const payload = await request.validateUsing(imputeCourierValidator)
 
     try {
-      const departmentId = await this.getDepartmentId(user?.$id || '', params.orgId)
+      const { departmentId, joinedAt: departmentJoinedAt } = await this.getDepartmentDetails(
+        user?.$id || '',
+        params.orgId
+      )
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id, user?.$id)
 
@@ -290,9 +315,13 @@ export default class CourierController {
         (a) => a.entityId === user?.$id && a.entityType === 'user'
       )
       const isAssignedDept = departmentId
-        ? courier.assignments.some(
-            (a) => a.entityId === departmentId && a.entityType === 'department'
-          )
+        ? courier.assignments.some((a) => {
+            if (a.entityId !== departmentId || a.entityType !== 'department') return false
+            if (departmentJoinedAt && a.createdAt) {
+              return new Date(a.createdAt) >= new Date(departmentJoinedAt)
+            }
+            return true
+          })
         : false
       const isCreator = courier.createdBy?.id === user?.$id
 
@@ -391,7 +420,10 @@ export default class CourierController {
    */
   async restore({ user, params, response, isOrgAdmin, isOrgSecretariat }: HttpContext) {
     try {
-      const departmentId = await this.getDepartmentId(user?.$id || '', params.orgId)
+      const { departmentId, joinedAt: departmentJoinedAt } = await this.getDepartmentDetails(
+        user?.$id || '',
+        params.orgId
+      )
       const service = await CourierService.forOrg(params.orgId)
       const courier = await service.get(params.id)
 
@@ -399,9 +431,13 @@ export default class CourierController {
         (a) => a.entityId === user?.$id && a.entityType === 'user'
       )
       const isAssignedDept = departmentId
-        ? courier.assignments.some(
-            (a) => a.entityId === departmentId && a.entityType === 'department'
-          )
+        ? courier.assignments.some((a) => {
+            if (a.entityId !== departmentId || a.entityType !== 'department') return false
+            if (departmentJoinedAt && a.createdAt) {
+              return new Date(a.createdAt) >= new Date(departmentJoinedAt)
+            }
+            return true
+          })
         : false
       const isCreator = courier.createdBy?.id === user?.$id
 

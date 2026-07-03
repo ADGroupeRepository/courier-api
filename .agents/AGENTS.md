@@ -7,11 +7,15 @@
 - **Owner Deletion**: Members with the `'owner'` role cannot be deleted or removed from the organization. They must transfer ownership first.
 - **Secretariat Role**: The `'secretariat'` role is an organisation-level role for reception/mailroom staff. Users with this role:
   - Can register **incoming couriers** for any department or user in the organisation.
-  - Are automatically assigned to the dedicated, auto-created `"Courier Service"` department. Because of this, explicit department assignment is optional when inviting or adding a user with this role.
   - See only couriers in their own department or addressed to them directly.
   - **Cannot** perform admin actions (manage members, settings, etc.).
 
-## 2. Courier Terminology & Mappings
+## 2. Courier Visibility Guardrails
+
+- **Historical Department Couriers**: Newly added department members must only see and access couriers assigned to their department **on or after** their department join date (tracked via the `$createdAt` of their `ORG_PROFILES` record).
+- **Bypass Exceptions**: This date-based visibility limit applies only to collective department assignments. Direct user-level assignments, creators, and administrators bypass the join-date limit.
+
+## 3. Courier Terminology & Mappings
 
 - **Terminology**:
   - The physical carrier or person delivering a courier is referred to as **deliverer** (`delivererName`, `delivererEmail`, `delivererPhone`).
