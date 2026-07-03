@@ -102,10 +102,10 @@ export default class NotificationService {
     senderName?: string,
     senderAvatarUrl?: string
   ): Promise<void> {
-    const subject = `New Courier Assignment`
-    const bodyText = `You have been assigned to courier ${courierId}. Please review it in your dashboard.`
+    const subject = `Nouveau courrier assigné`
+    const bodyText = `Vous avez été assigné au courrier ${courierId}. Veuillez le consulter dans votre tableau de bord.`
 
-    // Send Email
+    // Envoi de l'email
     if (assigneeEmail) {
       try {
         await this.sendEmail({
@@ -113,12 +113,12 @@ export default class NotificationService {
           subject,
           html: buildEmailHtml(
             subject,
-            `<p style="margin:0 0 16px">You have been assigned a new courier.</p>
+            `<p style="margin:0 0 16px">Un nouveau courrier vous a été assigné.</p>
             <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
               <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
             </table>
-            <p style="margin:0 0 24px">Log in to your dashboard to review and action it.</p>`,
-            'View Courier'
+            <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour le consulter et le traiter.</p>`,
+            'Voir le courrier'
           ),
           text: bodyText,
         })
@@ -127,17 +127,17 @@ export default class NotificationService {
       }
     }
 
-    // Send In-App Notification
+    // Notification in-app
     await this.sendInAppNotification(orgId, {
       userId: assigneeId,
-      title: 'New Courier Assignment',
+      title: 'Nouveau courrier assigné',
       body: bodyText,
       link: `/couriers/${courierId}`,
       senderName,
       senderAvatarUrl,
     })
 
-    // Send Push Notification
+    // Notification push
     await this.sendPushNotification([assigneeId], subject, bodyText, {
       courierId,
       link: `/couriers/${courierId}`,
@@ -382,9 +382,9 @@ export default class NotificationService {
       // Send to all unique recipients
       for (const recipientId of recipients) {
         const email = await this.getEmailByUserId(orgId, recipientId)
-        const label = itemType === 'message' ? 'Message' : 'Reply'
-        const subject = `New Courier ${label}`
-        const bodyText = `A new ${itemType} was posted on courier ${courierId}.`
+        const label = itemType === 'message' ? 'Message' : 'Réponse'
+        const subject = `Nouveau ${label.toLowerCase()} sur un courrier`
+        const bodyText = `Un nouveau ${itemType === 'message' ? 'message' : 'réponse'} a été publié sur le courrier ${courierId}.`
 
         if (email) {
           try {
@@ -393,12 +393,12 @@ export default class NotificationService {
               subject,
               html: buildEmailHtml(
                 subject,
-                `<p style="margin:0 0 16px">A new <strong>${itemType}</strong> has been posted on a courier you are involved in.</p>
+                `<p style="margin:0 0 16px">Un nouveau <strong>${itemType === 'message' ? 'message' : 'réponse'}</strong> a été publié sur un courrier auquel vous participez.</p>
                 <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
                   <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
                 </table>
-                <p style="margin:0 0 24px">Log in to your dashboard to view and respond.</p>`,
-                `View ${label}`
+                <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour consulter et répondre.</p>`,
+                `Voir le ${label.toLowerCase()}`
               ),
               text: bodyText,
             })
@@ -409,7 +409,7 @@ export default class NotificationService {
 
         await this.sendInAppNotification(orgId, {
           userId: recipientId,
-          title: `New Courier ${label}`,
+          title: `Nouveau ${label.toLowerCase()} sur un courrier`,
           body: bodyText,
           link: `/couriers/${courierId}`,
           senderName,
@@ -438,29 +438,29 @@ export default class NotificationService {
     recipientEmail: string,
     recipientId: string
   ): Promise<void> {
-    const subject = `New Courier Message`
-    const bodyText = `A new message was posted on courier ${courierId}.`
+    const subject = `Nouveau message sur un courrier`
+    const bodyText = `Un nouveau message a été publié sur le courrier ${courierId}.`
 
-    // Send Email
+    // Envoi de l'email
     await this.sendEmail({
       to: recipientEmail,
       subject,
       html: buildEmailHtml(
         subject,
-        `<p style="margin:0 0 16px">A new <strong>message</strong> has been posted on a courier you are involved in.</p>
+        `<p style="margin:0 0 16px">Un nouveau <strong>message</strong> a été publié sur un courrier auquel vous participez.</p>
         <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
           <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
         </table>
-        <p style="margin:0 0 24px">Log in to your dashboard to view and respond.</p>`,
-        'View Message'
+        <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour consulter et répondre.</p>`,
+        'Voir le message'
       ),
       text: bodyText,
     })
 
-    // Send In-App Notification
+    // Notification in-app
     await this.sendInAppNotification(orgId, {
       userId: recipientId,
-      title: 'New Courier Message',
+      title: 'Nouveau message sur un courrier',
       body: bodyText,
       link: `/couriers/${courierId}`,
     })
@@ -549,7 +549,7 @@ export default class NotificationService {
  */
 function buildEmailHtml(title: string, content: string, ctaLabel?: string): string {
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -577,7 +577,7 @@ function buildEmailHtml(title: string, content: string, ctaLabel?: string): stri
           <!-- Footer -->
           <tr>
             <td style="padding:20px 32px;border-top:1px solid #f3f4f6">
-              <p style="margin:0;font-size:12px;color:#6b7280">You received this email because you are a member of a Bara organisation. If you have questions, contact your organisation administrator.</p>
+              <p style="margin:0;font-size:12px;color:#6b7280">Vous avez reçu cet email car vous êtes membre d'une organisation Bara. Pour toute question, contactez l'administrateur de votre organisation.</p>
             </td>
           </tr>
         </table>
