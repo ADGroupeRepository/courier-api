@@ -67,6 +67,7 @@ export const directoryModule: ModuleDefinition = {
         { key: 'createdAt', type: 'datetime', required: true },
         { key: 'senderName', type: 'string', size: 255, required: false },
         { key: 'senderAvatarUrl', type: 'string', size: 500, required: false },
+        { key: 'senderId', type: 'string', size: 36, required: false },
       ],
       indexes: [
         { key: 'user_idx', type: 'key', attributes: ['userId'] },

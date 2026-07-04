@@ -21,6 +21,7 @@ export interface NotificationPayload {
   link?: string
   senderName?: string
   senderAvatarUrl?: string
+  senderId?: string
 }
 
 /**
@@ -76,6 +77,7 @@ export default class NotificationService {
           link: payload.link || null,
           senderName: payload.senderName || null,
           senderAvatarUrl: payload.senderAvatarUrl || null,
+          senderId: payload.senderId || null,
           isRead: false,
           createdAt: new Date().toISOString(),
         },
@@ -100,7 +102,8 @@ export default class NotificationService {
     assigneeEmail: string | null | undefined,
     assigneeId: string,
     senderName?: string,
-    senderAvatarUrl?: string
+    senderAvatarUrl?: string,
+    senderId?: string
   ): Promise<void> {
     const subject = `Nouveau courrier assigné`
     const bodyText = `Vous avez été assigné au courrier ${courierId}. Veuillez le consulter dans votre tableau de bord.`
@@ -135,12 +138,15 @@ export default class NotificationService {
       link: `/couriers/${courierId}`,
       senderName,
       senderAvatarUrl,
+      senderId,
     })
 
     // Notification push
     await this.sendPushNotification([assigneeId], subject, bodyText, {
       courierId,
       link: `/couriers/${courierId}`,
+      senderName: senderName || '',
+      senderAvatarUrl: senderAvatarUrl || '',
     })
   }
 
@@ -153,7 +159,8 @@ export default class NotificationService {
     assigneeEmail: string | null | undefined,
     assigneeId: string,
     senderName?: string,
-    senderAvatarUrl?: string
+    senderAvatarUrl?: string,
+    senderId?: string
   ): Promise<void> {
     const subject = `Responsable assigné au courrier`
     const bodyText = `Vous avez été désigné comme responsable du traitement du courrier ${courierId}. Veuillez l'examiner dans votre tableau de bord.`
@@ -188,12 +195,15 @@ export default class NotificationService {
       link: `/couriers/${courierId}`,
       senderName,
       senderAvatarUrl,
+      senderId,
     })
 
     // Send Push Notification
     await this.sendPushNotification([assigneeId], subject, bodyText, {
       courierId,
       link: `/couriers/${courierId}`,
+      senderName: senderName || '',
+      senderAvatarUrl: senderAvatarUrl || '',
     })
   }
 
@@ -239,7 +249,8 @@ export default class NotificationService {
           email,
           handlerUserId,
           senderName,
-          senderAvatarUrl
+          senderAvatarUrl,
+          courierDoc.createdBy || undefined
         )
       }
     } catch (err: any) {
@@ -294,7 +305,8 @@ export default class NotificationService {
             email,
             targetId,
             senderName,
-            senderAvatarUrl
+            senderAvatarUrl,
+            courierDoc.createdBy || undefined
           )
         }
       } else if (targetType === 'department') {
@@ -309,7 +321,8 @@ export default class NotificationService {
               email,
               member.userId,
               senderName,
-              senderAvatarUrl
+              senderAvatarUrl,
+              courierDoc.createdBy || undefined
             )
           }
         }
@@ -382,9 +395,14 @@ export default class NotificationService {
       // Send to all unique recipients
       for (const recipientId of recipients) {
         const email = await this.getEmailByUserId(orgId, recipientId)
-        const label = itemType === 'message' ? 'Message' : 'Réponse'
-        const subject = `Nouveau ${label.toLowerCase()} sur un courrier`
-        const bodyText = `Un nouveau ${itemType === 'message' ? 'message' : 'réponse'} a été publié sur le courrier ${courierId}.`
+        const subject =
+          itemType === 'message'
+            ? 'Nouveau message sur un courrier'
+            : 'Nouvelle réponse sur un courrier'
+        const bodyText =
+          itemType === 'message'
+            ? `Un nouveau message a été publié sur le courrier ${courierId}.`
+            : `Une nouvelle réponse a été publiée sur le courrier ${courierId}.`
 
         if (email) {
           try {
@@ -393,12 +411,18 @@ export default class NotificationService {
               subject,
               html: buildEmailHtml(
                 subject,
-                `<p style="margin:0 0 16px">Un nouveau <strong>${itemType === 'message' ? 'message' : 'réponse'}</strong> a été publié sur un courrier auquel vous participez.</p>
-                <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
-                  <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
-                </table>
-                <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour consulter et répondre.</p>`,
-                `Voir le ${label.toLowerCase()}`
+                itemType === 'message'
+                  ? `<p style="margin:0 0 16px">Un nouveau <strong>message</strong> a été publié sur un courrier auquel vous participez.</p>
+                     <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+                       <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+                     </table>
+                     <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour consulter et répondre.</p>`
+                  : `<p style="margin:0 0 16px">Une nouvelle <strong>réponse</strong> a été publiée sur un courrier auquel vous participez.</p>
+                     <table cellpadding="0" cellspacing="0" style="margin:0 0 24px">
+                       <tr><td style="padding:8px 12px;background:#f4f4f5;border-radius:6px;font-family:monospace;font-size:14px">${courierId}</td></tr>
+                     </table>
+                     <p style="margin:0 0 24px">Connectez-vous à votre tableau de bord pour consulter et y répondre.</p>`,
+                itemType === 'message' ? 'Voir le message' : 'Voir la réponse'
               ),
               text: bodyText,
             })
@@ -409,16 +433,22 @@ export default class NotificationService {
 
         await this.sendInAppNotification(orgId, {
           userId: recipientId,
-          title: `Nouveau ${label.toLowerCase()} sur un courrier`,
+          title:
+            itemType === 'message'
+              ? 'Nouveau message sur un courrier'
+              : 'Nouvelle réponse sur un courrier',
           body: bodyText,
           link: `/couriers/${courierId}`,
           senderName,
           senderAvatarUrl,
+          senderId,
         })
 
         await this.sendPushNotification([recipientId], subject, bodyText, {
           courierId,
           link: `/couriers/${courierId}`,
+          senderName: senderName || '',
+          senderAvatarUrl: senderAvatarUrl || '',
         })
       }
     } catch (err: any) {

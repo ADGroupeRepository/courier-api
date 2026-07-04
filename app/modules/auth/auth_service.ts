@@ -4,8 +4,9 @@ import { randomUUID } from 'node:crypto'
 import CacheService from '#services/cache_service'
 import EmailService from '#services/email_service'
 import logger from '@adonisjs/core/services/logger'
-import { AppwriteException, ID, Query } from 'node-appwrite'
+import { AppwriteException, ID, Query, Permission, Role } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
+import { Collections } from '#modules/_registry/collection_ids'
 
 interface SignupPayload {
   name: string
@@ -140,6 +141,7 @@ export default class AuthService {
         bucketId: 'public-media',
         fileId,
         file,
+        permissions: [Permission.read(Role.any())],
       })
 
       updatedPrefs.avatarFileId = fileId
@@ -165,6 +167,7 @@ export default class AuthService {
         bucketId: 'public-media',
         fileId,
         file,
+        permissions: [Permission.read(Role.any())],
       })
 
       updatedPrefs.signatureFileId = fileId
@@ -177,6 +180,80 @@ export default class AuthService {
         userId: user.$id,
         prefs: updatedPrefs,
       })
+    }
+
+    // 5. Update historical messages & notifications if name or avatar changed
+    const nameChanged = data.name !== undefined && data.name !== user.name
+    if (nameChanged || files?.avatar) {
+      try {
+        const newName = data.name || user.name || 'Utilisateur'
+        const newAvatarFileId = files?.avatar ? `avatar-${user.$id}` : user.prefs?.avatarFileId
+        const newAvatarUrl = newAvatarFileId ? AuthService.buildPreviewUrl(newAvatarFileId) : null
+
+        // List user's organisations/teams
+        const { teams } = appwrite.createSessionClient(jwt)
+        const teamList = await teams.list()
+
+        for (const team of teamList.teams) {
+          const teamPrefs = (await appwrite.teams.getPrefs({ teamId: team.$id })) as any
+          const databaseId = teamPrefs.databaseId
+          if (!databaseId) continue
+
+          // 5.1 Update user's messages
+          try {
+            const messages = await appwrite.databases.listDocuments({
+              databaseId,
+              collectionId: Collections.COURIER_MESSAGES,
+              queries: [Query.equal('createdBy', user.$id), Query.limit(100)],
+            })
+
+            for (const doc of messages.documents) {
+              await appwrite.databases.updateDocument({
+                databaseId,
+                collectionId: Collections.COURIER_MESSAGES,
+                documentId: doc.$id,
+                data: {
+                  senderName: newName,
+                  senderAvatarUrl: newAvatarUrl,
+                },
+              })
+            }
+          } catch (err: any) {
+            logger.warn(
+              { err, databaseId },
+              '[AuthService] Failed to sync avatar to courier messages'
+            )
+          }
+
+          // 5.2 Update user's sent notifications
+          try {
+            const notifications = await appwrite.databases.listDocuments({
+              databaseId,
+              collectionId: Collections.NOTIFICATIONS,
+              queries: [Query.equal('senderId', user.$id), Query.limit(100)],
+            })
+
+            for (const doc of notifications.documents) {
+              await appwrite.databases.updateDocument({
+                databaseId,
+                collectionId: Collections.NOTIFICATIONS,
+                documentId: doc.$id,
+                data: {
+                  senderName: newName,
+                  senderAvatarUrl: newAvatarUrl,
+                },
+              })
+            }
+          } catch (err: any) {
+            logger.warn({ err, databaseId }, '[AuthService] Failed to sync avatar to notifications')
+          }
+        }
+      } catch (err: any) {
+        logger.error(
+          { err, userId: user.$id },
+          'Failed to sync updated profile to historical documents'
+        )
+      }
     }
 
     return this.getUserProfile(jwt)

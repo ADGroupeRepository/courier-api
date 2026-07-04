@@ -8,6 +8,7 @@ import {
 } from '#modules/courier/courier_enums'
 import { ExternalContactService } from '#modules/external_contacts/external_contact_service'
 import appwrite from '#services/appwrite_service'
+import AuthService from '#modules/auth/auth_service'
 import logger from '@adonisjs/core/services/logger'
 import { ID, Query } from 'node-appwrite'
 
@@ -883,9 +884,7 @@ export default class CourierService {
     try {
       const user = await appwrite.users.get({ userId })
       const avatarFileId = user.prefs?.avatarFileId
-      const avatarUrl = avatarFileId
-        ? `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${avatarFileId}/preview?project=${appwriteConfig.projectId}`
-        : null
+      const avatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : null
 
       const result = {
         id: userId,
@@ -1012,9 +1011,7 @@ export default class CourierService {
       try {
         const user = await appwrite.users.get({ userId: assignment.entityId })
         const avatarFileId = user.prefs?.avatarFileId
-        const avatarUrl = avatarFileId
-          ? `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${avatarFileId}/preview?project=${appwriteConfig.projectId}`
-          : null
+        const avatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : null
         return {
           ...assignment,
           entityName: entityName ?? user?.name ?? user?.email ?? null,

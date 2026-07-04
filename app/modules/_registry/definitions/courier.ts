@@ -82,7 +82,6 @@ export const courierModule: ModuleDefinition = {
         { key: 'signedProofFileId', type: 'string', size: 36, required: false },
         { key: 'dispatchedAt', type: 'datetime', required: false },
         { key: 'dispatchedBy', type: 'string', size: 36, required: false },
-        { key: 'receivedAt', type: 'datetime', required: false },
         { key: 'receivedBy', type: 'string', size: 36, required: false },
         { key: 'handlerUserId', type: 'string', size: 36, required: false, array: true },
         { key: 'instruction', type: 'string', size: 2000, required: false },

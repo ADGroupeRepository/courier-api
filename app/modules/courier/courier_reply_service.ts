@@ -2,6 +2,7 @@ import appwrite from '#services/appwrite_service'
 import appwriteConfig from '#config/appwrite'
 import { ID, Query } from 'node-appwrite'
 import { Collections } from '#modules/_registry/collection_ids'
+import AuthService from '#modules/auth/auth_service'
 import CourierService from '#modules/courier/courier_service'
 import { CourierCustodyState } from '#modules/courier/courier_enums'
 
@@ -159,9 +160,7 @@ export default class CourierReplyService {
     try {
       const user = await appwrite.users.get({ userId })
       const avatarFileId = user.prefs?.avatarFileId
-      const avatarUrl = avatarFileId
-        ? `${appwriteConfig.endpoint}/storage/buckets/public-media/files/${avatarFileId}/preview?project=${appwriteConfig.projectId}`
-        : null
+      const avatarUrl = avatarFileId ? AuthService.buildPreviewUrl(avatarFileId) : null
 
       const result = {
         id: userId,

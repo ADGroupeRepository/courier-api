@@ -27,6 +27,30 @@ export default class ProvisionNotifications extends BaseCommand {
         try {
           await provisioningService.activate(team.$id, 'directory')
           this.logger.success(`Successfully activated/updated directory module for: ${team.name}`)
+
+          const teamPrefs = (await appwrite.teams.getPrefs({ teamId: team.$id })) as any
+          const databaseId = teamPrefs.databaseId
+          if (databaseId) {
+            try {
+              await appwrite.databases.createStringAttribute({
+                databaseId,
+                collectionId: 'notifications',
+                key: 'senderId',
+                size: 36,
+                required: false,
+              })
+              this.logger.success(
+                `Added 'senderId' attribute to notifications in database: ${databaseId}`
+              )
+            } catch (attrError: any) {
+              // 409 means attribute already exists
+              if (attrError.code !== 409) {
+                this.logger.warning(
+                  `Failed to add senderId attribute to database ${databaseId}: ${attrError.message}`
+                )
+              }
+            }
+          }
         } catch (orgError: any) {
           this.logger.error(
             `Failed for organisation ${team.name} (${team.$id}): ${orgError.message}`

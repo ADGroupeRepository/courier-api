@@ -230,6 +230,7 @@ export default class OrganisationService {
       bucketId: 'public-media',
       fileId,
       file,
+      permissions: [Permission.read(Role.any())],
     })
 
     // 3. Update team preferences
