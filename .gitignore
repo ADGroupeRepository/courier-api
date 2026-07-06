@@ -39,3 +39,9 @@ tfplan
 # Caspian security scan suggested exclusions
 credentials.json
 serviceAccountKey
+
+# GitHub release exclusions
+api-gateway/
+.agents/
+infrastructure/
+
