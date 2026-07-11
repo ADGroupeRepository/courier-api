@@ -79,5 +79,8 @@
   "bundleDependencies": [
     "@adonisjs/core",
     "reflect-metadata"
-  ]
+  ],
+  "allowScripts": {
+    "@swc/core@1.15.43": true
+  }
 }

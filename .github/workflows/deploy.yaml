@@ -5,7 +5,7 @@ on:
   #push:
   #  branches:
   #    - main
-  
+
 env:
   PROJECT_ID: courier-management-501610
   REGION: europe-west1
@@ -39,9 +39,9 @@ jobs:
         run: |
           gcloud config set project ${{ env.PROJECT_ID }}
 
-      - name: Configure Docker Authentication
+      - name: Docker Authentication
         run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build Docker Image
         run: |
@@ -63,13 +63,12 @@ jobs:
             --memory=512Mi \
             --min-instances=0 \
             --max-instances=2 \
-            --no-allow-unauthenticated
+            --no-allow-unauthenticated \
+            --update-env-vars="NODE_ENV=production,HOST=0.0.0.0,TZ=UTC,LOG_LEVEL=info,LOCK_STORE=redis,LIMITER_STORE=redis,APP_KEY=${{ secrets.APP_KEY }},APP_URL=${{ secrets.APP_URL }},APPWRITE_ENDPOINT=${{ secrets.APPWRITE_ENDPOINT }},APPWRITE_PROJECT_ID=${{ secrets.APPWRITE_PROJECT_ID }},APPWRITE_KEY=${{ secrets.APPWRITE_KEY }},TEMP_MEMBER_PASSWORD=${{ secrets.TEMP_MEMBER_PASSWORD }},REDIS_HOST=${{ secrets.REDIS_HOST }},REDIS_PORT=${{ secrets.REDIS_PORT }},REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }},RESEND_API_KEY=${{ secrets.RESEND_API_KEY }},MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}" 
 
       - name: Get Cloud Run URL
         run: |
           gcloud run services describe ${{ env.SERVICE }} \
-            --region=${{ env.REGION }} \
-            --format="value(status.url)"      
-
-
-            
+            --region=${{ env
+            .REGION }} \
+            --format="value(status.url)"

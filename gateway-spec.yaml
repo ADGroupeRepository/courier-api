@@ -1,0 +1,1539 @@
+swagger: "2.0"
+
+info:
+  title: "courier-api"
+  version: "1.0.0"
+  description: "API Gateway for courier-api"
+
+schemes:
+    - "https"
+
+produces:
+    - "application/json"
+
+paths:
+  /:
+    get:
+      summary: "Health Check"
+
+      responses:  
+        200:
+          description: "Server is healthy"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /auth/signup:
+    post:
+      summary: "User Signup"
+
+      responses:
+        200:
+          description: "User created successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /auth/profile:
+    get:
+      summary: "Get User Profile"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "User profile retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    patch:
+      summary: "Update User Profile"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "User profile updated successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url     
+    
+  /auth/push-token:
+    post:
+      summary: "Register Push Token"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "Push token registered successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /auth/forgot-password:
+    post:
+        summary: "Forgot Password"
+  
+        responses:
+          200:
+            description: "Password reset email sent successfully"
+  
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+    patch:
+        summary: "Reset Password"
+  
+        responses:
+          200:
+            description: "Password reset successfully"
+  
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+  /auth/forgot-password/verify:
+    post:
+        summary: "Verify Forgot Password Token"
+  
+        responses:
+          200:
+            description: "Forgot password token verified successfully"
+  
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+  /auth/forgot-password/reset:
+    post:
+        summary: "Reset Password with Token"
+  
+        responses:
+          200:
+            description: "Password reset successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+  /auth/verify-email:
+    post:
+        summary: "Verify Email"
+
+        security:
+          - appwrite_jwt: []
+  
+        responses:
+          200:
+            description: "Email verified successfully"
+  
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+    patch:
+        summary: "Resend Email Verification"
+
+        security:
+          - appwrite_jwt: []
+
+        responses:
+          200:
+            description: "Email verification resent successfully"
+  
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+
+  /organisations:
+      get:
+        summary: "Get Organisations"
+
+        security:
+          - appwrite_jwt: []
+
+        responses:
+          200:
+            description: "Organisations retrieved successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+      post:
+        summary: "Create Organisation"
+
+        security:
+          - appwrite_jwt: []
+
+        responses:
+          200:
+            description: "Organisation created successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url                  
+
+  /organisations/{orgId}:
+      get:
+        summary: "Get Organisation by ID"
+
+        security:
+          - appwrite_jwt: []
+
+        parameters:
+          - name: orgId
+            in: path
+            required: true
+            type: string  
+
+        responses:
+          200:
+            description: "Organisation retrieved successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+      patch:
+        summary: "Update Organisation by ID"
+
+        security:
+          - appwrite_jwt: []
+        
+        parameters:
+          - name: orgId
+            in: path
+            required: true
+            type: string 
+
+        responses:
+          200:
+            description: "Organisation updated successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+      delete:
+        summary: "Delete Organisation by ID"
+
+        security:
+          - appwrite_jwt: []
+
+        parameters:
+          - name: orgId
+            in: path
+            required: true
+            type: string 
+
+        responses:
+          200:
+            description: "Organisation deleted successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+  /organisations/{orgId}/licenses:
+      get:
+        summary: "Get Licenses for Organisation"
+
+        security:
+          - appwrite_jwt: []
+
+        parameters:
+          - name: orgId
+            in: path
+            required: true
+            type: string
+
+        responses:
+          200:
+            description: "Licenses retrieved successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+  /organisations/{orgId}/logo:
+      post:
+        summary: "Upload Organisation Logo"
+
+        security:
+          - appwrite_jwt: []
+
+        parameters:
+          - name: orgId
+            in: path
+            required: true
+            type: string
+
+        responses:
+          200:
+            description: "Organisation logo uploaded successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+  /organisations/{orgId}/licenses/assign:
+      post:
+        summary: "Assign License to Organisation"
+
+        security:
+          - appwrite_jwt: []
+
+        parameters:
+          - name: orgId 
+            in: path
+            required: true
+            type: string
+             
+        responses:
+          200:
+            description: "License assigned successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+  /organisations/{orgId}/subscription:
+      get:
+        summary: "Get Subscription for Organisation"
+
+        security:
+          - appwrite_jwt: []
+
+        parameters:
+          - name: orgId
+            in: path
+            required: true
+            type: string
+
+        responses:
+          200:
+            description: "Subscription retrieved successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+      post:
+        summary: "Create Subscription for Organisation"
+
+        security:
+          - appwrite_jwt: []
+
+        parameters:
+          - name: orgId
+            in: path
+            required: true
+            type: string
+
+        responses:
+          200:
+            description: "Subscription created successfully"
+
+        x-google-backend:
+          address: https://my_cloudrun_url
+
+  /organisations/{orgId}/licenses/revoke:
+    post:
+      summary: "Revoke License from Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string  
+
+      responses:
+        200:
+          description: "License revoked successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+
+  /organisations/{orgId}/members:
+    get:
+      summary: "Get Members of Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Members retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    post:
+      summary: "Add Member to Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Member added successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url        
+
+  /organisations/{orgId}/members/{userId}:
+    get:
+      summary: "Get Member of Organisation by User ID"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: userId
+          in: path
+          required: true
+          type: string
+          
+      responses:
+        200:
+          description: "Member retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    patch:
+      summary: "Update Member of Organisation by User ID"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: userId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Member updated successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url 
+
+    delete:
+      summary: "Remove Member from Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: userId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Member removed successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/modules:
+    get:
+      summary: "Get Modules for Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Modules retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    post:
+      summary: "Add Module to Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+           
+      responses:
+        200:
+          description: "Module added successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/modules/directory:
+    delete:
+      summary: "Remove Module from Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Module removed successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+       
+  /modules:
+    get:
+      summary: "Get all modules"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "Modules retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url              
+
+  /admin/marketplace:
+    post:
+      summary: "Publish to Marketplace"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "Publishes a code module to the marketplace."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /admin/marketplace/directory:
+    delete:
+      summary: "Remove Module from Marketplace"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "Remove a module from the marketplace."
+
+      x-google-backend:
+        address: https://my_cloudrun_url      
+
+  /admin/plans:
+    post:
+      summary: "Create a new plan"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "Creates a new subscription plan."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    get:
+      summary: "Get all plans"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "Retrieves all subscription plans."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /admin/plans/{planId}:
+    patch:
+      summary: "Update a plan"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          type: string  
+
+      responses:
+        200:
+          description: "Updates an existing subscription plan."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    delete:
+      summary: "Delete a plan"
+
+      security:
+        - appwrite_jwt: []
+     
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          type: string  
+
+      responses:
+        200:
+          description: "Deletes an existing subscription plan."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /admin/plans/{planId}/usage:
+    get:
+      summary: "Get plan usage"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Allows you to view the number of active/issued subscriptions for a given plan."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /admin/subscriptions:
+    get:
+      summary: "Get all subscriptions"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "Displays all issued subscriptions."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+    
+    post:
+      summary: "Create a new subscription"
+
+      security:
+        - appwrite_jwt: []
+
+      responses:
+        200:
+          description: "Issues a manual subscription for an organization."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /admin/subscriptions/{subscriptionId}:
+    patch:
+      summary: "Update a subscription"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: subscriptionId  
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Updates an existing subscription."
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+ 
+  /organisations/{orgId}/departments:
+    get:
+      summary: "Get Departments for Organisation"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Departments retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    post:
+      summary: "Add Department to Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Department added successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/departments/{deptId}:
+    get:
+      summary: "Get Department of Organisation by Department ID"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string 
+
+        - name: deptId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Department retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    patch:
+      summary: "Update Department of Organisation by Department ID"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string 
+
+        - name: deptId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Department updated successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url 
+
+    delete:
+      summary: "Remove Department from Organisation"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string 
+
+        - name: deptId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Department removed successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/departments/assign:
+    post:
+      summary: "Assign Department to Organisation"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Department assigned successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url    
+
+  /organisations/{orgId}/departments/{deptId}/members:
+    get:
+      summary: "Get Members of Department"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId 
+          in: path
+          required: true
+          type: string
+        
+        - name: deptId
+          in: path        
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Members retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/profiles/{profileId}:
+    delete:
+      summary: "Remove Profile from Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId 
+          in: path
+          required: true
+          type: string
+        
+        - name: profileId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Profile removed successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/notifications/read-all:
+    patch:
+      summary: "Mark all notifications as read for Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+          
+      responses:
+        200:
+          description: "All notifications marked as read successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+
+  /organisations/{orgId}/notifications/{notificationId}/read:
+    patch:
+      summary: "Mark a notification as read for Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        
+        - name: notificationId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Notification marked as read successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/notifications:
+    delete:
+      summary: "Delete all notifications for Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "All notifications deleted successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+  
+  /organisations/{orgId}/notifications/{notificationId}:
+    delete:
+      summary: "Delete a notification for Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: notificationId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Notification deleted successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/upload-url:
+    post:
+      summary: "Get Upload URL for Courier"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Upload URL retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers:
+    get:
+      summary: "Get Couriers for Organisation"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Couriers retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    post:
+      summary: "Add Courier to Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Courier added successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}:
+    get:
+      summary: "Get Courier of Organisation by Courier ID"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Courier retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    patch:
+      summary: "Update Courier of Organisation by Courier ID"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Courier updated successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url 
+
+    delete:
+      summary: "Remove Courier from Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Courier removed successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/force:
+    delete:
+      summary: "Force Remove Courier from Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Courier force removed successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/restore:
+    post:
+      summary: "Restore Courier for Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Courier restored successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/messages:
+    post:
+      summary: "Send Message to Courier"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Message sent to courier successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/replies:
+    get:
+      summary: "Get Replies from Courier"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Replies retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    post:
+      summary: "Send Reply to Courier"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Reply sent to courier successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url      
+
+  /organisations/{orgId}/couriers/{courierId}/replies/{replyId}:
+    patch:
+      summary: "Update Reply from Courier"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+        - name: replyId
+          in: path
+          required: true
+          type: string 
+
+      responses:
+        200:
+          description: "Reply updated successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/pickup:
+    post:
+      summary: "Request Pickup from Courier"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Pickup requested successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/handover:
+    post:
+      summary: "Request Handover from Courier"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Handover requested successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/dispatch:
+    post:
+      summary: "Request Dispatch from Courier"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Dispatch requested successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/impute:
+    post:
+      summary: "Request Impute from Courier"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Impute requested successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/couriers/{courierId}/activities:
+    get:
+      summary: "Get Activities from Courier"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: courierId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Activities retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/contacts:
+    get:
+      summary: "Get Contacts for Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        type: string
+
+      - name: type
+        in: query
+        type: string    
+
+      responses:
+        200:
+          description: "Contacts retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    post:
+      summary: "Add Contact to Organisation"
+
+      security:
+        - appwrite_jwt: []
+      
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        type: string
+
+      responses:
+        200:
+          description: "Contact added successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/contacts/{contactId}:
+    get:
+      summary: "Get Contact of Organisation by Contact ID"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        
+        - name: contactId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Contact retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+    patch:
+      summary: "Update Contact of Organisation by Contact ID"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        
+        - name: contactId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Contact updated successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url 
+
+    delete:
+      summary: "Remove Contact from Organisation"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+
+        - name: contactId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Contact removed successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+  /organisations/{orgId}/contacts/{contactId}/couriers:
+    get:
+      summary: "Get Couriers for Contact"
+
+      security:
+        - appwrite_jwt: []
+
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          type: string
+        
+        - name: contactId
+          in: path
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: "Couriers retrieved successfully"
+
+      x-google-backend:
+        address: https://my_cloudrun_url
+
+
+securityDefinitions:
+
+  appwrite_jwt:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: ""
+
+    x-google-issuer: "APPWRITE_ISSUER"
+
+    x-google-jwks_uri: "APPWRITE_JWKS_URI"
+
+    x-google-audiences: "APPWRITE_PROJECT_ID"
+          
+
