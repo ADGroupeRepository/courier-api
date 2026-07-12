@@ -1,10 +1,9 @@
 name: Deploy Backend to Cloud Run
 
 on:
-  workflow_dispatch:
-  #push:
-  #  branches:
-  #    - main
+  push:
+    branches:
+      - main
 
 env:
   PROJECT_ID: courier-management-501610
