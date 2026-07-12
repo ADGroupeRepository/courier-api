@@ -21,7 +21,7 @@ paths:
           description: "Server is healthy"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /auth/signup:
     post:
@@ -32,7 +32,7 @@ paths:
           description: "User created successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /auth/profile:
     get:
@@ -46,7 +46,7 @@ paths:
           description: "User profile retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     patch:
       summary: "Update User Profile"
@@ -59,7 +59,7 @@ paths:
           description: "User profile updated successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url     
+        address: https://courier-api-798287738190.europe-west1.run.app     
     
   /auth/push-token:
     post:
@@ -73,7 +73,7 @@ paths:
           description: "Push token registered successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /auth/forgot-password:
     post:
@@ -84,7 +84,7 @@ paths:
             description: "Password reset email sent successfully"
   
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
     patch:
         summary: "Reset Password"
@@ -94,7 +94,7 @@ paths:
             description: "Password reset successfully"
   
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
   /auth/forgot-password/verify:
     post:
@@ -105,7 +105,7 @@ paths:
             description: "Forgot password token verified successfully"
   
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
   /auth/forgot-password/reset:
     post:
@@ -116,7 +116,7 @@ paths:
             description: "Password reset successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
   /auth/verify-email:
     post:
@@ -130,7 +130,7 @@ paths:
             description: "Email verified successfully"
   
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
     patch:
         summary: "Resend Email Verification"
@@ -143,7 +143,7 @@ paths:
             description: "Email verification resent successfully"
   
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
 
   /organisations:
@@ -158,7 +158,7 @@ paths:
             description: "Organisations retrieved successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
       post:
         summary: "Create Organisation"
@@ -171,7 +171,7 @@ paths:
             description: "Organisation created successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url                  
+          address: https://courier-api-798287738190.europe-west1.run.app                  
 
   /organisations/{orgId}:
       get:
@@ -191,7 +191,7 @@ paths:
             description: "Organisation retrieved successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
       patch:
         summary: "Update Organisation by ID"
@@ -210,7 +210,7 @@ paths:
             description: "Organisation updated successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
       delete:
         summary: "Delete Organisation by ID"
@@ -229,7 +229,7 @@ paths:
             description: "Organisation deleted successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/licenses:
       get:
@@ -249,7 +249,7 @@ paths:
             description: "Licenses retrieved successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/logo:
       post:
@@ -269,7 +269,7 @@ paths:
             description: "Organisation logo uploaded successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/licenses/assign:
       post:
@@ -289,7 +289,7 @@ paths:
             description: "License assigned successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/subscription:
       get:
@@ -309,7 +309,7 @@ paths:
             description: "Subscription retrieved successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
       post:
         summary: "Create Subscription for Organisation"
@@ -328,7 +328,7 @@ paths:
             description: "Subscription created successfully"
 
         x-google-backend:
-          address: https://my_cloudrun_url
+          address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/licenses/revoke:
     post:
@@ -348,7 +348,7 @@ paths:
           description: "License revoked successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
 
   /organisations/{orgId}/members:
@@ -369,7 +369,7 @@ paths:
           description: "Members retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     post:
       summary: "Add Member to Organisation"
@@ -388,7 +388,7 @@ paths:
           description: "Member added successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url        
+        address: https://courier-api-798287738190.europe-west1.run.app        
 
   /organisations/{orgId}/members/{userId}:
     get:
@@ -413,7 +413,7 @@ paths:
           description: "Member retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     patch:
       summary: "Update Member of Organisation by User ID"
@@ -437,7 +437,7 @@ paths:
           description: "Member updated successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url 
+        address: https://courier-api-798287738190.europe-west1.run.app 
 
     delete:
       summary: "Remove Member from Organisation"
@@ -461,7 +461,7 @@ paths:
           description: "Member removed successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/modules:
     get:
@@ -481,7 +481,7 @@ paths:
           description: "Modules retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     post:
       summary: "Add Module to Organisation"
@@ -500,7 +500,7 @@ paths:
           description: "Module added successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/modules/directory:
     delete:
@@ -520,7 +520,7 @@ paths:
           description: "Module removed successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
        
   /modules:
     get:
@@ -534,7 +534,7 @@ paths:
           description: "Modules retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url              
+        address: https://courier-api-798287738190.europe-west1.run.app              
 
   /admin/marketplace:
     post:
@@ -548,7 +548,7 @@ paths:
           description: "Publishes a code module to the marketplace."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /admin/marketplace/directory:
     delete:
@@ -562,7 +562,7 @@ paths:
           description: "Remove a module from the marketplace."
 
       x-google-backend:
-        address: https://my_cloudrun_url      
+        address: https://courier-api-798287738190.europe-west1.run.app      
 
   /admin/plans:
     post:
@@ -576,7 +576,7 @@ paths:
           description: "Creates a new subscription plan."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     get:
       summary: "Get all plans"
@@ -589,7 +589,7 @@ paths:
           description: "Retrieves all subscription plans."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /admin/plans/{planId}:
     patch:
@@ -609,7 +609,7 @@ paths:
           description: "Updates an existing subscription plan."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     delete:
       summary: "Delete a plan"
@@ -628,7 +628,7 @@ paths:
           description: "Deletes an existing subscription plan."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /admin/plans/{planId}/usage:
     get:
@@ -648,7 +648,7 @@ paths:
           description: "Allows you to view the number of active/issued subscriptions for a given plan."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /admin/subscriptions:
     get:
@@ -662,7 +662,7 @@ paths:
           description: "Displays all issued subscriptions."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
     
     post:
       summary: "Create a new subscription"
@@ -675,7 +675,7 @@ paths:
           description: "Issues a manual subscription for an organization."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /admin/subscriptions/{subscriptionId}:
     patch:
@@ -695,7 +695,7 @@ paths:
           description: "Updates an existing subscription."
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
  
   /organisations/{orgId}/departments:
     get:
@@ -715,7 +715,7 @@ paths:
           description: "Departments retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     post:
       summary: "Add Department to Organisation"
@@ -734,7 +734,7 @@ paths:
           description: "Department added successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/departments/{deptId}:
     get:
@@ -759,7 +759,7 @@ paths:
           description: "Department retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     patch:
       summary: "Update Department of Organisation by Department ID"
@@ -783,7 +783,7 @@ paths:
           description: "Department updated successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url 
+        address: https://courier-api-798287738190.europe-west1.run.app 
 
     delete:
       summary: "Remove Department from Organisation"
@@ -807,7 +807,7 @@ paths:
           description: "Department removed successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/departments/assign:
     post:
@@ -827,7 +827,7 @@ paths:
           description: "Department assigned successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url    
+        address: https://courier-api-798287738190.europe-west1.run.app    
 
   /organisations/{orgId}/departments/{deptId}/members:
     get:
@@ -852,7 +852,7 @@ paths:
           description: "Members retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/profiles/{profileId}:
     delete:
@@ -877,7 +877,7 @@ paths:
           description: "Profile removed successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/notifications/read-all:
     patch:
@@ -897,7 +897,7 @@ paths:
           description: "All notifications marked as read successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
 
   /organisations/{orgId}/notifications/{notificationId}/read:
@@ -923,7 +923,7 @@ paths:
           description: "Notification marked as read successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/notifications:
     delete:
@@ -943,7 +943,7 @@ paths:
           description: "All notifications deleted successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
   
   /organisations/{orgId}/notifications/{notificationId}:
     delete:
@@ -968,7 +968,7 @@ paths:
           description: "Notification deleted successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/upload-url:
     post:
@@ -988,7 +988,7 @@ paths:
           description: "Upload URL retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers:
     get:
@@ -1008,7 +1008,7 @@ paths:
           description: "Couriers retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     post:
       summary: "Add Courier to Organisation"
@@ -1027,7 +1027,7 @@ paths:
           description: "Courier added successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}:
     get:
@@ -1052,7 +1052,7 @@ paths:
           description: "Courier retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     patch:
       summary: "Update Courier of Organisation by Courier ID"
@@ -1076,7 +1076,7 @@ paths:
           description: "Courier updated successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url 
+        address: https://courier-api-798287738190.europe-west1.run.app 
 
     delete:
       summary: "Remove Courier from Organisation"
@@ -1100,7 +1100,7 @@ paths:
           description: "Courier removed successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/force:
     delete:
@@ -1125,7 +1125,7 @@ paths:
           description: "Courier force removed successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/restore:
     post:
@@ -1150,7 +1150,7 @@ paths:
           description: "Courier restored successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/messages:
     post:
@@ -1175,7 +1175,7 @@ paths:
           description: "Message sent to courier successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/replies:
     get:
@@ -1200,7 +1200,7 @@ paths:
           description: "Replies retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     post:
       summary: "Send Reply to Courier"
@@ -1224,7 +1224,7 @@ paths:
           description: "Reply sent to courier successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url      
+        address: https://courier-api-798287738190.europe-west1.run.app      
 
   /organisations/{orgId}/couriers/{courierId}/replies/{replyId}:
     patch:
@@ -1254,7 +1254,7 @@ paths:
           description: "Reply updated successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/pickup:
     post:
@@ -1279,7 +1279,7 @@ paths:
           description: "Pickup requested successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/handover:
     post:
@@ -1304,7 +1304,7 @@ paths:
           description: "Handover requested successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/dispatch:
     post:
@@ -1329,7 +1329,7 @@ paths:
           description: "Dispatch requested successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/impute:
     post:
@@ -1354,7 +1354,7 @@ paths:
           description: "Impute requested successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/couriers/{courierId}/activities:
     get:
@@ -1379,7 +1379,7 @@ paths:
           description: "Activities retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/contacts:
     get:
@@ -1403,7 +1403,7 @@ paths:
           description: "Contacts retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     post:
       summary: "Add Contact to Organisation"
@@ -1422,7 +1422,7 @@ paths:
           description: "Contact added successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/contacts/{contactId}:
     get:
@@ -1447,7 +1447,7 @@ paths:
           description: "Contact retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
     patch:
       summary: "Update Contact of Organisation by Contact ID"
@@ -1471,7 +1471,7 @@ paths:
           description: "Contact updated successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url 
+        address: https://courier-api-798287738190.europe-west1.run.app 
 
     delete:
       summary: "Remove Contact from Organisation"
@@ -1495,7 +1495,7 @@ paths:
           description: "Contact removed successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
   /organisations/{orgId}/contacts/{contactId}/couriers:
     get:
@@ -1520,7 +1520,7 @@ paths:
           description: "Couriers retrieved successfully"
 
       x-google-backend:
-        address: https://my_cloudrun_url
+        address: https://courier-api-798287738190.europe-west1.run.app
 
 
 securityDefinitions:
@@ -1530,10 +1530,10 @@ securityDefinitions:
     flow: implicit
     authorizationUrl: ""
 
-    x-google-issuer: "APPWRITE_ISSUER"
+    x-google-issuer: "https://api.bara.adgroupe.io/v1"
 
-    x-google-jwks_uri: "APPWRITE_JWKS_URI"
+    x-google-jwks_uri: "https://api.bara.adgroupe.io/v1/jwks"
 
-    x-google-audiences: "APPWRITE_PROJECT_ID"
+    x-google-audiences: "6a50b69d003812cb2c0e"
           
 
