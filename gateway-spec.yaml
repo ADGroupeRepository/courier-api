@@ -43,8 +43,8 @@ paths:
       summary: "Get User Profile"
       operationId: "getUserProfile"
 
-      security:
-        - appwrite_jwt: []
+      # security:
+      #   - appwrite_jwt: []
 
       responses:
         200:
@@ -74,8 +74,8 @@ paths:
       summary: "Register Push Token"
       operationId: "registerPushToken"
 
-      security:
-        - appwrite_jwt: []
+      # security:
+      #   - appwrite_jwt: []
 
       responses:
         200:
@@ -141,8 +141,8 @@ paths:
       summary: "Verify Email"
       operationId: "verifyEmail"
 
-      security:
-        - appwrite_jwt: []
+      # security:
+      #   - appwrite_jwt: []
 
       responses:
         200:
@@ -1671,14 +1671,14 @@ paths:
         address: https://courier-api-798287738190.europe-west1.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
 
-securityDefinitions:
-  appwrite_jwt:
-    type: oauth2
-    flow: implicit
-    authorizationUrl: ""
+# securityDefinitions:
+#   appwrite_jwt:
+#     type: oauth2
+#     flow: implicit
+#     authorizationUrl: ""
 
-    x-google-issuer: "https://api.bara.adgroupe.io/v1"
+#     x-google-issuer: "https://api.bara.adgroupe.io/v1"
 
-    x-google-jwks_uri: "https://api.bara.adgroupe.io/v1/jwks"
+#     x-google-jwks_uri: "https://api.bara.adgroupe.io/v1/jwks"
 
-    x-google-audiences: "6a50b69d003812cb2c0e"
+#     x-google-audiences: "6a50b69d003812cb2c0e"
