@@ -43,11 +43,13 @@ The application codebase uses a domain-driven modular structure found under `app
 ### Installation
 
 1. Clone the repository and navigate into the project root:
+
    ```bash
    npm install
    ```
 
 2. Duplicate the environment variables template:
+
    ```bash
    cp .env.example .env
    ```
@@ -63,22 +65,26 @@ The application codebase uses a domain-driven modular structure found under `app
 ## 🏃 Running the Application
 
 - **Development Server (with Hot Reloading)**:
+
   ```bash
   npm run dev
   ```
 
 - **TypeScript Compilation Check**:
+
   ```bash
   npm run typecheck
   ```
 
 - **Linter & Formatting**:
+
   ```bash
   npm run lint
   npm run format
   ```
 
 - **Build for Production**:
+
   ```bash
   npm run build
   ```

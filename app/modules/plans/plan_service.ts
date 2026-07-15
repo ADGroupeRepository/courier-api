@@ -16,12 +16,7 @@ const PLATFORM_DB = 'bara-platform'
 const GRACE_PERIOD_DAYS = 5
 
 export type SubscriptionStatus =
-  | 'active'
-  | 'grace_period'
-  | 'expired'
-  | 'pending'
-  | 'rejected'
-  | 'none'
+  'active' | 'grace_period' | 'expired' | 'pending' | 'rejected' | 'none'
 
 export interface SubscriptionInfo {
   subscription: any

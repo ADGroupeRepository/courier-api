@@ -1,210 +1,138 @@
-swagger: "2.0"
+swagger: '2.0'
 
 info:
-  title: "courier-api"
-  version: "1.0.0"
-  description: "API Gateway for courier-api"
+  title: 'courier-api'
+  version: '1.0.0'
+  description: 'API Gateway for courier-api'
 
 schemes:
-  - "https"
+  - 'https'
 
 produces:
-  - "application/json"
+  - 'application/json'
+
+x-google-backend:
+  address: https://courier-api-798287738190.europe-west1.run.app/api/v1
+  path_translation: APPEND_PATH_TO_ADDRESS
 
 paths:
-  /api/v1:
+  /:
     get:
-      summary: "Health Check"
-      operationId: "healthCheck"
+      summary: 'Health Check'
+      operationId: 'healthCheck'
 
       responses:
         200:
-          description: "Server is healthy"
+          description: 'Server is healthy'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/auth/signup:
+  /auth/signup:
     post:
-      summary: "User Signup"
-      operationId: "userSignup"
+      summary: 'User Signup'
+      operationId: 'userSignup'
 
       responses:
         200:
-          description: "User created successfully"
+          description: 'User created successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/auth/profile:
+  /auth/profile:
     get:
-      summary: "Get User Profile"
-      operationId: "getUserProfile"
-
-      # security:
-      #   - appwrite_jwt: []
+      summary: 'Get User Profile'
+      operationId: 'getUserProfile'
 
       responses:
         200:
-          description: "User profile retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'User profile retrieved successfully'
 
     patch:
-      summary: "Update User Profile"
-      operationId: "updateUserProfile"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update User Profile'
+      operationId: 'updateUserProfile'
 
       responses:
         200:
-          description: "User profile updated successfully"
+          description: 'User profile updated successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/auth/push-token:
+  /auth/push-token:
     post:
-      summary: "Register Push Token"
-      operationId: "registerPushToken"
-
-      # security:
-      #   - appwrite_jwt: []
+      summary: 'Register Push Token'
+      operationId: 'registerPushToken'
 
       responses:
         200:
-          description: "Push token registered successfully"
+          description: 'Push token registered successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/auth/forgot-password:
+  /auth/forgot-password:
     post:
-      summary: "Forgot Password"
-      operationId: "forgotPassword"
+      summary: 'Forgot Password'
+      operationId: 'forgotPassword'
 
       responses:
         200:
-          description: "Password reset email sent successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Password reset email sent successfully'
 
     patch:
-      summary: "Reset Password"
-      operationId: "resetPassword"
+      summary: 'Reset Password'
+      operationId: 'resetPassword'
 
       responses:
         200:
-          description: "Password reset successfully"
+          description: 'Password reset successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/auth/forgot-password/verify:
+  /auth/forgot-password/verify:
     post:
-      summary: "Verify Forgot Password Token"
-      operationId: "verifyForgotPasswordToken"
+      summary: 'Verify Forgot Password Token'
+      operationId: 'verifyForgotPasswordToken'
 
       responses:
         200:
-          description: "Forgot password token verified successfully"
+          description: 'Forgot password token verified successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/auth/forgot-password/reset:
+  /auth/forgot-password/reset:
     post:
-      summary: "Reset Password with Token"
-      operationId: "resetPasswordWithToken"
+      summary: 'Reset Password with Token'
+      operationId: 'resetPasswordWithToken'
 
       responses:
         200:
-          description: "Password reset successfully"
+          description: 'Password reset successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/auth/verify-email:
+  /auth/verify-email:
     post:
-      summary: "Verify Email"
-      operationId: "verifyEmail"
-
-      # security:
-      #   - appwrite_jwt: []
+      summary: 'Verify Email'
+      operationId: 'verifyEmail'
 
       responses:
         200:
-          description: "Email verified successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Email verified successfully'
 
     patch:
-      summary: "Resend Email Verification"
-      operationId: "resendEmailVerification"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Resend Email Verification'
+      operationId: 'resendEmailVerification'
 
       responses:
         200:
-          description: "Email verification resent successfully"
+          description: 'Email verification resent successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations:
+  /organisations:
     get:
-      summary: "Get Organisations"
-      operationId: "getOrganisations"
-
-      # security:
-      #   - appwrite_jwt: []
+      summary: 'Get Organisations'
+      operationId: 'getOrganisations'
 
       responses:
         200:
-          description: "Organisations retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Organisations retrieved successfully'
 
     post:
-      summary: "Create Organisation"
-      operationId: "createOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Create Organisation'
+      operationId: 'createOrganisation'
 
       responses:
         200:
-          description: "Organisation created successfully"
+          description: 'Organisation created successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}:
+  /organisations/{orgId}:
     get:
-      summary: "Get Organisation by ID"
-      operationId: "getOrganisationById"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Organisation by ID'
+      operationId: 'getOrganisationById'
 
       parameters:
         - name: orgId
@@ -214,18 +142,11 @@ paths:
 
       responses:
         200:
-          description: "Organisation retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Organisation retrieved successfully'
 
     patch:
-      summary: "Update Organisation by ID"
-      operationId: "updateOrganisationById"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update Organisation by ID'
+      operationId: 'updateOrganisationById'
 
       parameters:
         - name: orgId
@@ -235,18 +156,11 @@ paths:
 
       responses:
         200:
-          description: "Organisation updated successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Organisation updated successfully'
 
     delete:
-      summary: "Delete Organisation by ID"
-      operationId: "deleteOrganisationById"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Delete Organisation by ID'
+      operationId: 'deleteOrganisationById'
 
       parameters:
         - name: orgId
@@ -256,19 +170,12 @@ paths:
 
       responses:
         200:
-          description: "Organisation deleted successfully"
+          description: 'Organisation deleted successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/licenses:
+  /organisations/{orgId}/licenses:
     get:
-      summary: "Get Licenses for Organisation"
-      operationId: "getLicensesForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Licenses for Organisation'
+      operationId: 'getLicensesForOrganisation'
 
       parameters:
         - name: orgId
@@ -278,19 +185,12 @@ paths:
 
       responses:
         200:
-          description: "Licenses retrieved successfully"
+          description: 'Licenses retrieved successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/logo:
+  /organisations/{orgId}/logo:
     post:
-      summary: "Upload Organisation Logo"
-      operationId: "uploadOrganisationLogo"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Upload Organisation Logo'
+      operationId: 'uploadOrganisationLogo'
 
       parameters:
         - name: orgId
@@ -300,19 +200,12 @@ paths:
 
       responses:
         200:
-          description: "Organisation logo uploaded successfully"
+          description: 'Organisation logo uploaded successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/licenses/assign:
+  /organisations/{orgId}/licenses/assign:
     post:
-      summary: "Assign License to Organisation"
-      operationId: "assignLicenseToOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Assign License to Organisation'
+      operationId: 'assignLicenseToOrganisation'
 
       parameters:
         - name: orgId
@@ -322,19 +215,12 @@ paths:
 
       responses:
         200:
-          description: "License assigned successfully"
+          description: 'License assigned successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/subscription:
+  /organisations/{orgId}/subscription:
     get:
-      summary: "Get Subscription for Organisation"
-      operationId: "getSubscriptionForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Subscription for Organisation'
+      operationId: 'getSubscriptionForOrganisation'
 
       parameters:
         - name: orgId
@@ -344,18 +230,11 @@ paths:
 
       responses:
         200:
-          description: "Subscription retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Subscription retrieved successfully'
 
     post:
-      summary: "Create Subscription for Organisation"
-      operationId: "createSubscriptionForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Create Subscription for Organisation'
+      operationId: 'createSubscriptionForOrganisation'
 
       parameters:
         - name: orgId
@@ -365,19 +244,12 @@ paths:
 
       responses:
         200:
-          description: "Subscription created successfully"
+          description: 'Subscription created successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/licenses/revoke:
+  /organisations/{orgId}/licenses/revoke:
     post:
-      summary: "Revoke License from Organisation"
-      operationId: "revokeLicenseFromOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Revoke License from Organisation'
+      operationId: 'revokeLicenseFromOrganisation'
 
       parameters:
         - name: orgId
@@ -387,19 +259,12 @@ paths:
 
       responses:
         200:
-          description: "License revoked successfully"
+          description: 'License revoked successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/members:
+  /organisations/{orgId}/members:
     get:
-      summary: "Get Members of Organisation"
-      operationId: "getMembersOfOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Members of Organisation'
+      operationId: 'getMembersOfOrganisation'
 
       parameters:
         - name: orgId
@@ -409,18 +274,11 @@ paths:
 
       responses:
         200:
-          description: "Members retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Members retrieved successfully'
 
     post:
-      summary: "Add Member to Organisation"
-      operationId: "addMemberToOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Add Member to Organisation'
+      operationId: 'addMemberToOrganisation'
 
       parameters:
         - name: orgId
@@ -430,19 +288,12 @@ paths:
 
       responses:
         200:
-          description: "Member added successfully"
+          description: 'Member added successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/members/{userId}:
+  /organisations/{orgId}/members/{userId}:
     get:
-      summary: "Get Member of Organisation by User ID"
-      operationId: "getMemberOfOrganisationByUserId"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Member of Organisation by User ID'
+      operationId: 'getMemberOfOrganisationByUserId'
 
       parameters:
         - name: orgId
@@ -457,18 +308,11 @@ paths:
 
       responses:
         200:
-          description: "Member retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Member retrieved successfully'
 
     patch:
-      summary: "Update Member of Organisation by User ID"
-      operationId: "updateMemberOfOrganisationByUserId"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update Member of Organisation by User ID'
+      operationId: 'updateMemberOfOrganisationByUserId'
 
       parameters:
         - name: orgId
@@ -483,18 +327,11 @@ paths:
 
       responses:
         200:
-          description: "Member updated successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Member updated successfully'
 
     delete:
-      summary: "Remove Member from Organisation"
-      operationId: "removeMemberFromOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Remove Member from Organisation'
+      operationId: 'removeMemberFromOrganisation'
 
       parameters:
         - name: orgId
@@ -509,19 +346,12 @@ paths:
 
       responses:
         200:
-          description: "Member removed successfully"
+          description: 'Member removed successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/modules:
+  /organisations/{orgId}/modules:
     get:
-      summary: "Get Modules for Organisation"
-      operationId: "getModulesForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Modules for Organisation'
+      operationId: 'getModulesForOrganisation'
 
       parameters:
         - name: orgId
@@ -531,18 +361,11 @@ paths:
 
       responses:
         200:
-          description: "Modules retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Modules retrieved successfully'
 
     post:
-      summary: "Add Module to Organisation"
-      operationId: "addModuleToOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Add Module to Organisation'
+      operationId: 'addModuleToOrganisation'
 
       parameters:
         - name: orgId
@@ -552,19 +375,12 @@ paths:
 
       responses:
         200:
-          description: "Module added successfully"
+          description: 'Module added successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/modules/directory:
+  /organisations/{orgId}/modules/directory:
     delete:
-      summary: "Remove Module from Organisation"
-      operationId: "removeModuleFromOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Remove Module from Organisation'
+      operationId: 'removeModuleFromOrganisation'
 
       parameters:
         - name: orgId
@@ -574,98 +390,56 @@ paths:
 
       responses:
         200:
-          description: "Module removed successfully"
+          description: 'Module removed successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/modules:
+  /modules:
     get:
-      summary: "Get all modules"
-      operationId: "getAllModules"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get all modules'
+      operationId: 'getAllModules'
 
       responses:
         200:
-          description: "Modules retrieved successfully"
+          description: 'Modules retrieved successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/admin/marketplace:
+  /admin/marketplace:
     post:
-      summary: "Publish to Marketplace"
-      operationId: "publishToMarketplace"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Publish to Marketplace'
+      operationId: 'publishToMarketplace'
 
       responses:
         200:
-          description: "Publishes a code module to the marketplace."
+          description: 'Publishes a code module to the marketplace.'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/admin/marketplace/directory:
+  /admin/marketplace/directory:
     delete:
-      summary: "Remove Module from Marketplace"
-      operationId: "removeModuleFromMarketplace"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Remove Module from Marketplace'
+      operationId: 'removeModuleFromMarketplace'
 
       responses:
         200:
-          description: "Remove a module from the marketplace."
+          description: 'Remove a module from the marketplace.'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/admin/plans:
+  /admin/plans:
     post:
-      summary: "Create a new plan"
-      operationId: "createNewPlan"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Create a new plan'
+      operationId: 'createNewPlan'
 
       responses:
         200:
-          description: "Creates a new subscription plan."
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Creates a new subscription plan.'
 
     get:
-      summary: "Get all plans"
-      operationId: "getAllPlans"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get all plans'
+      operationId: 'getAllPlans'
 
       responses:
         200:
-          description: "Retrieves all subscription plans."
+          description: 'Retrieves all subscription plans.'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/admin/plans/{planId}:
+  /admin/plans/{planId}:
     patch:
-      summary: "Update a plan"
-      operationId: "updatePlan"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update a plan'
+      operationId: 'updatePlan'
 
       parameters:
         - name: planId
@@ -675,18 +449,11 @@ paths:
 
       responses:
         200:
-          description: "Updates an existing subscription plan."
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Updates an existing subscription plan.'
 
     delete:
-      summary: "Delete a plan"
-      operationId: "deletePlan"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Delete a plan'
+      operationId: 'deletePlan'
 
       parameters:
         - name: planId
@@ -696,19 +463,12 @@ paths:
 
       responses:
         200:
-          description: "Deletes an existing subscription plan."
+          description: 'Deletes an existing subscription plan.'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/admin/plans/{planId}/usage:
+  /admin/plans/{planId}/usage:
     get:
-      summary: "Get plan usage"
-      operationId: "getPlanUsage"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get plan usage'
+      operationId: 'getPlanUsage'
 
       parameters:
         - name: planId
@@ -718,50 +478,29 @@ paths:
 
       responses:
         200:
-          description: "Allows you to view the number of active/issued subscriptions for a given plan."
+          description: 'Allows you to view the number of active/issued subscriptions for a given plan.'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/admin/subscriptions:
+  /admin/subscriptions:
     get:
-      summary: "Get all subscriptions"
-      operationId: "getAllSubscriptions"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get all subscriptions'
+      operationId: 'getAllSubscriptions'
 
       responses:
         200:
-          description: "Displays all issued subscriptions."
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Displays all issued subscriptions.'
 
     post:
-      summary: "Create a new subscription"
-      operationId: "createNewSubscription"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Create a new subscription'
+      operationId: 'createNewSubscription'
 
       responses:
         200:
-          description: "Issues a manual subscription for an organization."
+          description: 'Issues a manual subscription for an organization.'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/admin/subscriptions/{subscriptionId}:
+  /admin/subscriptions/{subscriptionId}:
     patch:
-      summary: "Update a subscription"
-      operationId: "updateSubscription"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update a subscription'
+      operationId: 'updateSubscription'
 
       parameters:
         - name: subscriptionId
@@ -771,19 +510,12 @@ paths:
 
       responses:
         200:
-          description: "Updates an existing subscription."
+          description: 'Updates an existing subscription.'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/departments:
+  /organisations/{orgId}/departments:
     get:
-      summary: "Get Departments for Organisation"
-      operationId: "getDepartmentsForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Departments for Organisation'
+      operationId: 'getDepartmentsForOrganisation'
 
       parameters:
         - name: orgId
@@ -793,18 +525,11 @@ paths:
 
       responses:
         200:
-          description: "Departments retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Departments retrieved successfully'
 
     post:
-      summary: "Add Department to Organisation"
-      operationId: "addDepartmentToOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Add Department to Organisation'
+      operationId: 'addDepartmentToOrganisation'
 
       parameters:
         - name: orgId
@@ -814,19 +539,12 @@ paths:
 
       responses:
         200:
-          description: "Department added successfully"
+          description: 'Department added successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/departments/{deptId}:
+  /organisations/{orgId}/departments/{deptId}:
     get:
-      summary: "Get Department of Organisation by Department ID"
-      operationId: "getDepartmentOfOrganisationByDepartmentId"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Department of Organisation by Department ID'
+      operationId: 'getDepartmentOfOrganisationByDepartmentId'
 
       parameters:
         - name: orgId
@@ -841,18 +559,11 @@ paths:
 
       responses:
         200:
-          description: "Department retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Department retrieved successfully'
 
     patch:
-      summary: "Update Department of Organisation by Department ID"
-      operationId: "updateDepartmentOfOrganisationByDepartmentId"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update Department of Organisation by Department ID'
+      operationId: 'updateDepartmentOfOrganisationByDepartmentId'
 
       parameters:
         - name: orgId
@@ -867,18 +578,11 @@ paths:
 
       responses:
         200:
-          description: "Department updated successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Department updated successfully'
 
     delete:
-      summary: "Remove Department from Organisation"
-      operationId: "removeDepartmentFromOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Remove Department from Organisation'
+      operationId: 'removeDepartmentFromOrganisation'
 
       parameters:
         - name: orgId
@@ -893,19 +597,12 @@ paths:
 
       responses:
         200:
-          description: "Department removed successfully"
+          description: 'Department removed successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/departments/assign:
+  /organisations/{orgId}/departments/assign:
     post:
-      summary: "Assign Department to Organisation"
-      operationId: "assignDepartmentToOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Assign Department to Organisation'
+      operationId: 'assignDepartmentToOrganisation'
 
       parameters:
         - name: orgId
@@ -915,19 +612,12 @@ paths:
 
       responses:
         200:
-          description: "Department assigned successfully"
+          description: 'Department assigned successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/departments/{deptId}/members:
+  /organisations/{orgId}/departments/{deptId}/members:
     get:
-      summary: "Get Members of Department"
-      operationId: "getMembersOfDepartment"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Members of Department'
+      operationId: 'getMembersOfDepartment'
 
       parameters:
         - name: orgId
@@ -942,19 +632,12 @@ paths:
 
       responses:
         200:
-          description: "Members retrieved successfully"
+          description: 'Members retrieved successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/profiles/{profileId}:
+  /organisations/{orgId}/profiles/{profileId}:
     delete:
-      summary: "Remove Profile from Organisation"
-      operationId: "removeProfileFromOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Remove Profile from Organisation'
+      operationId: 'removeProfileFromOrganisation'
 
       parameters:
         - name: orgId
@@ -969,19 +652,12 @@ paths:
 
       responses:
         200:
-          description: "Profile removed successfully"
+          description: 'Profile removed successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/notifications/read-all:
+  /organisations/{orgId}/notifications/read-all:
     patch:
-      summary: "Mark all notifications as read for Organisation"
-      operationId: "markAllNotificationsAsReadForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Mark all notifications as read for Organisation'
+      operationId: 'markAllNotificationsAsReadForOrganisation'
 
       parameters:
         - name: orgId
@@ -991,19 +667,12 @@ paths:
 
       responses:
         200:
-          description: "All notifications marked as read successfully"
+          description: 'All notifications marked as read successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/notifications/{notificationId}/read:
+  /organisations/{orgId}/notifications/{notificationId}/read:
     patch:
-      summary: "Mark a notification as read for Organisation"
-      operationId: "markNotificationAsReadForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Mark a notification as read for Organisation'
+      operationId: 'markNotificationAsReadForOrganisation'
 
       parameters:
         - name: orgId
@@ -1018,19 +687,12 @@ paths:
 
       responses:
         200:
-          description: "Notification marked as read successfully"
+          description: 'Notification marked as read successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/notifications:
+  /organisations/{orgId}/notifications:
     delete:
-      summary: "Delete all notifications for Organisation"
-      operationId: "deleteAllNotificationsForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Delete all notifications for Organisation'
+      operationId: 'deleteAllNotificationsForOrganisation'
 
       parameters:
         - name: orgId
@@ -1040,19 +702,12 @@ paths:
 
       responses:
         200:
-          description: "All notifications deleted successfully"
+          description: 'All notifications deleted successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/notifications/{notificationId}:
+  /organisations/{orgId}/notifications/{notificationId}:
     delete:
-      summary: "Delete a notification for Organisation"
-      operationId: "deleteNotificationForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Delete a notification for Organisation'
+      operationId: 'deleteNotificationForOrganisation'
 
       parameters:
         - name: orgId
@@ -1067,19 +722,12 @@ paths:
 
       responses:
         200:
-          description: "Notification deleted successfully"
+          description: 'Notification deleted successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/upload-url:
+  /organisations/{orgId}/couriers/upload-url:
     post:
-      summary: "Get Upload URL for Courier"
-      operationId: "getUploadUrlForCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Upload URL for Courier'
+      operationId: 'getUploadUrlForCourier'
 
       parameters:
         - name: orgId
@@ -1089,19 +737,12 @@ paths:
 
       responses:
         200:
-          description: "Upload URL retrieved successfully"
+          description: 'Upload URL retrieved successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers:
+  /organisations/{orgId}/couriers:
     get:
-      summary: "Get Couriers for Organisation"
-      operationId: "getCouriersForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Couriers for Organisation'
+      operationId: 'getCouriersForOrganisation'
 
       parameters:
         - name: orgId
@@ -1111,18 +752,11 @@ paths:
 
       responses:
         200:
-          description: "Couriers retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Couriers retrieved successfully'
 
     post:
-      summary: "Add Courier to Organisation"
-      operationId: "addCourierToOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Add Courier to Organisation'
+      operationId: 'addCourierToOrganisation'
 
       parameters:
         - name: orgId
@@ -1132,19 +766,12 @@ paths:
 
       responses:
         200:
-          description: "Courier added successfully"
+          description: 'Courier added successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}:
+  /organisations/{orgId}/couriers/{courierId}:
     get:
-      summary: "Get Courier of Organisation by Courier ID"
-      operationId: "getCourierOfOrganisationByCourierId"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Courier of Organisation by Courier ID'
+      operationId: 'getCourierOfOrganisationByCourierId'
 
       parameters:
         - name: orgId
@@ -1159,18 +786,11 @@ paths:
 
       responses:
         200:
-          description: "Courier retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Courier retrieved successfully'
 
     patch:
-      summary: "Update Courier of Organisation by Courier ID"
-      operationId: "updateCourierOfOrganisationByCourierId"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update Courier of Organisation by Courier ID'
+      operationId: 'updateCourierOfOrganisationByCourierId'
 
       parameters:
         - name: orgId
@@ -1185,18 +805,11 @@ paths:
 
       responses:
         200:
-          description: "Courier updated successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Courier updated successfully'
 
     delete:
-      summary: "Remove Courier from Organisation"
-      operationId: "removeCourierFromOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Remove Courier from Organisation'
+      operationId: 'removeCourierFromOrganisation'
 
       parameters:
         - name: orgId
@@ -1211,19 +824,12 @@ paths:
 
       responses:
         200:
-          description: "Courier removed successfully"
+          description: 'Courier removed successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/force:
+  /organisations/{orgId}/couriers/{courierId}/force:
     delete:
-      summary: "Force Remove Courier from Organisation"
-      operationId: "forceRemoveCourierFromOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Force Remove Courier from Organisation'
+      operationId: 'forceRemoveCourierFromOrganisation'
 
       parameters:
         - name: orgId
@@ -1238,19 +844,12 @@ paths:
 
       responses:
         200:
-          description: "Courier force removed successfully"
+          description: 'Courier force removed successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/restore:
+  /organisations/{orgId}/couriers/{courierId}/restore:
     post:
-      summary: "Restore Courier for Organisation"
-      operationId: "restoreCourierForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Restore Courier for Organisation'
+      operationId: 'restoreCourierForOrganisation'
 
       parameters:
         - name: orgId
@@ -1265,19 +864,12 @@ paths:
 
       responses:
         200:
-          description: "Courier restored successfully"
+          description: 'Courier restored successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/messages:
+  /organisations/{orgId}/couriers/{courierId}/messages:
     post:
-      summary: "Send Message to Courier"
-      operationId: "sendMessageToCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Send Message to Courier'
+      operationId: 'sendMessageToCourier'
 
       parameters:
         - name: orgId
@@ -1292,19 +884,12 @@ paths:
 
       responses:
         200:
-          description: "Message sent to courier successfully"
+          description: 'Message sent to courier successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/replies:
+  /organisations/{orgId}/couriers/{courierId}/replies:
     get:
-      summary: "Get Replies from Courier"
-      operationId: "getRepliesFromCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Replies from Courier'
+      operationId: 'getRepliesFromCourier'
 
       parameters:
         - name: orgId
@@ -1319,18 +904,11 @@ paths:
 
       responses:
         200:
-          description: "Replies retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Replies retrieved successfully'
 
     post:
-      summary: "Send Reply to Courier"
-      operationId: "sendReplyToCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Send Reply to Courier'
+      operationId: 'sendReplyToCourier'
 
       parameters:
         - name: orgId
@@ -1345,19 +923,12 @@ paths:
 
       responses:
         200:
-          description: "Reply sent to courier successfully"
+          description: 'Reply sent to courier successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/replies/{replyId}:
+  /organisations/{orgId}/couriers/{courierId}/replies/{replyId}:
     patch:
-      summary: "Update Reply from Courier"
-      operationId: "updateReplyFromCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update Reply from Courier'
+      operationId: 'updateReplyFromCourier'
 
       parameters:
         - name: orgId
@@ -1377,19 +948,12 @@ paths:
 
       responses:
         200:
-          description: "Reply updated successfully"
+          description: 'Reply updated successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/pickup:
+  /organisations/{orgId}/couriers/{courierId}/pickup:
     post:
-      summary: "Request Pickup from Courier"
-      operationId: "requestPickupFromCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Request Pickup from Courier'
+      operationId: 'requestPickupFromCourier'
 
       parameters:
         - name: orgId
@@ -1404,19 +968,12 @@ paths:
 
       responses:
         200:
-          description: "Pickup requested successfully"
+          description: 'Pickup requested successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/handover:
+  /organisations/{orgId}/couriers/{courierId}/handover:
     post:
-      summary: "Request Handover from Courier"
-      operationId: "requestHandoverFromCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Request Handover from Courier'
+      operationId: 'requestHandoverFromCourier'
 
       parameters:
         - name: orgId
@@ -1431,19 +988,12 @@ paths:
 
       responses:
         200:
-          description: "Handover requested successfully"
+          description: 'Handover requested successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/dispatch:
+  /organisations/{orgId}/couriers/{courierId}/dispatch:
     post:
-      summary: "Request Dispatch from Courier"
-      operationId: "requestDispatchFromCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Request Dispatch from Courier'
+      operationId: 'requestDispatchFromCourier'
 
       parameters:
         - name: orgId
@@ -1458,19 +1008,12 @@ paths:
 
       responses:
         200:
-          description: "Dispatch requested successfully"
+          description: 'Dispatch requested successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/impute:
+  /organisations/{orgId}/couriers/{courierId}/impute:
     post:
-      summary: "Request Impute from Courier"
-      operationId: "requestImputeFromCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Request Impute from Courier'
+      operationId: 'requestImputeFromCourier'
 
       parameters:
         - name: orgId
@@ -1485,19 +1028,12 @@ paths:
 
       responses:
         200:
-          description: "Impute requested successfully"
+          description: 'Impute requested successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/couriers/{courierId}/activities:
+  /organisations/{orgId}/couriers/{courierId}/activities:
     get:
-      summary: "Get Activities from Courier"
-      operationId: "getActivitiesFromCourier"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Activities from Courier'
+      operationId: 'getActivitiesFromCourier'
 
       parameters:
         - name: orgId
@@ -1512,19 +1048,12 @@ paths:
 
       responses:
         200:
-          description: "Activities retrieved successfully"
+          description: 'Activities retrieved successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/contacts:
+  /organisations/{orgId}/contacts:
     get:
-      summary: "Get Contacts for Organisation"
-      operationId: "getContactsForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Contacts for Organisation'
+      operationId: 'getContactsForOrganisation'
 
       parameters:
         - name: orgId
@@ -1538,18 +1067,11 @@ paths:
 
       responses:
         200:
-          description: "Contacts retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Contacts retrieved successfully'
 
     post:
-      summary: "Add Contact to Organisation"
-      operationId: "addContactToOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Add Contact to Organisation'
+      operationId: 'addContactToOrganisation'
 
       parameters:
         - name: orgId
@@ -1559,19 +1081,12 @@ paths:
 
       responses:
         200:
-          description: "Contact added successfully"
+          description: 'Contact added successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/contacts/{contactId}:
+  /organisations/{orgId}/contacts/{contactId}:
     get:
-      summary: "Get Contact of Organisation by Contact ID"
-      operationId: "getContactForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Contact of Organisation by Contact ID'
+      operationId: 'getContactForOrganisation'
 
       parameters:
         - name: orgId
@@ -1586,18 +1101,11 @@ paths:
 
       responses:
         200:
-          description: "Contact retrieved successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Contact retrieved successfully'
 
     patch:
-      summary: "Update Contact of Organisation by Contact ID"
-      operationId: "updateContactForOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Update Contact of Organisation by Contact ID'
+      operationId: 'updateContactForOrganisation'
 
       parameters:
         - name: orgId
@@ -1612,18 +1120,11 @@ paths:
 
       responses:
         200:
-          description: "Contact updated successfully"
-
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+          description: 'Contact updated successfully'
 
     delete:
-      summary: "Remove Contact from Organisation"
-      operationId: "removeContactFromOrganisation"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Remove Contact from Organisation'
+      operationId: 'removeContactFromOrganisation'
 
       parameters:
         - name: orgId
@@ -1638,19 +1139,12 @@ paths:
 
       responses:
         200:
-          description: "Contact removed successfully"
+          description: 'Contact removed successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
-
-  /api/v1/organisations/{orgId}/contacts/{contactId}/couriers:
+  /organisations/{orgId}/contacts/{contactId}/couriers:
     get:
-      summary: "Get Couriers for Contact"
-      operationId: "getCouriersForContact"
-
-      security:
-        - appwrite_jwt: []
+      summary: 'Get Couriers for Contact'
+      operationId: 'getCouriersForContact'
 
       parameters:
         - name: orgId
@@ -1665,20 +1159,28 @@ paths:
 
       responses:
         200:
-          description: "Couriers retrieved successfully"
+          description: 'Couriers retrieved successfully'
 
-      x-google-backend:
-        address: https://courier-api-798287738190.europe-west1.run.app
-        path_translation: APPEND_PATH_TO_ADDRESS
+  /plans:
+    get:
+      summary: 'Get all plans'
+      operationId: 'getAllPlansUser'
 
-# securityDefinitions:
-#   appwrite_jwt:
-#     type: oauth2
-#     flow: implicit
-#     authorizationUrl: ""
+      responses:
+        200:
+          description: 'Plans retrieved successfully'
 
-#     x-google-issuer: "https://api.bara.adgroupe.io/v1"
+  /plans/{planId}:
+    get:
+      summary: 'Get plan by ID'
+      operationId: 'getPlanById'
 
-#     x-google-jwks_uri: "https://api.bara.adgroupe.io/v1/jwks"
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          type: string
 
-#     x-google-audiences: "6a50b69d003812cb2c0e"
+      responses:
+        200:
+          description: 'Plan retrieved successfully'
