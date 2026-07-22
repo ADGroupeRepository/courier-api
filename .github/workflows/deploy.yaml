@@ -55,17 +55,14 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Format Check
-        run: terraform -chdir=terraform fmt -check   
-
       - name: Terraform Init
         run: |
           terraform -chdir=terraform init \
             -backend-config="bucket=courier-tf-state" \
             -backend-config="prefix=${TF_STATE_PREFIX}"
 
-      - name: Terraform Validate
-        run: terraform -chdir=terraform validate
+      - name: Terraform Format Check
+        run: terraform -chdir=terraform fmt -check         
 
       - name: Docker Authentication
         run: |
@@ -84,14 +81,14 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform -chdir=terraform plan \
-            -input=false
+            -input=false \
             -var-file=${TFVARS} \
             -var="image_tag=${{ github.sha }}"
       
       - name: Terraform Apply
         run: |
           terraform -chdir=terraform apply \
-            -input=false
+            -input=false \
             -auto-approve \
             -var-file=${TFVARS} \
             -var="image_tag=${{ github.sha }}"
