@@ -14,6 +14,3 @@ variable "image_tag" {
   type = string
 }
 
-variable "gateway_url" {
-  type = string
-}

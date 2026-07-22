@@ -43,11 +43,9 @@ jobs:
       - name: Set Environment Variables
         run: |
           if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
-            echo "TFVARS=environments/dev.tfvars" >> $GITHUB_ENV
             echo "ENVIRONMENT=dev" >> $GITHUB_ENV
             echo "TF_STATE_PREFIX=dev" >> $GITHUB_ENV
           else
-            echo "TFVARS=environments/prod.tfvars" >> $GITHUB_ENV
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
             echo "TF_STATE_PREFIX=prod" >> $GITHUB_ENV
           fi    
@@ -82,7 +80,9 @@ jobs:
         run: |
           terraform -chdir=terraform plan \
             -input=false \
-            -var-file=${TFVARS} \
+            -var="environment=${ENVIRONMENT}" \
+            -var="project_id=${PROJECT_ID}" \
+            -var="region=${REGION}" \
             -var="image_tag=${{ github.sha }}"
       
       - name: Terraform Apply
@@ -90,5 +90,7 @@ jobs:
           terraform -chdir=terraform apply \
             -input=false \
             -auto-approve \
-            -var-file=${TFVARS} \
+            -var="environment=${ENVIRONMENT}" \
+            -var="project_id=${PROJECT_ID}" \
+            -var="region=${REGION}" \
             -var="image_tag=${{ github.sha }}"

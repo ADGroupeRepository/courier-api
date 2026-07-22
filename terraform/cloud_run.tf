@@ -74,7 +74,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
         name  = "APP_URL"
-        value = var.gateway_url
+        value = "https://courier-gateway-a6q7woy6.ew.gateway.dev"
       }
 
       # Secret Manager variables
