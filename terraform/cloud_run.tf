@@ -7,7 +7,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
   ingress = "INGRESS_TRAFFIC_ALL"
 
-  #  deletion_protection = false
+  deletion_protection = false
 
   template {
 
