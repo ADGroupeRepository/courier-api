@@ -3,6 +3,7 @@ name: Deploy Backend to Cloud Run
 on:
   push:
     branches:
+      - develop
       - main
 
 env:
@@ -15,6 +16,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     permissions:
       contents: read
@@ -37,6 +39,33 @@ jobs:
       - name: Set GCP Project
         run: |
           gcloud config set project ${{ env.PROJECT_ID }}
+      
+      - name: Set Environment Variables
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
+            echo "TFVARS=environments/dev.tfvars" >> $GITHUB_ENV
+            echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+            echo "TF_STATE_PREFIX=dev" >> $GITHUB_ENV
+          else
+            echo "TFVARS=environments/prod.tfvars" >> $GITHUB_ENV
+            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+            echo "TF_STATE_PREFIX=prod" >> $GITHUB_ENV
+          fi    
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        run: terraform -chdir=terraform fmt -check   
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=terraform init \
+            -backend-config="bucket=courier-tf-state" \
+            -backend-config="prefix=${TF_STATE_PREFIX}"
+
+      - name: Terraform Validate
+        run: terraform -chdir=terraform validate
 
       - name: Docker Authentication
         run: |
@@ -45,23 +74,24 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build \
-            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} .
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }} .
 
       - name: Push Docker Image
         run: |
           docker push \
-            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
-
-      - name: Deploy to Cloud Run
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }}
+      
+      - name: Terraform Plan
         run: |
-          gcloud run deploy ${{ env.SERVICE }} \
-            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} \
-            --region=${{ env.REGION }} \
-            --platform=managed \
-            --service-account=cloudrun-sa@courier-management-501610.iam.gserviceaccount.com \
-            --memory=512Mi \
-            --min-instances=0 \
-            --max-instances=2 \
-            --no-allow-unauthenticated \
-            --set-env-vars="NODE_ENV=production,TZ=UTC,LOG_LEVEL=info,LOCK_STORE=redis,LIMITER_STORE=redis,REDIS_HOST=country-exquisite-sack-66092.db.redis.io,REDIS_PORT=19713,REDIS_KEY_PREFIX=courier:,APP_URL=https://courier-gateway-a6q7woy6.ew.gateway.dev" \
-            --update-secrets="APP_KEY=APP_KEY:latest,APPWRITE_KEY=APPWRITE_KEY:latest,APPWRITE_PROJECT_ID=APPWRITE_PROJECT_ID:latest,APPWRITE_ENDPOINT=APPWRITE_ENDPOINT:latest,TEMP_MEMBER_PASSWORD=TEMP_MEMBER_PASSWORD:latest,REDIS_PASSWORD=REDIS_PASSWORD:latest,RESEND_API_KEY=RESEND_API_KEY:latest,MAIL_FROM_ADDRESS=MAIL_FROM_ADDRESS:latest"
+          terraform -chdir=terraform plan \
+            -input=false
+            -var-file=${TFVARS} \
+            -var="image_tag=${{ github.sha }}"
+      
+      - name: Terraform Apply
+        run: |
+          terraform -chdir=terraform apply \
+            -input=false
+            -auto-approve \
+            -var-file=${TFVARS} \
+            -var="image_tag=${{ github.sha }}"
