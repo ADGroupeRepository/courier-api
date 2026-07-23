@@ -3,7 +3,7 @@ swagger: '2.0'
 info:
   title: 'courier-api'
   version: '1.0.0'
-  description: 'API Gateway for courier-api'
+  description: 'API Gateway for courier-api prod env'
 
 schemes:
   - 'https'
@@ -12,7 +12,7 @@ produces:
   - 'application/json'
 
 x-google-backend:
-  address: https://courier-api-798287738190.europe-west1.run.app/api/v1
+  address: https://courier-api-prod-798287738190.europe-west1.run.app/api/v1
   path_translation: APPEND_PATH_TO_ADDRESS
 
 paths:
