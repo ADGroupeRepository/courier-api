@@ -19,7 +19,7 @@ resource "google_api_gateway_api_config" "courier_config" {
 
   api = google_api_gateway_api.courier_api.api_id
 
-  api_config_id = "courier-config-api-${var.environment}"
+  api_config_id_prefix = "courier-config-api-${var.environment}-"
 
   openapi_documents {
 
@@ -33,6 +33,10 @@ resource "google_api_gateway_api_config" "courier_config" {
 
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 resource "google_api_gateway_gateway" "courier_gateway" {
@@ -44,5 +48,9 @@ resource "google_api_gateway_gateway" "courier_gateway" {
   api_config = google_api_gateway_api_config.courier_config.id
 
   region = var.region
+
+  depends_on = [
+    google_api_gateway_api_config.courier_config
+  ]
 
 }
