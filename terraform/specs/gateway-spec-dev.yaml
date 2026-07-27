@@ -12,7 +12,7 @@ produces:
   - 'application/json'
 
 x-google-backend:
-  address: https://courier-api-dev-798287738190.europe-west1.run.app/api/v1
+  address: https://courier-api-service-dev-4zqxluyahq-ew.a.run.app/api/v1
   path_translation: APPEND_PATH_TO_ADDRESS
 
 paths:

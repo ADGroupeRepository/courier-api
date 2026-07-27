@@ -9,8 +9,3 @@ variable "project_id" {
 variable "region" {
   type = string
 }
-
-variable "image_tag" {
-  type = string
-}
-

@@ -2,7 +2,7 @@
 
 resource "google_cloud_run_v2_service" "courier_api" {
 
-  name     = "courier-api-${var.environment}"
+  name     = "courier-api-service-${var.environment}"
   location = var.region
 
   ingress = "INGRESS_TRAFFIC_ALL"
@@ -22,7 +22,9 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
     containers {
 
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.courier_api.repository_id}/courier-api-${var.environment}:${var.image_tag}"
+      # image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.courier_api.repository_id}/${var.image_url}"
+
+      image = "us-docker.pkg.dev/cloudrun/container/hello@sha256:858b0c6fb3f4b601d89186aba5df53757467f995dfbdddada2d322488fe3f177"
 
       resources {
 

@@ -1,5 +1,29 @@
 locals {
 
+  github_roles = [
+    "roles/artifactregistry.admin",
+    "roles/run.developer",
+    "roles/apigateway.admin",
+    "roles/secretmanager.secretAccessor",
+    "roles/iam.serviceAccountUser"
+  ]
+
+}
+
+# github actions Service Account
+resource "google_project_iam_member" "github_actions" {
+
+  for_each = toset(local.github_roles)
+
+  project = var.project_id
+
+  role = each.value
+
+  member = "serviceAccount:${google_service_account.github_actions_sa.email}"
+}
+
+locals {
+
   cloudrun_roles = [
     "roles/secretmanager.secretAccessor",
     "roles/run.developer"

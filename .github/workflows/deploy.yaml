@@ -10,8 +10,8 @@ env:
   PROJECT_ID: courier-management-501610
   REGION: europe-west1
   REPOSITORY: courier-api
-  IMAGE: courier-api
-  SERVICE: courier-api
+  IMAGE: courier-api-image
+  SERVICE: courier-api-service
 
 jobs:
   deploy:
@@ -39,28 +39,14 @@ jobs:
       - name: Set GCP Project
         run: |
           gcloud config set project ${{ env.PROJECT_ID }}
-      
+
       - name: Set Environment Variables
         run: |
           if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
             echo "ENVIRONMENT=dev" >> $GITHUB_ENV
-            echo "TF_STATE_PREFIX=dev" >> $GITHUB_ENV
           else
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-            echo "TF_STATE_PREFIX=prod" >> $GITHUB_ENV
-          fi    
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Init
-        run: |
-          terraform -chdir=terraform init \
-            -backend-config="bucket=courier-tf-state" \
-            -backend-config="prefix=${TF_STATE_PREFIX}"
-
-      - name: Terraform Format Check
-        run: terraform -chdir=terraform fmt -check         
+          fi
 
       - name: Docker Authentication
         run: |
@@ -75,22 +61,14 @@ jobs:
         run: |
           docker push \
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }}
-      
-      - name: Terraform Plan
+
+      - name: Deploy to Cloud Run
         run: |
-          terraform -chdir=terraform plan \
-            -input=false \
-            -var="environment=${ENVIRONMENT}" \
-            -var="project_id=${PROJECT_ID}" \
-            -var="region=${REGION}" \
-            -var="image_tag=${{ github.sha }}"
-      
-      - name: Terraform Apply
-        run: |
-          terraform -chdir=terraform apply \
-            -input=false \
-            -auto-approve \
-            -var="environment=${ENVIRONMENT}" \
-            -var="project_id=${PROJECT_ID}" \
-            -var="region=${REGION}" \
-            -var="image_tag=${{ github.sha }}"
+          gcloud run deploy ${{ env.SERVICE }}-${ENVIRONMENT} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --service-account=cloudrun-sa@courier-management-501610.iam.gserviceaccount.com \
+            --no-allow-unauthenticated \
+            --set-env-vars="NODE_ENV=production,TZ=UTC,LOG_LEVEL=info,LOCK_STORE=redis,LIMITER_STORE=redis,REDIS_HOST=country-exquisite-sack-66092.db.redis.io,REDIS_PORT=19713,REDIS_KEY_PREFIX=courier:,APP_URL=https://courier-gateway-a6q7woy6.ew.gateway.dev" \
+            --update-secrets="APP_KEY=APP_KEY:latest,APPWRITE_KEY=APPWRITE_KEY:latest,APPWRITE_PROJECT_ID=APPWRITE_PROJECT_ID:latest,APPWRITE_ENDPOINT=APPWRITE_ENDPOINT:latest,TEMP_MEMBER_PASSWORD=TEMP_MEMBER_PASSWORD:latest,REDIS_PASSWORD=REDIS_PASSWORD:latest,RESEND_API_KEY=RESEND_API_KEY:latest,MAIL_FROM_ADDRESS=MAIL_FROM_ADDRESS:latest"
