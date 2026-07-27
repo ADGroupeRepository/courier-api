@@ -56,3 +56,22 @@ resource "google_project_iam_member" "gateway_invoker" {
   member = "serviceAccount:${google_service_account.apigateway_sa.email}"
 
 }
+
+resource "google_service_account_iam_member" "github_wif" {
+
+  service_account_id = google_service_account.github_actions_sa.name
+
+  role = "roles/iam.workloadIdentityUser"
+
+  member = "principalSet://iam.googleapis.com/projects/798287738190/locations/global/workloadIdentityPools/github-pool/attribute.repository/ADGroupeRepository/courier-api"
+}
+
+
+resource "google_service_account_iam_member" "github_actions_impersonation" {
+
+  service_account_id = google_service_account.github_actions_sa.name
+
+  role = "roles/iam.serviceAccountTokenCreator"
+
+  member = "principalSet://iam.googleapis.com/projects/798287738190/locations/global/workloadIdentityPools/github-pool/attribute.repository/ADGroupeRepository/courier-api"
+}
