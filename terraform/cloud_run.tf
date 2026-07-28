@@ -85,13 +85,13 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "APP_KEY"
+        name = "APP_KEY_${upper(var.environment)}"
 
         value_source {
 
           secret_key_ref {
 
-            secret  = google_secret_manager_secret.secret["APP_KEY"].secret_id
+            secret  = google_secret_manager_secret.secret["APP_KEY_${upper(var.environment)}"].secret_id
             version = "latest"
 
           }
@@ -102,13 +102,13 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "APPWRITE_KEY"
+        name = "APPWRITE_KEY_${upper(var.environment)}"
 
         value_source {
 
           secret_key_ref {
 
-            secret  = google_secret_manager_secret.secret["APPWRITE_KEY"].secret_id
+            secret  = google_secret_manager_secret.secret["APPWRITE_KEY_${upper(var.environment)}"].secret_id
             version = "latest"
 
           }
@@ -119,13 +119,13 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "APPWRITE_PROJECT_ID"
+        name = "APPWRITE_PROJECT_ID_${upper(var.environment)}"
 
         value_source {
 
           secret_key_ref {
 
-            secret  = google_secret_manager_secret.secret["APPWRITE_PROJECT_ID"].secret_id
+            secret  = google_secret_manager_secret.secret["APPWRITE_PROJECT_ID_${upper(var.environment)}"].secret_id
             version = "latest"
 
           }
@@ -136,13 +136,13 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "APPWRITE_ENDPOINT"
+        name = "APPWRITE_ENDPOINT_${upper(var.environment)}"
 
         value_source {
 
           secret_key_ref {
 
-            secret  = google_secret_manager_secret.secret["APPWRITE_ENDPOINT"].secret_id
+            secret  = google_secret_manager_secret.secret["APPWRITE_ENDPOINT_${upper(var.environment)}"].secret_id
             version = "latest"
 
           }
@@ -153,13 +153,13 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "TEMP_MEMBER_PASSWORD"
+        name = "TEMP_MEMBER_PASSWORD_${upper(var.environment)}"
 
         value_source {
 
           secret_key_ref {
 
-            secret  = google_secret_manager_secret.secret["TEMP_MEMBER_PASSWORD"].secret_id
+            secret  = google_secret_manager_secret.secret["TEMP_MEMBER_PASSWORD_${upper(var.environment)}"].secret_id
             version = "latest"
 
           }
@@ -170,13 +170,13 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "REDIS_PASSWORD"
+        name = "REDIS_PASSWORD_${upper(var.environment)}"
 
         value_source {
 
           secret_key_ref {
 
-            secret  = google_secret_manager_secret.secret["REDIS_PASSWORD"].secret_id
+            secret  = google_secret_manager_secret.secret["REDIS_PASSWORD_${upper(var.environment)}"].secret_id
             version = "latest"
 
           }
@@ -187,13 +187,13 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "RESEND_API_KEY"
+        name = "RESEND_API_KEY_${upper(var.environment)}"
 
         value_source {
 
           secret_key_ref {
 
-            secret  = google_secret_manager_secret.secret["RESEND_API_KEY"].secret_id
+            secret  = google_secret_manager_secret.secret["RESEND_API_KEY_${upper(var.environment)}"].secret_id
             version = "latest"
 
           }
@@ -204,13 +204,13 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "MAIL_FROM_ADDRESS"
+        name = "MAIL_FROM_ADDRESS_${upper(var.environment)}"
 
         value_source {
 
           secret_key_ref {
 
-            secret  = google_secret_manager_secret.secret["MAIL_FROM_ADDRESS"].secret_id
+            secret  = google_secret_manager_secret.secret["MAIL_FROM_ADDRESS_${upper(var.environment)}"].secret_id
             version = "latest"
 
           }

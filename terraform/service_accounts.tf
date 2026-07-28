@@ -1,7 +1,7 @@
 # GitHub Actions Service Account
 resource "google_service_account" "github_actions_sa" {
 
-  account_id = "github-actions-sa"
+  account_id = "github-actions-sa-${var.environment}"
 
   display_name = "GitHub Actions Service Account"
 
@@ -13,7 +13,7 @@ resource "google_service_account" "github_actions_sa" {
 # Cloud Run Service Account
 resource "google_service_account" "cloudrun_sa" {
 
-  account_id = "cloudrun-sa"
+  account_id = "cloudrun-sa-${var.environment}"
 
   display_name = "Cloud Run Service Account"
 
@@ -25,7 +25,7 @@ resource "google_service_account" "cloudrun_sa" {
 # API Gateway Service Account
 resource "google_service_account" "apigateway_sa" {
 
-  account_id = "apigateway-sa"
+  account_id = "apigateway-sa-${var.environment}"
 
   display_name = "API Gateway Service Account"
 

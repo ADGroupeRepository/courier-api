@@ -44,8 +44,10 @@ jobs:
         run: |
           if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
             echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+            echo "ENVIRONMENT_UPPER=DEV" >> $GITHUB_ENV
           else
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+            echo "ENVIRONMENT_UPPER=PROD" >> $GITHUB_ENV
           fi
 
       - name: Docker Authentication
@@ -71,4 +73,4 @@ jobs:
             --service-account=cloudrun-sa@courier-management-501610.iam.gserviceaccount.com \
             --no-allow-unauthenticated \
             --set-env-vars="NODE_ENV=production,TZ=UTC,LOG_LEVEL=info,LOCK_STORE=redis,LIMITER_STORE=redis,REDIS_HOST=country-exquisite-sack-66092.db.redis.io,REDIS_PORT=19713,REDIS_KEY_PREFIX=courier:,APP_URL=https://courier-gateway-a6q7woy6.ew.gateway.dev" \
-            --update-secrets="APP_KEY=APP_KEY:latest,APPWRITE_KEY=APPWRITE_KEY:latest,APPWRITE_PROJECT_ID=APPWRITE_PROJECT_ID:latest,APPWRITE_ENDPOINT=APPWRITE_ENDPOINT:latest,TEMP_MEMBER_PASSWORD=TEMP_MEMBER_PASSWORD:latest,REDIS_PASSWORD=REDIS_PASSWORD:latest,RESEND_API_KEY=RESEND_API_KEY:latest,MAIL_FROM_ADDRESS=MAIL_FROM_ADDRESS:latest"
+            --update-secrets="APP_KEY=APP_KEY_${ENVIRONMENT_UPPER}:latest,APPWRITE_KEY=APPWRITE_KEY_${ENVIRONMENT_UPPER}:latest,APPWRITE_PROJECT_ID=APPWRITE_PROJECT_ID_${ENVIRONMENT_UPPER}:latest,APPWRITE_ENDPOINT=APPWRITE_ENDPOINT_${ENVIRONMENT_UPPER}:latest,TEMP_MEMBER_PASSWORD=TEMP_MEMBER_PASSWORD_${ENVIRONMENT_UPPER}:latest,REDIS_PASSWORD=REDIS_PASSWORD_${ENVIRONMENT_UPPER}:latest,RESEND_API_KEY=RESEND_API_KEY_${ENVIRONMENT_UPPER}:latest,MAIL_FROM_ADDRESS=MAIL_FROM_ADDRESS_${ENVIRONMENT_UPPER}:latest"

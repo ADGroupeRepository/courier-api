@@ -2,7 +2,7 @@ resource "google_artifact_registry_repository" "courier_api" {
 
   location = var.region
 
-  repository_id = "courier-api"
+  repository_id = "courier-api-${var.environment}"
 
   description = "Docker repository for Courier API"
 

@@ -2,21 +2,21 @@ locals {
 
   secrets = [
 
-    "APP_KEY",
+    "APP_KEY_${upper(var.environment)}",
 
-    "APPWRITE_KEY",
+    "APPWRITE_KEY_${upper(var.environment)}",
 
-    "APPWRITE_PROJECT_ID",
+    "APPWRITE_PROJECT_ID_${upper(var.environment)}",
 
-    "APPWRITE_ENDPOINT",
+    "APPWRITE_ENDPOINT_${upper(var.environment)}",
 
-    "TEMP_MEMBER_PASSWORD",
+    "TEMP_MEMBER_PASSWORD_${upper(var.environment)}",
 
-    "REDIS_PASSWORD",
+    "REDIS_PASSWORD_${upper(var.environment)}",
 
-    "RESEND_API_KEY",
+    "RESEND_API_KEY_${upper(var.environment)}",
 
-    "MAIL_FROM_ADDRESS"
+    "MAIL_FROM_ADDRESS_${upper(var.environment)}"
 
   ]
 
