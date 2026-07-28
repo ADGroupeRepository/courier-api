@@ -4,7 +4,7 @@ resource "google_artifact_registry_repository" "courier_api" {
 
   repository_id = "courier-api-${var.environment}"
 
-  description = "Docker repository for Courier API"
+  description = "Docker repository for Courier API."
 
   format = "DOCKER"
 
