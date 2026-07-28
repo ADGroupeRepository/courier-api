@@ -26,20 +26,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.SERVICE_ACCOUNT }}
-
-      - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v3
-
-      - name: Set GCP Project
-        run: |
-          gcloud config set project ${{ env.PROJECT_ID }}
-
       - name: Set Environment Variables
         run: |
           if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
@@ -49,6 +35,28 @@ jobs:
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
             echo "ENVIRONMENT_UPPER=PROD" >> $GITHUB_ENV
           fi
+
+      - name: Authenticate Dev
+        if: github.ref_name == 'develop'
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_DEV }}
+
+
+      - name: Authenticate Prod
+        if: github.ref_name == 'main'
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_PROD }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Set GCP Project
+        run: |
+          gcloud config set project ${{ env.PROJECT_ID }}
 
       - name: Docker Authentication
         run: |
