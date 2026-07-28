@@ -65,17 +65,17 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build \
-            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }} .
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}-${ENVIRONMENT}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }} .
 
       - name: Push Docker Image
         run: |
           docker push \
-            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }}
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}-${ENVIRONMENT}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }}
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE }}-${ENVIRONMENT} \
-            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}-${ENVIRONMENT}/${{ env.IMAGE }}-${ENVIRONMENT}:${{ github.sha }} \
             --region=${{ env.REGION }} \
             --platform=managed \
             --service-account=cloudrun-sa@courier-management-501610.iam.gserviceaccount.com \
