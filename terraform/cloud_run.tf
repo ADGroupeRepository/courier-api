@@ -85,7 +85,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "APP_KEY_${upper(var.environment)}"
+        name = "APP_KEY"
 
         value_source {
 
@@ -102,7 +102,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "APPWRITE_KEY_${upper(var.environment)}"
+        name = "APPWRITE_KEY"
 
         value_source {
 
@@ -119,7 +119,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "APPWRITE_PROJECT_ID_${upper(var.environment)}"
+        name = "APPWRITE_PROJECT_ID"
 
         value_source {
 
@@ -136,7 +136,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "APPWRITE_ENDPOINT_${upper(var.environment)}"
+        name = "APPWRITE_ENDPOINT"
 
         value_source {
 
@@ -153,7 +153,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "TEMP_MEMBER_PASSWORD_${upper(var.environment)}"
+        name = "TEMP_MEMBER_PASSWORD"
 
         value_source {
 
@@ -170,7 +170,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "REDIS_PASSWORD_${upper(var.environment)}"
+        name = "REDIS_PASSWORD"
 
         value_source {
 
@@ -187,7 +187,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "RESEND_API_KEY_${upper(var.environment)}"
+        name = "RESEND_API_KEY"
 
         value_source {
 
@@ -204,7 +204,7 @@ resource "google_cloud_run_v2_service" "courier_api" {
 
       env {
 
-        name = "MAIL_FROM_ADDRESS_${upper(var.environment)}"
+        name = "MAIL_FROM_ADDRESS"
 
         value_source {
 
