@@ -16,7 +16,9 @@ locals {
 
     "RESEND_API_KEY_${upper(var.environment)}",
 
-    "MAIL_FROM_ADDRESS_${upper(var.environment)}"
+    "MAIL_FROM_ADDRESS_${upper(var.environment)}",
+
+    "OTEL_EXPORTER_OTLP_HEADERS_${upper(var.environment)}"
 
   ]
 

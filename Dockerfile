@@ -32,4 +32,5 @@ COPY --from=production-deps /app/node_modules ./node_modules
 COPY --from=build /app/build ./
 
 # Start the server
-CMD ["node", "bin/server.js"]
+# CMD ["node", "bin/server.js"]
+CMD ["node", "--require", "@opentelemetry/auto-instrumentations-node/register", "bin/server.js"]

@@ -81,6 +81,49 @@ resource "google_cloud_run_v2_service" "courier_api" {
         value = "https://courier-gateway-a6q7woy6.ew.gateway.dev"
       }
 
+      # NEW OpenTelemetry variables
+      env {
+        name  = "OTEL_SERVICE_NAME"
+        value = "courier-api"
+      }
+
+      env {
+        name  = "OTEL_TRACES_EXPORTER"
+        value = "otlp"
+      }
+
+      env {
+        name  = "OTEL_METRICS_EXPORTER"
+        value = "otlp"
+      }
+
+      env {
+        name  = "OTEL_EXPORTER_OTLP_PROTOCOL"
+        value = "http/protobuf"
+      }
+
+      env {
+        name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
+        value = "https://qa.wind-drift.online/api/default"
+      }
+
+      # Credential comes from Secret Manager
+      env {
+        name = "OTEL_EXPORTER_OTLP_HEADERS"
+
+        value_source {
+
+          secret_key_ref {
+
+            secret  = google_secret_manager_secret.secret["OTEL_EXPORTER_OTLP_HEADERS_${upper(var.environment)}"].secret_id
+            version = "latest"
+
+          }
+
+        }
+
+      }
+
       # Secret Manager variables
 
       env {
